@@ -140,7 +140,7 @@ export default function SellPostItem({ post, num, showStatus, onJumped }: SellPo
                 {post.type === 'buy' ? `+${Math.abs(post.discount ?? 0)}%` : `${post.discount ?? 0}%`}
               </span>
               <span className="text-[13px] font-bold text-zinc-900">
-                {post.price.toLocaleString()}
+                {(post.price ?? 0).toLocaleString()}
               </span>
             </div>
           ) : (

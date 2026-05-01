@@ -628,7 +628,7 @@ export default function AdminPage() {
                   <td className="py-2.5 px-4"><span className={`badge ${p.type === 'sell' ? 'bg-blue-50 text-blue-600' : 'bg-zinc-100 text-zinc-500'}`}>{p.type === 'sell' ? '판매' : '구매'}</span></td>
                   <td className="py-2.5 px-4 font-medium">{p.title}</td>
                   <td className="py-2.5 px-4 text-zinc-500">{getCategoryName(p.category)}</td>
-                  <td className="py-2.5 px-4 text-right font-medium">{p.price.toLocaleString()}원</td>
+                  <td className="py-2.5 px-4 text-right font-medium">{p.percentage != null ? `${p.percentage}%` : `${(p.price ?? 0).toLocaleString()}원`}</td>
                   <td className="py-2.5 px-4 text-zinc-500">{p.author?.name || '-'}</td>
                   <td className="py-2.5 px-4 text-center text-zinc-400">{p.views}</td>
                   <td className="py-2.5 px-4 text-zinc-400 text-[11px]">{new Date(p.created_at).toLocaleDateString('ko-KR')}</td>

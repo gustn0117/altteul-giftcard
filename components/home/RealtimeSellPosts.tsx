@@ -75,7 +75,11 @@ export default function RealtimeSellPosts({ posts, loading, sidebar = false }: P
                   <span className="shrink-0 text-[9px] text-white bg-red-500 px-1 py-px rounded-sm font-bold">N</span>
                 )}
                 <span className="shrink-0 text-[12px] font-bold text-gray-900 tabular-nums whitespace-nowrap">
-                  {post.price > 0 ? `${post.price.toLocaleString()}원` : '협의'}
+                  {post.percentage != null
+                    ? `${post.percentage}%`
+                    : post.price && post.price > 0
+                      ? `${post.price.toLocaleString()}원`
+                      : '협의'}
                 </span>
                 {!sidebar && (
                   <span className="shrink-0 hidden md:inline-block text-[10px] text-gray-400 tabular-nums w-[52px] text-right">
