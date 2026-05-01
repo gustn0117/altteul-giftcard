@@ -75,7 +75,7 @@ export default function RegisterPage() {
     <div className="min-h-[80vh] flex items-center justify-center px-5 py-8">
       <div className="w-full max-w-[460px]">
         <div className="text-center mb-6">
-          <Image src="/logo-dark.png" alt="알뜰상품권" width={140} height={40} className="h-10 w-auto object-contain mx-auto mb-3" priority />
+          <Image src="/logo-dark.svg" alt="알뜰상품권" width={140} height={40} className="h-10 w-auto object-contain mx-auto mb-3" priority />
           <h1 className="text-[16px] font-bold text-gray-900">회원가입</h1>
           <p className="text-[12px] text-gray-500 mt-1">무료로 가입하고 상품권을 사고파세요.</p>
         </div>

@@ -63,7 +63,7 @@ export default function Footer() {
             {/* Logo */}
             <div className="flex flex-col items-end">
               <div className="mb-3 inline-block px-3 py-2 rounded bg-gray-800">
-                <Image src="/logo.png" alt="알뜰상품권" width={120} height={26} className="h-6 w-auto object-contain" />
+                <Image src="/logo.svg" alt="알뜰상품권" width={120} height={26} className="h-6 w-auto object-contain" />
               </div>
               <Link href="/guide" className="text-[11px] text-gray-500 hover:text-accent border border-gray-300 px-3 py-1.5 flex items-center gap-1">
                 알뜰상품권 이용안내 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>

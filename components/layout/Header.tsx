@@ -74,7 +74,7 @@ export default function Header() {
           <div className="flex items-center justify-between h-[70px] md:h-[80px]">
             {/* Logo */}
             <Link href="/" className="flex items-center shrink-0">
-              <Image src="/logo-dark.png" alt="알뜰상품권" width={180} height={40} className="h-8 md:h-10 w-auto object-contain" priority />
+              <Image src="/logo-dark.svg" alt="알뜰상품권" width={180} height={40} className="h-8 md:h-10 w-auto object-contain" priority />
             </Link>
 
             {/* Search bars - Desktop */}

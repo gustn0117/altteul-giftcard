@@ -69,7 +69,7 @@ export default function RegisterBusinessPage() {
     <div className="min-h-[80vh] flex items-center justify-center px-5 py-6">
       <div className="w-full max-w-[640px]">
         <div className="text-center mb-6">
-          <Image src="/logo-dark.png" alt="알뜰상품권" width={140} height={40} className="h-10 w-auto object-contain mx-auto mb-3" priority />
+          <Image src="/logo-dark.svg" alt="알뜰상품권" width={140} height={40} className="h-10 w-auto object-contain mx-auto mb-3" priority />
           <h1 className="text-[16px] font-bold text-gray-900">업체 회원가입</h1>
           <p className="text-[12px] text-gray-500 mt-1">매입 업체로 등록하여 광고 노출 및 상담 문의를 받아보세요.</p>
         </div>
