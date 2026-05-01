@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Search, User, Menu, X, Clock, Eye, ShieldAlert, Megaphone } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import NotificationBell from '@/components/layout/NotificationBell';
 
 export default function Header() {
   const router = useRouter();
@@ -125,6 +126,7 @@ export default function Header() {
                   <span className="text-[10px]">내 대시보드</span>
                 </Link>
               )}
+              {isLoggedIn && <NotificationBell />}
               <Link href="/advertising" className="flex flex-col items-center gap-1 text-gray-600 hover:text-accent transition-colors">
                 <Megaphone size={22} strokeWidth={1.5} />
                 <span className="text-[10px]">광고문의</span>

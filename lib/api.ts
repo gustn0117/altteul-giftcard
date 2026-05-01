@@ -1,16 +1,28 @@
 import { supabase } from './supabase';
-import type { DBPost, DBUser, DBChat, DBMessage, DBNotice, DBPremiumBuyer } from './types';
+import type { DBPost, DBUser, DBChat, DBMessage, DBNotice, DBPremiumBuyer, DBMainBanner, DBNotification, DBJumpLog, DBPointTransaction } from './types';
 
 // ─── Posts ───
 
-export async function getPosts(type?: 'sell' | 'buy', opts?: { limit?: number; withAuthor?: boolean }) {
+const POST_BASE_COLS = 'id, type, title, category, face_value, price, discount, percentage, send_month, send_day, delivery, delivery_method, tags, views, is_active, author_id, guest_name, expires_at, blind_locked, completed_at, deleted_at, last_jumped_at, notified_expiry_at, created_at';
+
+export async function getPosts(type?: 'sell' | 'buy', opts?: { limit?: number; withAuthor?: boolean; includeBlinded?: boolean }) {
   const limit = opts?.limit ?? 100;
   const withAuthor = opts?.withAuthor ?? true;
+  const includeBlinded = opts?.includeBlinded ?? false;
   const selectCols = withAuthor
-    ? 'id, type, title, category, face_value, price, discount, delivery, delivery_method, tags, views, is_active, author_id, guest_name, created_at, author:users!author_id(id, name, type)'
-    : 'id, type, title, category, face_value, price, discount, delivery, delivery_method, tags, views, is_active, author_id, guest_name, created_at';
-  let q = supabase.from('posts').select(selectCols).order('created_at', { ascending: false }).limit(limit);
+    ? `${POST_BASE_COLS}, author:users!author_id(id, name, type)`
+    : POST_BASE_COLS;
+  // 블라인드/삭제 제외 (운영자 페이지에서는 includeBlinded=true)
+  // 정렬: last_jumped_at desc nulls last → created_at desc
+  let q = supabase
+    .from('posts')
+    .select(selectCols)
+    .is('deleted_at', null)
+    .order('last_jumped_at', { ascending: false, nullsFirst: false })
+    .order('created_at', { ascending: false })
+    .limit(limit);
   if (type) q = q.eq('type', type);
+  if (!includeBlinded) q = q.eq('blind_locked', false);
   const { data, error } = await q;
   if (error) throw error;
   return (data as unknown) as (DBPost & { author: DBUser })[];
@@ -41,8 +53,38 @@ export async function updatePost(id: string, updates: Partial<DBPost>) {
 }
 
 export async function deletePost(id: string) {
-  const { error } = await supabase.from('posts').delete().eq('id', id);
+  // soft-delete
+  const { error } = await supabase.from('posts').update({ deleted_at: new Date().toISOString() }).eq('id', id);
   if (error) throw error;
+}
+
+/** 작성자가 판매완료 토글 — completed_at 설정/해제 */
+export async function togglePostComplete(id: string, completed: boolean) {
+  const { data, error } = await supabase
+    .from('posts')
+    .update({ completed_at: completed ? new Date().toISOString() : null, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as DBPost;
+}
+
+/** 작성자가 만료 시각을 연장 — 기본 +N일 */
+export async function extendPostExpiry(id: string, addDays: number) {
+  const { data: existing, error: getErr } = await supabase.from('posts').select('expires_at').eq('id', id).single();
+  if (getErr) throw getErr;
+  const base = existing?.expires_at ? new Date(existing.expires_at) : new Date();
+  if (base < new Date()) base.setTime(Date.now());
+  base.setTime(base.getTime() + addDays * 86400000);
+  const { data, error } = await supabase
+    .from('posts')
+    .update({ expires_at: base.toISOString(), notified_expiry_at: null, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as DBPost;
 }
 
 // ─── Users ───
@@ -225,4 +267,76 @@ export async function updateUser(id: string, updates: Partial<DBUser>) {
 export async function deleteUser(id: string) {
   const { error } = await supabase.from('users').delete().eq('id', id);
   if (error) throw error;
+}
+
+// ─── Main Banners (메인 배너 광고: 3×2 = 6칸) ───
+
+export async function getMainBanners(activeOnly = true): Promise<DBMainBanner[]> {
+  let q = supabase.from('main_banners').select('*').order('position', { ascending: true });
+  if (activeOnly) q = q.eq('is_active', true).gt('expires_at', new Date().toISOString());
+  const { data, error } = await q;
+  if (error) throw error;
+  return data as DBMainBanner[];
+}
+
+// ─── Notifications ───
+
+export async function getNotifications(userId: string, opts?: { unreadOnly?: boolean; limit?: number }) {
+  const limit = opts?.limit ?? 30;
+  let q = supabase
+    .from('notifications')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (opts?.unreadOnly) q = q.is('read_at', null);
+  const { data, error } = await q;
+  if (error) throw error;
+  return data as DBNotification[];
+}
+
+export async function getUnreadNotificationCount(userId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from('notifications')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .is('read_at', null);
+  if (error) throw error;
+  return count ?? 0;
+}
+
+export async function markNotificationRead(id: string) {
+  const { error } = await supabase.from('notifications').update({ read_at: new Date().toISOString() }).eq('id', id);
+  if (error) throw error;
+}
+
+export async function markAllNotificationsRead(userId: string) {
+  const { error } = await supabase.from('notifications').update({ read_at: new Date().toISOString() })
+    .eq('user_id', userId).is('read_at', null);
+  if (error) throw error;
+}
+
+// ─── Jump / Points ───
+
+export async function getTodayJumpCount(userId: string, postId: string): Promise<number> {
+  const since = new Date(); since.setHours(0, 0, 0, 0);
+  const { count, error } = await supabase
+    .from('jump_logs')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('post_id', postId)
+    .gte('created_at', since.toISOString());
+  if (error) throw error;
+  return count ?? 0;
+}
+
+export async function getPointTransactions(userId: string, limit = 50): Promise<DBPointTransaction[]> {
+  const { data, error } = await supabase
+    .from('point_transactions')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return data as DBPointTransaction[];
 }

@@ -304,6 +304,22 @@ export default function AdminPage() {
         <button onClick={logout} className="btn-secondary text-[12px] h-8">로그아웃</button>
       </div>
 
+      {/* 신규 운영자 페이지 빠른 링크 */}
+      <div className="grid grid-cols-3 gap-2 mb-3">
+        <a href="/admin/banners" className="card card-hover p-3 text-left bg-blue-50 border-blue-200">
+          <span className="text-[11px] text-blue-700">메인 배너 관리</span>
+          <p className="text-[13px] font-bold text-blue-900 mt-0.5">3×2 광고 슬롯</p>
+        </a>
+        <a href="/admin/blinded" className="card card-hover p-3 text-left bg-amber-50 border-amber-200">
+          <span className="text-[11px] text-amber-700">블라인드 관리</span>
+          <p className="text-[13px] font-bold text-amber-900 mt-0.5">잠긴 글 풀기</p>
+        </a>
+        <a href="/admin/points" className="card card-hover p-3 text-left bg-emerald-50 border-emerald-200">
+          <span className="text-[11px] text-emerald-700">포인트 관리</span>
+          <p className="text-[13px] font-bold text-emerald-900 mt-0.5">충전 / 차감</p>
+        </a>
+      </div>
+
       <div className="grid grid-cols-4 md:grid-cols-8 gap-2 mb-5">
         {tabs.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)}

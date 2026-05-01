@@ -11,6 +11,10 @@ import { formatNumber, parseNumber } from '@/lib/format';
 import LeftSidebar from '@/components/layout/LeftSidebar';
 import RightSidebar from '@/components/layout/RightSidebar';
 
+// 만료 정책 (일 단위)
+const SELL_EXPIRE_DAYS = 7;   // 팝니다: 7일 후 잠금 (30일 후 자동삭제)
+const BUY_EXPIRE_DAYS = 7;    // 삽니다: 7일 후 잠금 (운영자 해제)
+
 export default function WritePostPage() {
   return (
     <Suspense fallback={<div className="container-main py-20 text-center text-gray-400 text-[13px]">불러오는 중...</div>}>
@@ -48,6 +52,11 @@ function WritePostContent() {
     category: '',
     categoryName: '',
     title: '',
+    // 팝니다 신규: 매입률(%) + 발송 월/일
+    percentage: '',
+    sendMonth: '',
+    sendDay: '',
+    // 삽니다 (기존 금액 방식 유지)
     faceValue: '',
     price: '',
     delivery: '7일 이내 발송',
@@ -75,8 +84,11 @@ function WritePostContent() {
             category: post.category,
             categoryName: '',
             title: post.title,
-            faceValue: String(post.face_value),
-            price: String(post.price),
+            percentage: post.percentage != null ? String(post.percentage) : '',
+            sendMonth: post.send_month != null ? String(post.send_month) : '',
+            sendDay: post.send_day != null ? String(post.send_day) : '',
+            faceValue: post.face_value != null ? String(post.face_value) : '',
+            price: post.price != null ? String(post.price) : '',
             delivery: post.delivery || '7일 이내 발송',
             deliveryMethod: post.delivery_method || 'mobile',
             description: '',
@@ -122,6 +134,9 @@ function WritePostContent() {
   const faceValue = Number(form.faceValue) || 0;
   const price = Number(form.price) || 0;
   const discount = faceValue > 0 ? Math.round((1 - price / faceValue) * 100) : 0;
+  const percentage = Number(form.percentage) || 0;
+  const sendMonth = Number(form.sendMonth) || 0;
+  const sendDay = Number(form.sendDay) || 0;
 
   const verifyEditPassword = (e: React.FormEvent) => {
     e.preventDefault();
@@ -149,18 +164,43 @@ function WritePostContent() {
       if (!form.guestPassword.trim() || form.guestPassword.length < 4) return alert('비밀번호는 4자 이상 입력하세요.');
     }
 
+    // 팝니다(sell) 신규 검증
+    if (form.type === 'sell') {
+      if (!percentage || percentage <= 0 || percentage > 200) return alert('매입률(%)을 1~200 사이로 입력하세요.');
+      if (!sendMonth || sendMonth < 1 || sendMonth > 12) return alert('발송 월(1~12)을 입력하세요.');
+      if (!sendDay || sendDay < 1 || sendDay > 31) return alert('발송 일(1~31)을 입력하세요.');
+    }
+
     setSubmitting(true);
     try {
+      const expireDays = form.type === 'sell' ? SELL_EXPIRE_DAYS : BUY_EXPIRE_DAYS;
+      const expiresAt = new Date(Date.now() + expireDays * 86400000).toISOString();
+
+      const sendTag = form.type === 'sell' && sendMonth && sendDay ? `${sendMonth}월 ${sendDay}일 발송` : form.delivery;
       const payload: Record<string, unknown> = {
         type: form.type as 'sell' | 'buy',
         title: form.title,
         category: form.category,
-        face_value: faceValue,
-        price,
         delivery_method: form.deliveryMethod,
-        delivery: form.delivery,
-        tags: [form.delivery, form.region ? `#${form.region}` : '', form.deliveryMethod === 'mobile' ? '#모바일' : form.deliveryMethod === 'parcel' ? '#택배' : '#직접만남'].filter(Boolean),
+        delivery: form.type === 'sell' ? sendTag : form.delivery,
+        tags: [sendTag, form.region ? `#${form.region}` : '', form.deliveryMethod === 'mobile' ? '#모바일' : form.deliveryMethod === 'parcel' ? '#택배' : '#직접만남'].filter(Boolean),
       };
+
+      if (form.type === 'sell') {
+        // 팝니다는 percentage + 월/일 사용 (face_value/price는 null)
+        payload.percentage = percentage;
+        payload.send_month = sendMonth;
+        payload.send_day = sendDay;
+        payload.face_value = null;
+        payload.price = null;
+      } else {
+        // 삽니다는 기존 금액 방식
+        payload.face_value = faceValue;
+        payload.price = price;
+      }
+
+      // 신규 등록 시에만 만료 시각 설정 (수정 시는 기존 만료 유지)
+      if (!isEdit) payload.expires_at = expiresAt;
 
       if (isLoggedIn && user) {
         payload.author_id = user.id;
@@ -284,35 +324,78 @@ function WritePostContent() {
               placeholder="예: 신세계 10만원권 판매" className="input" required />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[12px] font-medium text-zinc-600 mb-1">개당 상품권 금액 (원) *</label>
-              <input type="text" inputMode="numeric" value={formatNumber(form.faceValue)}
-                onChange={(e) => handleChange('faceValue', parseNumber(e.target.value))} placeholder="100,000" className="input" required />
-            </div>
-            <div>
-              <label className="block text-[12px] font-medium text-zinc-600 mb-1">개당 구매금액 (원) *</label>
-              <input type="text" inputMode="numeric" value={formatNumber(form.price)}
-                onChange={(e) => handleChange('price', parseNumber(e.target.value))} placeholder="70,000" className="input" required />
-            </div>
-          </div>
+          {/* 팝니다: 매입률(%) + 월/일 발송 */}
+          {form.type === 'sell' ? (
+            <>
+              <div>
+                <label className="block text-[12px] font-medium text-zinc-600 mb-1">매입률 (%) *</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number" min={1} max={200} step="0.1"
+                    value={form.percentage}
+                    onChange={(e) => handleChange('percentage', e.target.value)}
+                    placeholder="92" className="input flex-1" required
+                  />
+                  <span className="text-[14px] font-bold text-accent">%</span>
+                </div>
+                <p className="text-[11px] text-zinc-400 mt-1">예: 92 (액면가 대비 92% 매입)</p>
+              </div>
+              <div>
+                <label className="block text-[12px] font-medium text-zinc-600 mb-1">발송 예정일 *</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number" min={1} max={12}
+                    value={form.sendMonth}
+                    onChange={(e) => handleChange('sendMonth', e.target.value)}
+                    placeholder="5" className="input w-20" required
+                  />
+                  <span className="text-[13px] text-zinc-600">월</span>
+                  <input
+                    type="number" min={1} max={31}
+                    value={form.sendDay}
+                    onChange={(e) => handleChange('sendDay', e.target.value)}
+                    placeholder="15" className="input w-20" required
+                  />
+                  <span className="text-[13px] text-zinc-600">일 발송</span>
+                </div>
+                {sendMonth > 0 && sendDay > 0 && (
+                  <p className="text-[11px] text-accent mt-1 font-medium">표시: {sendMonth}월 {sendDay}일 발송</p>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[12px] font-medium text-zinc-600 mb-1">개당 상품권 금액 (원) *</label>
+                  <input type="text" inputMode="numeric" value={formatNumber(form.faceValue)}
+                    onChange={(e) => handleChange('faceValue', parseNumber(e.target.value))} placeholder="100,000" className="input" required />
+                </div>
+                <div>
+                  <label className="block text-[12px] font-medium text-zinc-600 mb-1">개당 구매금액 (원) *</label>
+                  <input type="text" inputMode="numeric" value={formatNumber(form.price)}
+                    onChange={(e) => handleChange('price', parseNumber(e.target.value))} placeholder="70,000" className="input" required />
+                </div>
+              </div>
 
-          {faceValue > 0 && price > 0 && (
-            <div className="bg-zinc-50 rounded-md px-4 py-3 text-[13px] border border-zinc-200">
-              할인율: <span className="text-zinc-900 font-semibold">{discount}%</span>
-            </div>
+              {faceValue > 0 && price > 0 && (
+                <div className="bg-zinc-50 rounded-md px-4 py-3 text-[13px] border border-zinc-200">
+                  할인율: <span className="text-zinc-900 font-semibold">{discount}%</span>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-[12px] font-medium text-zinc-600 mb-1">발송 예정</label>
+                <select value={form.delivery} onChange={(e) => handleChange('delivery', e.target.value)} className="input">
+                  <option value="즉시발송">즉시발송</option>
+                  <option value="3일 이내 발송">3일 이내 발송</option>
+                  <option value="5일 이내 발송">5일 이내 발송</option>
+                  <option value="7일 이내 발송">7일 이내 발송</option>
+                  <option value="14일 이내 발송">14일 이내 발송</option>
+                </select>
+              </div>
+            </>
           )}
-
-          <div>
-            <label className="block text-[12px] font-medium text-zinc-600 mb-1">발송 예정</label>
-            <select value={form.delivery} onChange={(e) => handleChange('delivery', e.target.value)} className="input">
-              <option value="즉시발송">즉시발송</option>
-              <option value="3일 이내 발송">3일 이내 발송</option>
-              <option value="5일 이내 발송">5일 이내 발송</option>
-              <option value="7일 이내 발송">7일 이내 발송</option>
-              <option value="14일 이내 발송">14일 이내 발송</option>
-            </select>
-          </div>
 
           <div>
             <label className="block text-[12px] font-medium text-zinc-600 mb-1">배송 방법</label>

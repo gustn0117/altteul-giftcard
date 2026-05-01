@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ChevronRight, ShoppingCart, PenSquare } from 'lucide-react';
 import HeroBanner from '@/components/home/HeroBanner';
+import MainBanners from '@/components/home/MainBanners';
 import LeftSidebar from '@/components/layout/LeftSidebar';
 import RightSidebar from '@/components/layout/RightSidebar';
 import MainCompaniesSection from '@/components/home/MainCompaniesSection';
@@ -38,6 +39,7 @@ export default function Home() {
 
   return (
     <div>
+      <MainBanners />
       <HeroBanner />
 
       <div className="container-main py-6">

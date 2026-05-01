@@ -7,9 +7,15 @@ export interface DBPost {
   type: 'sell' | 'buy';
   category: string;
   title: string;
-  face_value: number;
-  price: number;
-  discount: number; // generated column
+  face_value: number | null;
+  price: number | null;
+  discount: number | null;
+  /** 매입률(%) — 팝니다 글의 새 표기 */
+  percentage: number | null;
+  /** 발송 예정 월 (1-12) */
+  send_month: number | null;
+  /** 발송 예정 일 (1-31) */
+  send_day: number | null;
   delivery: string | null;
   delivery_method: string;
   region: string | null;
@@ -17,9 +23,20 @@ export interface DBPost {
   tags: string[];
   views: number;
   is_active: boolean;
+  /** 만료(블라인드 잠금) 시각 */
+  expires_at: string | null;
+  /** 블라인드 잠금 여부 (만료되면 true) */
+  blind_locked: boolean;
+  /** 판매완료 시각 — 작성자가 직접 토글 */
+  completed_at: string | null;
+  /** soft-delete 시각 (30일 자동삭제 등) */
+  deleted_at: string | null;
+  /** 마지막 점프 시각 — 정렬 우선순위 */
+  last_jumped_at: string | null;
+  /** 만료 1시간 전 알림 발송 시각 */
+  notified_expiry_at: string | null;
   created_at: string;
   updated_at: string;
-  // joined
   author?: DBUser;
 }
 
@@ -30,8 +47,64 @@ export interface DBUser {
   phone: string | null;
   type: 'normal' | 'business';
   password_hash?: string;
+  /** 점프 등에 사용하는 포인트 — 운영자만 충전 */
+  points: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface DBMainBanner {
+  id: string;
+  position: 1 | 2 | 3 | 4 | 5 | 6;
+  title: string;
+  subtitle: string | null;
+  image_url: string | null;
+  link_url: string | null;
+  business_id: string | null;
+  bg_color: string;
+  expires_at: string;
+  notified_expiry_at: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type NotificationType =
+  | 'post_expiry_soon'
+  | 'banner_expiry_soon'
+  | 'post_locked'
+  | 'banner_locked'
+  | 'post_unlocked'
+  | 'point_charged';
+
+export interface DBNotification {
+  id: string;
+  user_id: string;
+  type: NotificationType;
+  title: string;
+  body: string | null;
+  link: string | null;
+  read_at: string | null;
+  created_at: string;
+}
+
+export interface DBJumpLog {
+  id: string;
+  post_id: string;
+  user_id: string;
+  used_free: boolean;
+  points_used: number;
+  created_at: string;
+}
+
+export interface DBPointTransaction {
+  id: string;
+  user_id: string;
+  delta: number;
+  balance_after: number;
+  reason: string;
+  admin_id: string | null;
+  created_at: string;
 }
 
 export interface DBChat {
