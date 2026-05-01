@@ -2,7 +2,7 @@ services:
   app:
     build: .
     ports:
-      - "4010:3000"
+      - "4095:3000"
     env_file:
       - .env.production
     restart: unless-stopped
