@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Search, User, Menu, X, Clock, Eye, ShieldAlert, Megaphone } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import NotificationBell from '@/components/layout/NotificationBell';
@@ -21,25 +21,6 @@ export default function Header() {
     router.push(`/search?q=${encodeURIComponent(q)}`);
     setMobileMenuOpen(false);
   };
-
-  const handleBuyerSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const q = searchQuery.trim();
-    if (!q) return;
-    router.push(`/search?q=${encodeURIComponent(q)}&tab=buyer`);
-  };
-  const [visitorInfo, setVisitorInfo] = useState<{ today: number; current: number; total: number } | null>(null);
-
-  useEffect(() => {
-    fetch('/api/visitors')
-      .then((r) => r.json())
-      .then((data) => setVisitorInfo({
-        today: data.today ?? 0,
-        current: Math.max(1, Math.floor(Math.random() * 30) + 5),
-        total: data.total ?? 40571676
-      }))
-      .catch(() => setVisitorInfo({ today: 473, current: 12, total: 40571676 }));
-  }, []);
 
   return (
     <header className="bg-white sticky top-0 z-50">
@@ -97,14 +78,6 @@ export default function Header() {
                   <Search size={16} />
                 </button>
               </div>
-              <button
-                type="button"
-                onClick={handleBuyerSearchSubmit}
-                disabled={!searchQuery.trim()}
-                className="h-[38px] px-3 border border-gray-300 text-[12px] text-gray-600 hover:border-accent hover:text-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-              >
-                업체명 검색
-              </button>
             </form>
 
             {/* Icon nav - Desktop */}

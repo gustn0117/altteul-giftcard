@@ -1,19 +1,45 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 60" preserveAspectRatio="xMidYMid meet">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 64" preserveAspectRatio="xMidYMid meet">
   <defs>
-    <linearGradient id="cardGradLight" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#1E40AF"/>
+    <linearGradient id="cardGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1E3A8A"/>
+      <stop offset="55%" stop-color="#1E40AF"/>
       <stop offset="100%" stop-color="#3B82F6"/>
     </linearGradient>
+    <linearGradient id="cardShine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.35"/>
+      <stop offset="55%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="textBlue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1E40AF"/>
+      <stop offset="100%" stop-color="#2563EB"/>
+    </linearGradient>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#1E40AF" flood-opacity="0.35"/>
+    </filter>
   </defs>
   <style>
-    .l { font-family: 'Pretendard', system-ui, -apple-system, 'Segoe UI', sans-serif; font-weight: 800; font-size: 36px; letter-spacing: -1.5px; }
+    .l { font-family: 'Pretendard', system-ui, -apple-system, 'Segoe UI', sans-serif; font-weight: 800; font-size: 34px; letter-spacing: -1.5px; }
+    .s { font-family: 'Pretendard', system-ui, -apple-system, 'Segoe UI', sans-serif; font-weight: 700; font-size: 9px; letter-spacing: 4px; }
     .w { font-family: 'Pretendard', system-ui, -apple-system, 'Segoe UI', sans-serif; font-weight: 800; font-size: 22px; }
   </style>
-  <g transform="translate(0, 8)">
-    <rect x="2" y="4" width="48" height="40" rx="6" fill="url(#cardGradLight)"/>
-    <rect x="2" y="4" width="48" height="10" rx="6" fill="#1E3A8A" opacity="0.4"/>
-    <text x="26" y="33" text-anchor="middle" class="w" fill="#FFFFFF">₩</text>
+
+  <!-- Card icon with gradient + shadow + shine -->
+  <g transform="translate(2, 6)" filter="url(#cardShadow)">
+    <rect x="0" y="2" width="52" height="44" rx="7" fill="url(#cardGrad)"/>
+    <!-- Top stripe (magnetic / chip area) -->
+    <rect x="0" y="2" width="52" height="11" rx="7" fill="#0F172A" opacity="0.35"/>
+    <rect x="0" y="9" width="52" height="2" fill="#0F172A" opacity="0.25"/>
+    <!-- Shine -->
+    <rect x="0" y="2" width="52" height="22" rx="7" fill="url(#cardShine)"/>
+    <!-- Star spark -->
+    <path d="M44 17 L45 19 L47 19.5 L45.4 21 L45.7 23 L44 22 L42.3 23 L42.6 21 L41 19.5 L43 19 Z" fill="#FBBF24"/>
+    <!-- ₩ symbol -->
+    <text x="26" y="38" text-anchor="middle" class="w" fill="#FFFFFF">₩</text>
   </g>
-  <text x="62" y="44" class="l" fill="#1C1D3E">알뜰</text>
-  <text x="142" y="44" class="l" fill="#1E40AF">상품권</text>
+
+  <!-- Brand wordmark -->
+  <text x="66" y="36" class="l" fill="#0F172A">알뜰</text>
+  <text x="146" y="36" class="l" fill="url(#textBlue)">상품권</text>
+  <!-- Tagline -->
+  <text x="66" y="54" class="s" fill="#64748B">GIFT CARD MARKETPLACE</text>
 </svg>
