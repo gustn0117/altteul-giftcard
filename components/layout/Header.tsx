@@ -64,51 +64,52 @@ export default function Header() {
           {/* Spacer (모바일) */}
           <div className="flex-1 md:hidden" />
 
-          {/* 우측 액션 — 큼직한 박스 + 강렬한 색상 차별화 */}
-          <div className="hidden md:flex items-center gap-2">
+          {/* 우측 액션 — 라이트, 텍스트 링크 + 1개 CTA */}
+          <div className="hidden md:flex items-center gap-1">
             {isLoggedIn && <NotificationBell />}
 
-            {/* 글쓰기 — 주황 솔리드 (시선 강탈) */}
+            {/* 글쓰기 — 텍스트 링크 */}
             <Link
               href="/board/write?type=sell"
-              className="inline-flex items-center gap-2 h-12 px-5 bg-amber-500 hover:bg-amber-600 text-white text-[14px] font-black tracking-tight rounded-lg shadow-[0_4px_0_0_rgb(180,83,9)] hover:shadow-[0_2px_0_0_rgb(180,83,9)] hover:translate-y-0.5 transition-all"
+              className="inline-flex items-center gap-1.5 h-9 px-3 text-[13px] font-semibold text-gray-600 hover:text-gray-900 transition-colors"
             >
-              <PenSquare size={16} strokeWidth={3} /> 글쓰기
+              <PenSquare size={14} /> 글쓰기
             </Link>
+
+            <span className="w-px h-3.5 bg-gray-200 mx-0.5" aria-hidden />
 
             {isLoggedIn ? (
               <>
-                {/* 대시보드 — 진한 파랑 (입체) */}
                 <Link
                   href="/dashboard"
-                  className="inline-flex items-center gap-2 h-12 px-5 bg-blue-700 hover:bg-blue-800 text-white text-[14px] font-black tracking-tight rounded-lg shadow-[0_4px_0_0_#1E3A8A] hover:shadow-[0_2px_0_0_#1E3A8A] hover:translate-y-0.5 transition-all"
+                  className="inline-flex items-center gap-1.5 h-9 px-3 text-[13px] font-semibold text-gray-700 hover:text-accent transition-colors"
                 >
-                  <LayoutDashboard size={16} strokeWidth={3} />
+                  <LayoutDashboard size={14} />
                   <span className="max-w-24 truncate">{user?.name ?? '내 대시보드'}</span>
                 </Link>
                 <button
                   onClick={logout}
-                  className="text-[13px] font-bold text-gray-600 hover:text-gray-900 px-2 transition-colors"
+                  className="h-9 px-3 text-[13px] font-medium text-gray-500 hover:text-gray-900 transition-colors"
                 >
                   로그아웃
                 </button>
               </>
             ) : (
               <>
-                {/* 로그인 — 진한 회색/검정 outline (박스 형태) */}
+                {/* 로그인 — 텍스트 링크 */}
                 <Link
                   href="/login"
-                  className="inline-flex items-center gap-2 h-12 px-5 bg-white border-2 border-gray-900 hover:bg-gray-900 hover:text-white text-gray-900 text-[14px] font-black tracking-tight rounded-lg shadow-[0_4px_0_0_#111827] hover:shadow-[0_2px_0_0_#111827] hover:translate-y-0.5 transition-all"
+                  className="inline-flex items-center gap-1.5 h-9 px-3 text-[13px] font-semibold text-gray-700 hover:text-gray-900 transition-colors"
                 >
-                  <LogIn size={16} strokeWidth={3} /> 로그인
+                  <LogIn size={14} /> 로그인
                 </Link>
 
-                {/* 회원가입 — 진한 파랑 (Primary CTA, 입체 그림자) */}
+                {/* 회원가입 — 유일한 CTA (라이트한 솔리드 pill) */}
                 <Link
                   href="/register"
-                  className="inline-flex items-center gap-2 h-12 px-6 bg-blue-700 hover:bg-blue-800 text-white text-[14px] font-black tracking-tight rounded-lg shadow-[0_4px_0_0_#1E3A8A] hover:shadow-[0_2px_0_0_#1E3A8A] hover:translate-y-0.5 transition-all"
+                  className="inline-flex items-center gap-1.5 h-9 px-4 ml-1 bg-accent hover:bg-blue-700 text-white text-[13px] font-bold rounded-full transition-colors"
                 >
-                  <UserPlus size={16} strokeWidth={3} /> 회원가입
+                  <UserPlus size={14} /> 회원가입
                 </Link>
               </>
             )}
