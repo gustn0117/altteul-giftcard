@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ChevronRight, ShoppingCart, PenSquare, Tag, Users, Zap, TrendingUp } from 'lucide-react';
+import { ChevronRight, ShoppingCart, PenSquare, Tag, Users, TrendingUp } from 'lucide-react';
 import MainBanners from '@/components/home/MainBanners';
 import HomeAside from '@/components/layout/HomeAside';
 import MainCompaniesSection from '@/components/home/MainCompaniesSection';
@@ -40,11 +40,10 @@ export default function Home() {
 
       <div className="container-main py-8">
         {/* Quick stats — 모노톤 통일 */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        <div className="grid grid-cols-3 gap-3 mb-6">
           <StatCard icon={Tag} label="판매글" value={sellPosts.length} unit="건" loading={loading} />
           <StatCard icon={ShoppingCart} label="구매글" value={buyPosts.length} unit="건" loading={loading} />
           <StatCard icon={Users} label="매입업체" value={buyers.length} unit="곳" loading={loading} />
-          <StatCard icon={Zap} label="실시간 처리" value="평균 12분" />
         </div>
 
         {/* 메인 그리드: 좌측 사이드(280) + 메인 풀와이드 (사이드 위치 변경) */}
