@@ -49,6 +49,8 @@ export interface DBUser {
   password_hash?: string;
   /** 점프 등에 사용하는 포인트 — 운영자만 충전 */
   points: number;
+  /** 팝니다 글 연락처 열람 권한 만료 시각 — 운영자가 부여 */
+  contact_view_until: string | null;
   created_at: string;
   updated_at: string;
 }

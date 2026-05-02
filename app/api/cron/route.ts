@@ -43,57 +43,26 @@ async function runCron() {
     banners_notified: 0,
   };
 
-  // ── 1. 만료된 글 잠금 (blind_locked = true) ──
-  const { data: toLock } = await supabase
-    .from('posts')
-    .select('id, author_id, type, title')
-    .eq('blind_locked', false)
-    .is('deleted_at', null)
-    .not('expires_at', 'is', null)
-    .lte('expires_at', nowIso);
-  if (toLock && toLock.length > 0) {
-    const ids = toLock.map((p) => p.id);
-    await supabase.from('posts').update({ blind_locked: true, updated_at: nowIso }).in('id', ids);
-    result.posts_locked = toLock.length;
-    // 작성자에게 잠금 알림
-    const noties = toLock
-      .filter((p) => !!p.author_id)
-      .map((p) => ({
-        user_id: p.author_id!,
-        type: 'post_locked',
-        title: '글이 만료되어 비공개되었습니다',
-        body: `[${p.title}] 운영자 검토 후 다시 활성화됩니다.`,
-        link: `/board/${p.id}`,
-      }));
-    if (noties.length > 0) await supabase.from('notifications').insert(noties);
-  }
-
-  // ── 2. 1시간 내 만료 예정 글 알림 (한 번만) ──
-  const { data: toNotify } = await supabase
-    .from('posts')
-    .select('id, author_id, title, expires_at')
-    .eq('blind_locked', false)
-    .is('deleted_at', null)
-    .is('notified_expiry_at', null)
-    .not('expires_at', 'is', null)
-    .gt('expires_at', nowIso)
-    .lte('expires_at', inOneHour)
-    .not('author_id', 'is', null);
-  if (toNotify && toNotify.length > 0) {
-    const ids = toNotify.map((p) => p.id);
-    await supabase.from('posts').update({ notified_expiry_at: nowIso }).in('id', ids);
-    const noties = toNotify.map((p) => ({
-      user_id: p.author_id!,
+  // ── (폐기) 글 단위 만료/잠금 시스템은 회원별 연락처 권한으로 대체됨 ──
+  // ── 1. 연락처 열람 권한 만료 회원 → 만료 임박 알림 (1시간 전) ──
+  const { data: grantsExpiring } = await supabase
+    .from('users')
+    .select('id, name, contact_view_until')
+    .gt('contact_view_until', nowIso)
+    .lte('contact_view_until', inOneHour);
+  if (grantsExpiring && grantsExpiring.length > 0) {
+    const noties = grantsExpiring.map((u) => ({
+      user_id: u.id,
       type: 'post_expiry_soon',
-      title: '글이 1시간 후 잠깁니다',
-      body: `[${p.title}] 만료 전에 연장하실 수 있습니다.`,
-      link: `/board/${p.id}`,
+      title: '연락처 열람 권한이 1시간 후 만료됩니다',
+      body: '연장이 필요하시면 운영자에게 문의해주세요.',
+      link: '/contact',
     }));
     await supabase.from('notifications').insert(noties);
-    result.posts_notified = toNotify.length;
+    result.posts_notified = grantsExpiring.length;
   }
 
-  // ── 3. 30일 지난 팝니다 글 soft-delete ──
+  // ── 2. 30일 지난 팝니다 글 soft-delete ──
   const { data: toDelete } = await supabase
     .from('posts')
     .select('id')

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Lock, CheckCircle, Rocket, Calendar } from 'lucide-react';
+import { CheckCircle, Rocket, Calendar } from 'lucide-react';
 import type { DBPost, DBUser } from '@/lib/types';
 import { getCategoryName } from '@/data/mock';
 import { BRAND_STYLES, normalizeBrandKey } from '@/components/BrandLogo';
@@ -49,7 +49,6 @@ export default function SellPostItem({ post, num, onJumped }: SellPostItemProps)
   const { user } = useAuth();
   const [jumping, setJumping] = useState(false);
   const isCompleted = !!post.completed_at;
-  const isBlinded = post.blind_locked === true;
   const isOwner = !!user && post.author_id === user.id;
 
   const isNew = Date.now() - new Date(post.created_at).getTime() < 3 * 86400000;
@@ -82,7 +81,7 @@ export default function SellPostItem({ post, num, onJumped }: SellPostItemProps)
     }
   };
 
-  const dimmed = isCompleted || isBlinded;
+  const dimmed = isCompleted;
 
   return (
     <Link href={`/board/${post.id}`} className="block group">
@@ -109,11 +108,6 @@ export default function SellPostItem({ post, num, onJumped }: SellPostItemProps)
             <CheckCircle size={10} strokeWidth={3} /> 완료
           </span>
         )}
-        {!isCompleted && isBlinded && (
-          <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 text-[10.5px] font-bold rounded-full bg-amber-500 text-white">
-            <Lock size={10} strokeWidth={3} /> 검토중
-          </span>
-        )}
 
         {/* 카테고리 뱃지 */}
         <span
@@ -129,7 +123,7 @@ export default function SellPostItem({ post, num, onJumped }: SellPostItemProps)
             <span className="text-[13.5px] font-medium text-gray-800 truncate group-hover:text-accent transition-colors">
               {post.title}
             </span>
-            {isNew && !isCompleted && !isBlinded && (
+            {isNew && !isCompleted && (
               <span className="shrink-0 text-[9.5px] font-black text-white bg-rose-500 px-1 rounded">N</span>
             )}
           </div>
@@ -170,7 +164,7 @@ export default function SellPostItem({ post, num, onJumped }: SellPostItemProps)
         </div>
 
         {/* 점프 버튼 (작성자만) */}
-        {isOwner && !isCompleted && !isBlinded && (
+        {isOwner && !isCompleted && (
           <button
             type="button"
             onClick={handleJump}

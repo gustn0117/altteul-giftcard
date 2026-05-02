@@ -308,9 +308,9 @@ export default function AdminPage() {
           <span className="text-[10.5px] text-gray-500">메인 배너</span>
           <p className="text-[12.5px] font-bold text-gray-900 mt-0.5">3×2 광고 슬롯</p>
         </a>
-        <a href="/admin/blinded" className="card card-hover p-3 text-left">
-          <span className="text-[10.5px] text-amber-600 font-bold">블라인드</span>
-          <p className="text-[12.5px] font-bold text-gray-900 mt-0.5">잠긴 글 풀기</p>
+        <a href="/admin/grants" className="card card-hover p-3 text-left">
+          <span className="text-[10.5px] text-amber-600 font-bold">연락처 권한</span>
+          <p className="text-[12.5px] font-bold text-gray-900 mt-0.5">회원별 시간/일 부여</p>
         </a>
         <a href="/admin/inquiries" className="card card-hover p-3 text-left">
           <span className="text-[10.5px] text-rose-600 font-bold">문의</span>

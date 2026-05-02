@@ -3,7 +3,7 @@
 import { use, useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Eye, Clock, Pencil, Tag, ShoppingCart, Phone, MessageSquare, CheckCircle, Lock, Timer, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Eye, Clock, Pencil, Tag, ShoppingCart, Phone, MessageSquare, CheckCircle, Timer, RotateCcw } from 'lucide-react';
 import { getPost, togglePostComplete, extendPostExpiry } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import type { DBPost, DBUser } from '@/lib/types';
@@ -75,12 +75,23 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   const HeaderIcon = isSell ? Tag : ShoppingCart;
 
   const isCompleted = !!post.completed_at;
-  const isBlinded = post.blind_locked === true;
   const rawPhone = post.guest_phone || post.author?.phone || '';
-  // 완료 또는 블라인드면 연락처 마스킹
-  const showRealPhone = !isCompleted && !isBlinded;
+
+  /**
+   * 연락처 노출 정책 (팝니다/sell 글 한정)
+   * - 작성자 본인: 항상 보임
+   * - 글 완료 처리됨 (isCompleted): 누구라도 가림 (작성자 제외)
+   * - 삽니다(buy): 모두 공개
+   * - 팝니다(sell): 로그인 + contact_view_until > now 인 회원만
+   */
+  const now = Date.now();
+  const hasViewPermission = !!user?.contact_view_until && new Date(user.contact_view_until).getTime() > now;
+  const showRealPhone = isAuthor
+    || (!isSell)                                  // 삽니다 = 모두 공개
+    || (!isCompleted && hasViewPermission);       // 팝니다 = 권한 회원만, 완료 시 X
   const contactPhone = showRealPhone ? rawPhone : '';
   const remaining = formatRemainingTime(post.expires_at);
+  const viewRemainingMs = user?.contact_view_until ? new Date(user.contact_view_until).getTime() - now : 0;
 
   const handleToggleComplete = async () => {
     if (!isAuthor) return;
@@ -147,19 +158,23 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
               )}
             </div>
           )}
-          {!isCompleted && isBlinded && (
-            <div className="mb-3 px-4 py-3 bg-amber-50 border border-amber-200 text-[13px] text-amber-800 flex items-center gap-2">
-              <Lock size={16} /> 만료되어 <strong>운영자 검토 대기 중</strong>입니다. 연락처와 상세 내용이 임시 비공개됩니다.
+          {/* 권한 회원에게: 잔여 시간 표시 */}
+          {isSell && !isAuthor && !isCompleted && hasViewPermission && (
+            <div className="mb-3 px-4 py-2 bg-emerald-50 border border-emerald-200 text-[12px] text-emerald-800 flex items-center gap-2">
+              <Eye size={14} /> 연락처 열람 권한 활성 — 만료까지 <strong>{formatRemainingTime(user!.contact_view_until)}</strong>
             </div>
           )}
-          {!isCompleted && !isBlinded && remaining && (
+          {!isCompleted && !isAuthor && remaining && (
+            <div className="mb-3 px-4 py-2 bg-gray-50 border border-gray-200 text-[12px] text-gray-600 flex items-center gap-2">
+              <Timer size={14} className="text-accent" /> 글 만료까지 {remaining} <span className="text-gray-400">(만료 시 작성자가 7일 연장 가능)</span>
+            </div>
+          )}
+          {!isCompleted && isAuthor && remaining && (
             <div className="mb-3 px-4 py-2 bg-gray-50 border border-gray-200 text-[12px] text-gray-600 flex items-center gap-2">
               <Timer size={14} className="text-accent" /> 만료까지 {remaining}
-              {isAuthor && (
-                <button onClick={handleExtend} disabled={busy} className="ml-auto text-[12px] text-accent font-bold hover:underline flex items-center gap-1">
-                  <RotateCcw size={11} /> 7일 연장
-                </button>
-              )}
+              <button onClick={handleExtend} disabled={busy} className="ml-auto text-[12px] text-accent font-bold hover:underline flex items-center gap-1">
+                <RotateCcw size={11} /> 7일 연장
+              </button>
             </div>
           )}
 
@@ -194,13 +209,8 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                     <CheckCircle size={11} /> 완료
                   </span>
                 )}
-                {!isCompleted && isBlinded && (
-                  <span className="inline-flex items-center gap-0.5 px-2 py-0.5 text-[11px] font-bold rounded bg-amber-500 text-white">
-                    <Lock size={11} /> 운영자 검토중
-                  </span>
-                )}
                 <BrandLogo name={getCategoryName(post.category)} size="sm" />
-                {(Date.now() - new Date(post.created_at).getTime() < 3 * 86400000) && !isCompleted && !isBlinded && (
+                {(Date.now() - new Date(post.created_at).getTime() < 3 * 86400000) && !isCompleted && (
                   <span className="text-[10px] font-bold text-white bg-red-500 px-1.5 py-0.5 rounded-sm">NEW</span>
                 )}
                 {post.tags?.map(t => (
@@ -265,15 +275,10 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
 
             {/* Description */}
             <div className="px-5 py-5 border-b border-gray-100">
-              {post.description && !isBlinded && (
+              {post.description && (
                 <div className="mb-4">
                   <p className="text-[11px] text-gray-400 mb-2">상세 설명</p>
                   <p className="text-[13px] text-gray-700 leading-relaxed whitespace-pre-wrap">{post.description}</p>
-                </div>
-              )}
-              {isBlinded && (
-                <div className="mb-4 p-4 bg-zinc-50 border border-zinc-200 text-center text-[12px] text-zinc-500">
-                  운영자 검토 대기 중 — 상세 내용이 임시 가려져 있습니다.
                 </div>
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-[12px]">
@@ -310,9 +315,30 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                     </p>
                   </>
                 ) : !showRealPhone && rawPhone ? (
-                  <div className="text-center py-4">
-                    <p className="text-[14px] font-bold text-zinc-500 tabular-nums mb-1">{maskPhone(rawPhone)}</p>
-                    <p className="text-[11px] text-zinc-400">{isCompleted ? '판매완료된 글입니다.' : '운영자 검토 대기 중입니다.'}</p>
+                  <div className="text-center py-4 space-y-3">
+                    <p className="text-[14px] font-bold text-zinc-500 tabular-nums">{maskPhone(rawPhone)}</p>
+                    {isCompleted ? (
+                      <p className="text-[11px] text-zinc-400">판매완료된 글입니다. 연락처가 비공개되었습니다.</p>
+                    ) : !isLoggedIn ? (
+                      <>
+                        <p className="text-[11.5px] text-zinc-500">연락처는 권한 회원만 볼 수 있습니다.</p>
+                        <Link href={`/login?redirect=${encodeURIComponent(`/board/${id}`)}`}
+                          className="inline-flex items-center gap-1 h-9 px-4 bg-accent hover:bg-blue-700 text-white text-[12.5px] font-bold rounded-full transition-colors">
+                          로그인 →
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-[11.5px] text-zinc-500">연락처 열람 권한이 없습니다.</p>
+                        <p className="text-[10.5px] text-zinc-400 leading-relaxed">
+                          매입 업체로 활동하시려면 운영자에게 권한 신청을 해주세요.<br/>
+                          (1일 / 7일 / 30일 단위 부여)
+                        </p>
+                        <Link href="/contact" className="inline-flex items-center gap-1 h-9 px-4 border-2 border-accent text-accent hover:bg-accent hover:text-white text-[12.5px] font-bold rounded-full transition-colors">
+                          권한 문의 →
+                        </Link>
+                      </>
+                    )}
                   </div>
                 ) : (
                   <p className="text-[12px] text-gray-500 text-center py-4">
