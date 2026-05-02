@@ -39,12 +39,12 @@ export default function Home() {
       <MainBanners />
 
       <div className="container-main py-8">
-        {/* Quick stats — 페이지 진입 시 빠른 데이터 인사이트 */}
+        {/* Quick stats — 모노톤 통일 */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          <StatCard icon={Tag} label="판매글" value={sellPosts.length} unit="건" color="rose" loading={loading} />
-          <StatCard icon={ShoppingCart} label="구매글" value={buyPosts.length} unit="건" color="blue" loading={loading} />
-          <StatCard icon={Users} label="매입업체" value={buyers.length} unit="곳" color="emerald" loading={loading} />
-          <StatCard icon={Zap} label="실시간 처리" value="평균 12분" color="violet" />
+          <StatCard icon={Tag} label="판매글" value={sellPosts.length} unit="건" loading={loading} />
+          <StatCard icon={ShoppingCart} label="구매글" value={buyPosts.length} unit="건" loading={loading} />
+          <StatCard icon={Users} label="매입업체" value={buyers.length} unit="곳" loading={loading} />
+          <StatCard icon={Zap} label="실시간 처리" value="평균 12분" />
         </div>
 
         {/* 메인 그리드: 좌측 사이드(280) + 메인 풀와이드 (사이드 위치 변경) */}
@@ -120,25 +120,18 @@ export default function Home() {
 /* ──────── 보조 컴포넌트 ──────── */
 
 interface StatCardProps {
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
   label: string;
   value: number | string;
   unit?: string;
-  color: 'rose' | 'blue' | 'emerald' | 'violet';
   loading?: boolean;
 }
 
-function StatCard({ icon: Icon, label, value, unit, color, loading }: StatCardProps) {
-  const ring = {
-    rose: 'bg-rose-50 text-rose-500',
-    blue: 'bg-blue-50 text-blue-500',
-    emerald: 'bg-emerald-50 text-emerald-500',
-    violet: 'bg-violet-50 text-violet-500',
-  }[color];
+function StatCard({ icon: Icon, label, value, unit, loading }: StatCardProps) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3 shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_20px_rgba(0,0,0,0.06)] transition-shadow">
-      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${ring}`}>
-        <Icon size={18} />
+    <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3 hover:border-gray-300 transition-colors">
+      <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-gray-50 text-gray-700">
+        <Icon size={18} strokeWidth={1.8} />
       </div>
       <div className="min-w-0">
         <p className="text-[11px] text-gray-500 font-medium">{label}</p>
