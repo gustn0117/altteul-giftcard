@@ -64,43 +64,52 @@ export default function Header() {
           {/* Spacer (모바일) */}
           <div className="flex-1 md:hidden" />
 
-          {/* 우측 액션 — 알림 / 글쓰기 / 로그인·대시보드 */}
-          <div className="hidden md:flex items-center gap-2">
+          {/* 우측 액션 — 시각적 위계: 텍스트 링크 < 아웃라인 < 솔리드 CTA */}
+          <div className="hidden md:flex items-center gap-2.5">
             {isLoggedIn && <NotificationBell />}
+
+            {/* 글쓰기 — accent 아웃라인 (자주 쓰는 액션) */}
             <Link
               href="/board/write?type=sell"
-              className="inline-flex items-center gap-1.5 h-9 px-3.5 border border-gray-200 hover:border-accent hover:text-accent text-gray-600 text-[12.5px] font-bold rounded-full transition-colors"
+              className="group inline-flex items-center gap-1.5 h-10 px-4 border-1.5 border-accent text-accent hover:bg-accent hover:text-white text-[13px] font-bold rounded-full transition-all"
+              style={{ borderWidth: '1.5px' }}
             >
-              <PenSquare size={13} /> 글쓰기
+              <PenSquare size={14} strokeWidth={2.4} /> 글쓰기
             </Link>
+
             {isLoggedIn ? (
               <>
+                {/* 대시보드 — solid CTA */}
                 <Link
                   href="/dashboard"
-                  className="inline-flex items-center gap-1.5 h-9 px-3.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-[12.5px] font-bold rounded-full transition-colors"
+                  className="inline-flex items-center gap-1.5 h-10 px-4 bg-accent hover:bg-blue-700 text-white text-[13px] font-bold rounded-full shadow-sm shadow-blue-500/30 hover:shadow-md hover:shadow-blue-500/40 transition-all"
                 >
-                  <LayoutDashboard size={13} /> {user?.name?.slice(0, 8) ?? '내 대시보드'}
+                  <LayoutDashboard size={14} strokeWidth={2.4} />
+                  <span className="max-w-20 truncate">{user?.name ?? '내 대시보드'}</span>
                 </Link>
                 <button
                   onClick={logout}
-                  className="text-[12px] text-gray-500 hover:text-gray-800 px-2 py-1"
+                  className="text-[12px] text-gray-400 hover:text-gray-700 px-1 transition-colors"
                 >
                   로그아웃
                 </button>
               </>
             ) : (
               <>
+                {/* 로그인 — 텍스트 링크 스타일 (낮은 위계) */}
                 <Link
                   href="/login"
-                  className="inline-flex items-center gap-1.5 h-9 px-3.5 border border-gray-200 hover:border-accent hover:text-accent text-gray-700 text-[12.5px] font-bold rounded-full transition-colors"
+                  className="inline-flex items-center gap-1.5 h-10 px-3 text-gray-600 hover:text-gray-900 text-[13px] font-bold transition-colors"
                 >
-                  <LogIn size={13} /> 로그인
+                  <LogIn size={14} strokeWidth={2.2} /> 로그인
                 </Link>
+
+                {/* 회원가입 — Primary CTA (가장 강조) */}
                 <Link
                   href="/register"
-                  className="inline-flex items-center gap-1.5 h-9 px-3.5 bg-accent hover:bg-accent/90 text-white text-[12.5px] font-bold rounded-full transition-colors"
+                  className="inline-flex items-center gap-1.5 h-10 px-5 bg-accent hover:bg-blue-700 text-white text-[13px] font-bold rounded-full shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 hover:-translate-y-px transition-all"
                 >
-                  <UserPlus size={13} /> 회원가입
+                  <UserPlus size={14} strokeWidth={2.4} /> 회원가입
                 </Link>
               </>
             )}
