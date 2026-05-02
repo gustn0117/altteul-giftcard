@@ -104,10 +104,13 @@ export default function Header() {
                   <LogIn size={14} /> 로그인
                 </Link>
 
-                {/* 회원가입 — 유일한 CTA (라이트한 솔리드 pill) */}
+                {/* 회원가입 — 유일한 CTA (흰 글씨 강제) */}
                 <Link
                   href="/register"
-                  className="inline-flex items-center gap-1.5 h-9 px-4 ml-1 bg-accent hover:bg-blue-700 text-white text-[13px] font-bold rounded-full transition-colors"
+                  className="inline-flex items-center gap-1.5 h-9 px-4 ml-1 rounded-full text-[13px] font-bold transition-colors"
+                  style={{ background: '#1E40AF', color: '#FFFFFF' }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = '#1D4ED8')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = '#1E40AF')}
                 >
                   <UserPlus size={14} /> 회원가입
                 </Link>
