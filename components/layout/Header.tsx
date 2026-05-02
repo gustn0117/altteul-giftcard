@@ -64,53 +64,51 @@ export default function Header() {
           {/* Spacer (모바일) */}
           <div className="flex-1 md:hidden" />
 
-          {/* 우측 액션 — 강한 콘트라스트 (검정 / 흰 outline / 파란 그라디언트) */}
+          {/* 우측 액션 — 큼직한 박스 + 강렬한 색상 차별화 */}
           <div className="hidden md:flex items-center gap-2">
             {isLoggedIn && <NotificationBell />}
 
-            {/* 글쓰기 — 검정 솔리드 (눈에 확 띄는 어두운 톤) */}
+            {/* 글쓰기 — 주황 솔리드 (시선 강탈) */}
             <Link
               href="/board/write?type=sell"
-              className="inline-flex items-center gap-1.5 h-11 px-4 bg-gray-900 hover:bg-black text-white text-[13.5px] font-extrabold rounded-full shadow-sm hover:shadow-md transition-all"
+              className="inline-flex items-center gap-2 h-12 px-5 bg-amber-500 hover:bg-amber-600 text-white text-[14px] font-black tracking-tight rounded-lg shadow-[0_4px_0_0_rgb(180,83,9)] hover:shadow-[0_2px_0_0_rgb(180,83,9)] hover:translate-y-0.5 transition-all"
             >
-              <PenSquare size={15} strokeWidth={2.6} /> 글쓰기
+              <PenSquare size={16} strokeWidth={3} /> 글쓰기
             </Link>
 
             {isLoggedIn ? (
               <>
-                {/* 대시보드 — 진한 파란 그라디언트 */}
+                {/* 대시보드 — 진한 파랑 (입체) */}
                 <Link
                   href="/dashboard"
-                  className="inline-flex items-center gap-1.5 h-11 px-5 text-white text-[13.5px] font-extrabold rounded-full shadow-md hover:shadow-lg transition-all"
-                  style={{ background: 'linear-gradient(135deg, #1E3A8A, #2563EB)' }}
+                  className="inline-flex items-center gap-2 h-12 px-5 bg-blue-700 hover:bg-blue-800 text-white text-[14px] font-black tracking-tight rounded-lg shadow-[0_4px_0_0_#1E3A8A] hover:shadow-[0_2px_0_0_#1E3A8A] hover:translate-y-0.5 transition-all"
                 >
-                  <LayoutDashboard size={15} strokeWidth={2.6} />
+                  <LayoutDashboard size={16} strokeWidth={3} />
                   <span className="max-w-24 truncate">{user?.name ?? '내 대시보드'}</span>
                 </Link>
                 <button
                   onClick={logout}
-                  className="text-[12.5px] font-bold text-gray-500 hover:text-gray-900 px-2 transition-colors"
+                  className="text-[13px] font-bold text-gray-600 hover:text-gray-900 px-2 transition-colors"
                 >
                   로그아웃
                 </button>
               </>
             ) : (
               <>
-                {/* 로그인 — 흰 배경 + 진한 outline (명확한 박스) */}
+                {/* 로그인 — 진한 회색/검정 outline (박스 형태) */}
                 <Link
                   href="/login"
-                  className="inline-flex items-center gap-1.5 h-11 px-4 bg-white border-2 border-gray-300 hover:border-gray-900 hover:bg-gray-50 text-gray-900 text-[13.5px] font-extrabold rounded-full transition-colors"
+                  className="inline-flex items-center gap-2 h-12 px-5 bg-white border-2 border-gray-900 hover:bg-gray-900 hover:text-white text-gray-900 text-[14px] font-black tracking-tight rounded-lg shadow-[0_4px_0_0_#111827] hover:shadow-[0_2px_0_0_#111827] hover:translate-y-0.5 transition-all"
                 >
-                  <LogIn size={15} strokeWidth={2.6} /> 로그인
+                  <LogIn size={16} strokeWidth={3} /> 로그인
                 </Link>
 
-                {/* 회원가입 — 그라디언트 + 강한 그림자 + 떠오름 (Primary CTA) */}
+                {/* 회원가입 — 진한 파랑 (Primary CTA, 입체 그림자) */}
                 <Link
                   href="/register"
-                  className="inline-flex items-center gap-1.5 h-11 px-5 text-white text-[13.5px] font-extrabold rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
-                  style={{ background: 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)', boxShadow: '0 6px 20px -4px rgba(37, 99, 235, 0.5)' }}
+                  className="inline-flex items-center gap-2 h-12 px-6 bg-blue-700 hover:bg-blue-800 text-white text-[14px] font-black tracking-tight rounded-lg shadow-[0_4px_0_0_#1E3A8A] hover:shadow-[0_2px_0_0_#1E3A8A] hover:translate-y-0.5 transition-all"
                 >
-                  <UserPlus size={15} strokeWidth={2.6} /> 회원가입
+                  <UserPlus size={16} strokeWidth={3} /> 회원가입
                 </Link>
               </>
             )}
