@@ -38,18 +38,18 @@ export default function Header() {
 
   return (
     <header className="bg-white sticky top-0 z-50 border-b border-gray-200">
-      {/* Main row: 로고 | 검색 | 우측 액션 */}
+      {/* Main row: 3분할 그리드 (좌:로고 / 중:검색 / 우:액션) */}
       <div className="container-main">
-        <div className="flex items-center gap-3 md:gap-5 h-17 md:h-19">
-          {/* Logo */}
+        <div className="md:grid md:grid-cols-[auto_1fr_auto] md:gap-6 flex items-center h-17 md:h-19">
+          {/* Logo (좌) */}
           <Link href="/" className="flex items-center shrink-0">
             <Image src="/logo-dark.svg" alt="알뜰상품권" width={180} height={40}
               className="h-8 md:h-9 w-auto object-contain" priority />
           </Link>
 
-          {/* Search — 데스크탑에서 가운데 (둥근, 강조) */}
+          {/* Search (가운데, 데스크탑) */}
           <form onSubmit={handleSearchSubmit}
-            className="hidden md:flex flex-1 max-w-130 relative">
+            className="hidden md:flex w-full max-w-130 mx-auto relative">
             <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             <input
               type="text"
