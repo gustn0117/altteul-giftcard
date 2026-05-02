@@ -126,7 +126,7 @@ export default function MainCompaniesSection({ buyers, loading, compact = false,
       ) : (
         <div className={gridCls}>
           {buyers.slice(0, maxCount).map((b, i) => (
-            <CompanyCard key={b.id} company={b} isNew={i < 3} fallbackIndex={i} />
+            <CompanyCard key={b.id} company={b} isNew={i < 3} />
           ))}
           {fillItems.map((item, i) => (
             <DemoCard key={`demo-${i}`} item={item} index={i} />
