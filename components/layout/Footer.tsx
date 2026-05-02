@@ -9,7 +9,6 @@ const SECTIONS = [
       { label: '상품권 팝니다', href: '/board?tab=sell' },
       { label: '상품권 삽니다', href: '/board?tab=buy' },
       { label: '추천 매입업체', href: '/recommended' },
-      { label: '커뮤니티', href: '/community' },
     ],
   },
   {

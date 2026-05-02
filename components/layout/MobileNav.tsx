@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { Home, Tag, ShoppingCart, MessageCircle, User } from 'lucide-react';
+import { Home, Tag, ShoppingCart, Users, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Suspense } from 'react';
 
@@ -14,6 +14,7 @@ function NavInner() {
 
   const isBoardSell = pathname?.startsWith('/board') && tab === 'sell';
   const isBoardBuy = pathname?.startsWith('/board') && tab !== 'sell';
+  const isRecommended = pathname?.startsWith('/recommended');
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-300 z-50">
@@ -33,10 +34,10 @@ function NavInner() {
           <ShoppingCart size={18} strokeWidth={isBoardBuy ? 2 : 1.5} />
           삽니다
         </Link>
-        <Link href="/community"
-          className={`flex flex-col items-center gap-0.5 text-[10px] ${pathname?.startsWith('/community') ? 'text-accent font-semibold' : 'text-gray-400'}`}>
-          <MessageCircle size={18} strokeWidth={pathname?.startsWith('/community') ? 2 : 1.5} />
-          커뮤니티
+        <Link href="/recommended"
+          className={`flex flex-col items-center gap-0.5 text-[10px] ${isRecommended ? 'text-accent font-semibold' : 'text-gray-400'}`}>
+          <Users size={18} strokeWidth={isRecommended ? 2 : 1.5} />
+          매입업체
         </Link>
         <Link href={isLoggedIn ? '/dashboard' : '/login'}
           className={`flex flex-col items-center gap-0.5 text-[10px] ${pathname === '/login' || pathname?.startsWith('/dashboard') ? 'text-accent font-semibold' : 'text-gray-400'}`}>

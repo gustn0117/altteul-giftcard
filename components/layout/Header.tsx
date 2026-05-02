@@ -12,7 +12,6 @@ const PRIMARY_NAV = [
   { href: '/board?tab=sell', label: '상품권 팝니다', badge: 'HOT', dot: 'bg-rose-500', glow: 'group-hover:shadow-[0_0_8px_2px_rgba(244,63,94,0.5)]' },
   { href: '/board?tab=buy', label: '상품권 삽니다', badge: 'HOT', dot: 'bg-blue-500', glow: 'group-hover:shadow-[0_0_8px_2px_rgba(59,130,246,0.5)]' },
   { href: '/recommended', label: '매입업체', badge: 'N', dot: 'bg-emerald-500', glow: 'group-hover:shadow-[0_0_8px_2px_rgba(16,185,129,0.5)]' },
-  { href: '/community', label: '커뮤니티', dot: 'bg-violet-500', glow: 'group-hover:shadow-[0_0_8px_2px_rgba(139,92,246,0.5)]' },
 ];
 
 const SECONDARY_NAV = [
@@ -53,7 +52,7 @@ export default function Header() {
             <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             <input
               type="text"
-              placeholder="상품권 / 업체 / 커뮤니티 통합검색"
+              placeholder="상품권 / 업체 통합검색"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               maxLength={80}
@@ -134,7 +133,7 @@ export default function Header() {
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             <input
               type="text"
-              placeholder="상품권 / 업체 / 커뮤니티 검색"
+              placeholder="상품권 / 업체 검색"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               maxLength={80}

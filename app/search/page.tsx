@@ -121,7 +121,7 @@ function SearchContent() {
                   type="text"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="상품권, 업체, 커뮤니티 글을 검색하세요"
+                  placeholder="상품권, 업체를 검색하세요"
                   className="w-full h-10 pl-3 pr-9 border border-gray-300 text-[13px] focus:border-accent focus:outline-none"
                   autoFocus={!initialQ}
                   maxLength={80}

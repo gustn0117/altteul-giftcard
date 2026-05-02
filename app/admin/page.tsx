@@ -290,7 +290,6 @@ export default function AdminPage() {
     { key: 'overview' as const, label: '대시보드', icon: LayoutDashboard, count: null as number | null },
     { key: 'users' as const, label: '회원', icon: Users, count: users.length },
     { key: 'posts' as const, label: '게시글', icon: FileText, count: posts.length },
-    { key: 'community' as const, label: '커뮤니티', icon: MessageCircle, count: communityPosts.length },
     { key: 'notices' as const, label: '공지', icon: Bell, count: notices.length },
     { key: 'chats' as const, label: '거래', icon: MessageCircle, count: chats.length },
     { key: 'premium' as const, label: '프리미엄', icon: Crown, count: premiumBuyers.length },

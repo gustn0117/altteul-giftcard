@@ -2,7 +2,6 @@ import Link from 'next/link';
 import {
   MapPin,
   Tag,
-  MessageSquare,
   HeadphonesIcon,
   ChevronRight,
 } from 'lucide-react';
@@ -39,17 +38,6 @@ const COLUMNS: MenuColumn[] = [
       { label: '컬쳐랜드', href: '/category/product?type=컬쳐랜드' },
       { label: '스타벅스', href: '/category/product?type=스타벅스' },
       { label: '더보기 +', href: '/category/product', highlight: true },
-    ],
-  },
-  {
-    title: '커뮤니티',
-    icon: MessageSquare,
-    href: '/community',
-    items: [
-      { label: '업계뉴스', href: '/community?cat=news' },
-      { label: '거래TIP (안전거래)', href: '/community?cat=tip' },
-      { label: '질문과 답변', href: '/community?cat=qna' },
-      { label: '통합검색', href: '/search' },
     ],
   },
   {

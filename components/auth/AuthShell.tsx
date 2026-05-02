@@ -5,7 +5,7 @@ import { ShieldCheck, Zap, Users } from 'lucide-react';
 const FEATURES = [
   { Icon: ShieldCheck, title: '안전한 거래', desc: '검증된 매입 업체와 안전하게 거래하세요.' },
   { Icon: Zap, title: '빠른 매입', desc: '실시간 매입률 비교, 즉시 발송까지.' },
-  { Icon: Users, title: '믿을 수 있는 커뮤니티', desc: '실 사용자 후기와 시세 정보를 공유합니다.' },
+  { Icon: Users, title: '검증된 매입 업체', desc: '운영자가 검토한 사업자만 노출됩니다.' },
 ];
 
 interface AuthShellProps {
