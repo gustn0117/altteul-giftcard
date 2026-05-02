@@ -1,11 +1,10 @@
 'use client';
+import HomeAside from '@/components/layout/HomeAside';
 
 import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, Tag, ShoppingCart, Building2, MessageSquare, X } from 'lucide-react';
-import LeftSidebar from '@/components/layout/LeftSidebar';
-import RightSidebar from '@/components/layout/RightSidebar';
 import CompanyCard from '@/components/home/CompanyCard';
 import SellPostItem from '@/components/home/SellPostItem';
 import type { DBPost, DBUser, DBPremiumBuyer, DBCommunityPost } from '@/lib/types';
@@ -109,8 +108,8 @@ function SearchContent() {
         </div>
       </div>
 
-      <div className="flex gap-4">
-        <LeftSidebar />
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
+        <HomeAside />
 
         <div className="flex-1 min-w-0">
           {/* Search box */}
@@ -311,7 +310,6 @@ function SearchContent() {
           )}
         </div>
 
-        <RightSidebar />
       </div>
     </div>
   );

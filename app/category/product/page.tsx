@@ -1,11 +1,10 @@
 'use client';
+import HomeAside from '@/components/layout/HomeAside';
 
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { LayoutGrid } from 'lucide-react';
-import LeftSidebar from '@/components/layout/LeftSidebar';
-import RightSidebar from '@/components/layout/RightSidebar';
 import CompanyCard from '@/components/home/CompanyCard';
 import { BrandLogo } from '@/components/BrandLogo';
 import { getPremiumBuyers } from '@/lib/api';
@@ -67,8 +66,8 @@ function ProductContent() {
         </div>
       </div>
 
-      <div className="flex gap-4">
-        <LeftSidebar />
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
+        <HomeAside />
 
         <div className="flex-1 min-w-0">
           <div className="flex flex-col md:flex-row gap-3 mb-4">
@@ -145,7 +144,6 @@ function ProductContent() {
           )}
         </div>
 
-        <RightSidebar />
       </div>
     </div>
   );

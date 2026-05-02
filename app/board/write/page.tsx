@@ -1,4 +1,5 @@
 'use client';
+import HomeAside from '@/components/layout/HomeAside';
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -8,8 +9,6 @@ import { categories } from '@/data/mock';
 import { createPost, getPost, updatePost } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatNumber, parseNumber } from '@/lib/format';
-import LeftSidebar from '@/components/layout/LeftSidebar';
-import RightSidebar from '@/components/layout/RightSidebar';
 
 // 만료 정책 (일 단위)
 const SELL_EXPIRE_DAYS = 7;   // 팝니다: 7일 후 잠금 (30일 후 자동삭제)
@@ -242,8 +241,8 @@ function WritePostContent() {
             <Link href="/">HOME</Link> &gt; <Link href="/board">게시판</Link> &gt; 수정
           </div>
         </div>
-        <div className="flex gap-4">
-          <LeftSidebar />
+        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
+          <HomeAside />
           <div className="flex-1 min-w-0">
             <div className="max-w-[420px] mx-auto bg-white border border-gray-200 p-6">
               <div className="text-center mb-5">
@@ -258,7 +257,6 @@ function WritePostContent() {
               </form>
             </div>
           </div>
-          <RightSidebar />
         </div>
       </div>
     );
@@ -276,8 +274,8 @@ function WritePostContent() {
         </div>
       </div>
 
-      <div className="flex gap-4">
-        <LeftSidebar />
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
+        <HomeAside />
 
         <div className="flex-1 min-w-0 max-w-[800px]">
           <div className="bg-white border border-gray-200">
@@ -462,7 +460,6 @@ function WritePostContent() {
           </div>
         </div>
 
-        <RightSidebar />
       </div>
     </div>
   );

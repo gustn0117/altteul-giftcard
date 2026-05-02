@@ -1,11 +1,10 @@
 'use client';
+import HomeAside from '@/components/layout/HomeAside';
 
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { MapPin, Phone, LayoutGrid, Building2, Landmark, Anchor, Train, University, Waves, Sun, Factory, Construction, Mountain, Leaf, Wheat, Sprout, TreePine, MountainSnow, Palmtree } from 'lucide-react';
-import LeftSidebar from '@/components/layout/LeftSidebar';
-import RightSidebar from '@/components/layout/RightSidebar';
 import CompanyCard from '@/components/home/CompanyCard';
 import { getPremiumBuyers } from '@/lib/api';
 import type { DBPremiumBuyer } from '@/lib/types';
@@ -73,8 +72,8 @@ function AreaContent() {
         </div>
       </div>
 
-      <div className="flex gap-4">
-        <LeftSidebar />
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
+        <HomeAside />
 
         <div className="flex-1 min-w-0">
           {/* Premium Banner + Region Icons */}
@@ -153,7 +152,6 @@ function AreaContent() {
           )}
         </div>
 
-        <RightSidebar />
       </div>
     </div>
   );

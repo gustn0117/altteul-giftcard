@@ -1,10 +1,9 @@
 'use client';
+import HomeAside from '@/components/layout/HomeAside';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Crown, Sparkles, TrendingUp } from 'lucide-react';
-import LeftSidebar from '@/components/layout/LeftSidebar';
-import RightSidebar from '@/components/layout/RightSidebar';
 import CompanyCard from '@/components/home/CompanyCard';
 import { getPremiumBuyers } from '@/lib/api';
 import type { DBPremiumBuyer } from '@/lib/types';
@@ -34,8 +33,8 @@ export default function RecommendedPage() {
         </div>
       </div>
 
-      <div className="flex gap-4">
-        <LeftSidebar />
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
+        <HomeAside />
 
         <div className="flex-1 min-w-0">
           {/* Hero stripe */}
@@ -101,7 +100,6 @@ export default function RecommendedPage() {
           )}
         </div>
 
-        <RightSidebar />
       </div>
     </div>
   );

@@ -9,10 +9,10 @@ function escapeIlike(raw: string) {
 
 export async function GET(req: NextRequest) {
   const rawQ = (req.nextUrl.searchParams.get('q') || '').trim();
-  const type = req.nextUrl.searchParams.get('type') || 'all'; // all | post | buyer | community
+  const type = req.nextUrl.searchParams.get('type') || 'all'; // all | post | buyer
 
   if (rawQ.length < 1) {
-    return NextResponse.json({ q: rawQ, posts: [], buyers: [], community: [] });
+    return NextResponse.json({ q: rawQ, posts: [], buyers: [] });
   }
   if (rawQ.length > 80) {
     return NextResponse.json({ error: '검색어가 너무 깁니다.' }, { status: 400 });
@@ -24,9 +24,8 @@ export async function GET(req: NextRequest) {
 
   const wantPosts = type === 'all' || type === 'post';
   const wantBuyers = type === 'all' || type === 'buyer';
-  const wantCommunity = type === 'all' || type === 'community';
 
-  const [postsRes, buyersRes, communityRes] = await Promise.all([
+  const [postsRes, buyersRes] = await Promise.all([
     wantPosts
       ? supabase
           .from('posts')
@@ -43,14 +42,6 @@ export async function GET(req: NextRequest) {
           .or(`name.ilike.${pattern},description.ilike.${pattern},region.ilike.${pattern}`)
           .eq('is_active', true)
           .order('priority', { ascending: false })
-          .limit(PER_TYPE_LIMIT)
-      : Promise.resolve({ data: [], error: null }),
-    wantCommunity
-      ? supabase
-          .from('community_posts')
-          .select('id, category, title, content, author_name, views, is_pinned, created_at')
-          .or(`title.ilike.${pattern},content.ilike.${pattern},author_name.ilike.${pattern}`)
-          .order('created_at', { ascending: false })
           .limit(PER_TYPE_LIMIT)
       : Promise.resolve({ data: [], error: null }),
   ]);
@@ -77,11 +68,9 @@ export async function GET(req: NextRequest) {
     q: rawQ,
     posts: postsRes.data || [],
     buyers,
-    community: communityRes.data || [],
     errors: {
       posts: postsRes.error?.message,
       buyers: buyersRes.error?.message,
-      community: communityRes.error?.message,
     },
   });
 }

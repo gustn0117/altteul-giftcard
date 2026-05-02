@@ -1,12 +1,11 @@
 'use client';
+import HomeAside from '@/components/layout/HomeAside';
 
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { PenSquare, Tag, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
 import SellPostItem from '@/components/home/SellPostItem';
-import LeftSidebar from '@/components/layout/LeftSidebar';
-import RightSidebar from '@/components/layout/RightSidebar';
 import PremiumBuyerCard from '@/components/home/PremiumBuyerCard';
 import { getPosts, getPremiumBuyers } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
@@ -62,8 +61,8 @@ function BoardContent() {
         </div>
       </div>
 
-      <div className="flex gap-4">
-        <LeftSidebar />
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
+        <HomeAside />
 
         <div className="flex-1 min-w-0">
           {/* Tabs */}
@@ -210,7 +209,6 @@ function BoardContent() {
           )}
         </div>
 
-        <RightSidebar />
       </div>
     </div>
   );

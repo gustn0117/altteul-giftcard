@@ -9,8 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import type { DBPost, DBUser } from '@/lib/types';
 import { getCategoryName } from '@/data/mock';
 import { BrandLogo } from '@/components/BrandLogo';
-import LeftSidebar from '@/components/layout/LeftSidebar';
-import RightSidebar from '@/components/layout/RightSidebar';
+import HomeAside from '@/components/layout/HomeAside';
 
 type PostWithAuthor = DBPost & { author: DBUser };
 
@@ -133,8 +132,8 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
         </div>
       </div>
 
-      <div className="flex gap-4">
-        <LeftSidebar />
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
+        <HomeAside />
 
         <div className="flex-1 min-w-0">
           {/* 상태 안내 배너 */}
@@ -335,7 +334,6 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
           </article>
         </div>
 
-        <RightSidebar />
       </div>
     </div>
   );
