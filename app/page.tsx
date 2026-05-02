@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ChevronRight, ShoppingCart, PenSquare } from 'lucide-react';
+import { ChevronRight, ShoppingCart, PenSquare, Tag, Users, Zap, TrendingUp } from 'lucide-react';
 import MainBanners from '@/components/home/MainBanners';
 import HomeAside from '@/components/layout/HomeAside';
 import MainCompaniesSection from '@/components/home/MainCompaniesSection';
@@ -35,40 +35,56 @@ export default function Home() {
   }, []);
 
   return (
-    <div>
+    <div className="bg-gradient-to-b from-gray-50/50 to-white min-h-[calc(100vh-200px)]">
       <MainBanners />
 
       <div className="container-main py-8">
-        {/* 1. 검색 / 필터 */}
-        <BuyerFinder />
+        {/* Quick stats — 페이지 진입 시 빠른 데이터 인사이트 */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <StatCard icon={Tag} label="판매글" value={sellPosts.length} unit="건" color="rose" loading={loading} />
+          <StatCard icon={ShoppingCart} label="구매글" value={buyPosts.length} unit="건" color="blue" loading={loading} />
+          <StatCard icon={Users} label="매입업체" value={buyers.length} unit="곳" color="emerald" loading={loading} />
+          <StatCard icon={Zap} label="실시간 처리" value="평균 12분" color="violet" />
+        </div>
 
-        {/* 2. 메인 그리드: 콘텐츠 풀와이드 + 우측 사이드 280px */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6 mt-6">
+        {/* 메인 그리드: 좌측 사이드(280) + 메인 풀와이드 (사이드 위치 변경) */}
+        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
+          {/* 좌측 사이드 */}
+          <HomeAside />
+
           <div className="space-y-6 min-w-0">
-            {/* 메인 등록업체 */}
-            <MainCompaniesSection buyers={buyers} loading={loading} />
+            {/* 검색 / 필터 */}
+            <BuyerFinder />
+
+            {/* 메인 등록업체 섹션 */}
+            <SectionWrap
+              icon={TrendingUp}
+              title="메인 등록업체"
+              desc="검증된 매입 업체를 추천 우선순위로 노출합니다."
+            >
+              <MainCompaniesSection buyers={buyers} loading={loading} />
+            </SectionWrap>
 
             {/* 사이트 메뉴 */}
             <SiteMenu />
 
-            {/* 상품권 삽니다 (줄광고) */}
-            <section>
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-[16px] font-bold text-gray-800 flex items-center gap-2">
-                  <ShoppingCart size={15} className="text-accent" />
-                  상품권 삽니다
-                  {!loading && <span className="text-[12px] text-gray-400 font-normal">{buyPosts.length}건</span>}
-                </h2>
-                <div className="flex items-center gap-2">
+            {/* 상품권 삽니다 */}
+            <SectionWrap
+              icon={ShoppingCart}
+              title="상품권 삽니다"
+              desc="매입 업체가 등록한 구매 요청 글입니다."
+              count={!loading ? buyPosts.length : undefined}
+              actions={(
+                <>
                   <Link href="/board?tab=buy" className="text-[12px] text-gray-500 hover:text-accent flex items-center gap-0.5">
                     전체보기 <ChevronRight size={11} />
                   </Link>
                   <Link href="/board/write?type=buy" className="btn-primary h-8 px-3 text-[12px]">
                     <PenSquare size={12} /> 구매글 작성
                   </Link>
-                </div>
-              </div>
-
+                </>
+              )}
+            >
               {loading ? (
                 <div className="py-10 text-center text-gray-400 text-[13px]">불러오는 중...</div>
               ) : buyPosts.length === 0 ? (
@@ -90,16 +106,78 @@ export default function Home() {
                   )}
                 </div>
               )}
-            </section>
+            </SectionWrap>
 
             {/* 실시간 판매문의 */}
             <RealtimeSellPosts posts={sellPosts} loading={loading} />
           </div>
-
-          {/* 우측 사이드 — 통합 위젯 */}
-          <HomeAside />
         </div>
       </div>
     </div>
+  );
+}
+
+/* ──────── 보조 컴포넌트 ──────── */
+
+interface StatCardProps {
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  label: string;
+  value: number | string;
+  unit?: string;
+  color: 'rose' | 'blue' | 'emerald' | 'violet';
+  loading?: boolean;
+}
+
+function StatCard({ icon: Icon, label, value, unit, color, loading }: StatCardProps) {
+  const ring = {
+    rose: 'bg-rose-50 text-rose-500',
+    blue: 'bg-blue-50 text-blue-500',
+    emerald: 'bg-emerald-50 text-emerald-500',
+    violet: 'bg-violet-50 text-violet-500',
+  }[color];
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3 shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_20px_rgba(0,0,0,0.06)] transition-shadow">
+      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${ring}`}>
+        <Icon size={18} />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[11px] text-gray-500 font-medium">{label}</p>
+        <p className="text-[16px] font-extrabold text-gray-900 truncate">
+          {loading ? '—' : (
+            <>
+              {typeof value === 'number' ? value.toLocaleString() : value}
+              {unit && <span className="text-[11px] text-gray-400 ml-1">{unit}</span>}
+            </>
+          )}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+interface SectionWrapProps {
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  title: string;
+  desc?: string;
+  count?: number;
+  actions?: React.ReactNode;
+  children: React.ReactNode;
+}
+
+function SectionWrap({ icon: Icon, title, desc, count, actions, children }: SectionWrapProps) {
+  return (
+    <section>
+      <div className="flex items-end justify-between mb-3 gap-3">
+        <div className="min-w-0">
+          <h2 className="text-[17px] font-extrabold text-gray-900 flex items-center gap-2">
+            <Icon size={16} className="text-accent" /> {title}
+            {count !== undefined && <span className="text-[12px] text-gray-400 font-normal">{count}건</span>}
+          </h2>
+          {desc && <p className="text-[11.5px] text-gray-500 mt-1">{desc}</p>}
+        </div>
+        {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
+      </div>
+      {children}
+    </section>
   );
 }

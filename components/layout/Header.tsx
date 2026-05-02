@@ -9,10 +9,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import NotificationBell from '@/components/layout/NotificationBell';
 
 const PRIMARY_NAV = [
-  { href: '/board?tab=sell', label: '상품권 팝니다', badge: 'HOT' },
-  { href: '/board?tab=buy', label: '상품권 삽니다', badge: 'HOT' },
-  { href: '/recommended', label: '매입업체', badge: 'N' },
-  { href: '/community', label: '커뮤니티' },
+  { href: '/board?tab=sell', label: '상품권 팝니다', badge: 'HOT', dot: 'bg-rose-500', glow: 'group-hover:shadow-[0_0_8px_2px_rgba(244,63,94,0.5)]' },
+  { href: '/board?tab=buy', label: '상품권 삽니다', badge: 'HOT', dot: 'bg-blue-500', glow: 'group-hover:shadow-[0_0_8px_2px_rgba(59,130,246,0.5)]' },
+  { href: '/recommended', label: '매입업체', badge: 'N', dot: 'bg-emerald-500', glow: 'group-hover:shadow-[0_0_8px_2px_rgba(16,185,129,0.5)]' },
+  { href: '/community', label: '커뮤니티', dot: 'bg-violet-500', glow: 'group-hover:shadow-[0_0_8px_2px_rgba(139,92,246,0.5)]' },
 ];
 
 const SECONDARY_NAV = [
@@ -148,16 +148,17 @@ export default function Header() {
       <nav className="hidden md:block bg-white border-t border-gray-100">
         <div className="container-main py-2.5">
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-1.5 flex-wrap">
+            <div className="flex items-center gap-0.5 flex-wrap">
               {PRIMARY_NAV.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="inline-flex items-center gap-1.5 h-8 px-3.5 bg-gray-50 hover:bg-accent hover:text-white text-gray-700 text-[12.5px] font-bold rounded-full transition-colors"
+                  className="group inline-flex items-center gap-2 h-10 px-4 rounded-lg text-[14px] font-extrabold text-gray-800 hover:bg-gray-50 hover:text-gray-900 transition-colors"
                 >
-                  {item.label}
+                  <span className={`w-2 h-2 rounded-full ${item.dot} ${item.glow} group-hover:scale-125 transition-all`} />
+                  <span>{item.label}</span>
                   {item.badge && (
-                    <span className={`text-[9.5px] text-white px-1 rounded-sm ${item.badge === 'HOT' ? 'bg-rose-500' : 'bg-emerald-500'}`}>
+                    <span className={`text-[10px] font-black text-white px-1.5 py-0.5 rounded ${item.badge === 'HOT' ? 'bg-rose-500' : 'bg-emerald-500'}`}>
                       {item.badge}
                     </span>
                   )}
