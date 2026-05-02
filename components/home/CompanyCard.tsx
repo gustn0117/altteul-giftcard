@@ -4,21 +4,28 @@ import Link from 'next/link';
 import { Phone, User, MessageSquare } from 'lucide-react';
 import type { DBPremiumBuyer } from '@/lib/types';
 import { addRecentBuyer } from '@/lib/recentBuyers';
-import { pickFallbackPhoto } from '@/lib/fallbackPhotos';
 
 const SMS_BODY = '알뜰상품권 보고 연락드립니다.';
 const stripPhone = (p?: string | null) => (p || '').replace(/[^0-9+]/g, '');
 
+const HASH_BG = {
+  backgroundImage: `repeating-linear-gradient(
+    45deg,
+    #f1f5f9,
+    #f1f5f9 8px,
+    #e2e8f0 8px,
+    #e2e8f0 16px
+  )`,
+};
+
 interface CompanyCardProps {
   company: DBPremiumBuyer;
   isNew?: boolean;
-  /** 이미지가 없을 때 기본 배경 사진 인덱스 (0~9) */
-  fallbackIndex?: number;
 }
 
-export default function CompanyCard({ company, isNew, fallbackIndex = 0 }: CompanyCardProps) {
-  const fallbackPhoto = pickFallbackPhoto(company.id || fallbackIndex);
+export default function CompanyCard({ company, isNew }: CompanyCardProps) {
   const displayTitle = company.headline?.trim() || company.description?.split('\n')[0]?.slice(0, 20) || company.name;
+  const hasImage = !!company.image_url;
 
   const handleClick = () => {
     addRecentBuyer({
@@ -38,23 +45,31 @@ export default function CompanyCard({ company, isNew, fallbackIndex = 0 }: Compa
         onClick={handleClick}
         className="block"
       >
-        {/* Image header with overlay title */}
-        <div className="relative h-[125px] md:h-[140px] overflow-hidden bg-gray-800">
-          <img
-            src={company.image_url || fallbackPhoto}
-            alt={company.name}
-            loading="lazy"
-            className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${
-              company.image_url ? '' : 'opacity-60'
-            }`}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/75" />
-          {/* Title overlay */}
-          <div className="absolute inset-0 flex items-center justify-center px-3">
-            <h3 className="text-white text-[14px] md:text-[15px] font-bold text-center leading-tight drop-shadow-md">
-              {displayTitle}
-            </h3>
-          </div>
+        {/* Header: 이미지가 있으면 이미지 + 오버레이, 없으면 빗금 + 흰 패널 */}
+        <div className="relative h-[125px] md:h-[140px] overflow-hidden border-b border-gray-200" style={!hasImage ? HASH_BG : undefined}>
+          {hasImage ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={company.image_url!}
+                alt={company.name}
+                loading="lazy"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/75" />
+              <div className="absolute inset-0 flex items-center justify-center px-3">
+                <h3 className="text-white text-[14px] md:text-[15px] font-bold text-center leading-tight drop-shadow-md">
+                  {displayTitle}
+                </h3>
+              </div>
+            </>
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center px-3">
+              <h3 className="text-gray-900 text-[14px] md:text-[15px] font-bold text-center leading-tight bg-white/85 backdrop-blur-sm px-3 py-2 rounded-md">
+                {displayTitle}
+              </h3>
+            </div>
+          )}
           {/* Badges */}
           {isNew && (
             <span className="absolute top-1.5 right-1.5 text-[9px] text-white bg-red-500 px-1.5 py-0.5 rounded-sm font-bold z-10">NEW</span>

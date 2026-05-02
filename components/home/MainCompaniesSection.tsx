@@ -4,10 +4,20 @@ import Link from 'next/link';
 import { Phone, User, HelpCircle, MessageSquare } from 'lucide-react';
 import CompanyCard from './CompanyCard';
 import type { DBPremiumBuyer } from '@/lib/types';
-import { pickFallbackPhoto } from '@/lib/fallbackPhotos';
 
 const SMS_BODY = '알뜰상품권 보고 연락드립니다.';
 const stripPhone = (p: string) => p.replace(/[^0-9+]/g, '');
+
+// 빗금 패턴 (이미지 placeholder)
+const HASH_BG = {
+  backgroundImage: `repeating-linear-gradient(
+    45deg,
+    #f1f5f9,
+    #f1f5f9 8px,
+    #e2e8f0 8px,
+    #e2e8f0 16px
+  )`,
+};
 
 interface Props {
   buyers: DBPremiumBuyer[];
@@ -37,23 +47,15 @@ const DEMO_COMPANIES = [
   { title: '신속 당일 즉시', desc: '당일 승인 원칙\n정직하게 신속하게', phone: '010-5351-8287', name: '뉴스타트', region: '전국' },
 ];
 
-function DemoCard({ item, index }: { item: typeof DEMO_COMPANIES[number]; index: number }) {
-  const fallbackPhoto = pickFallbackPhoto(`demo-${index}-${item.title}`);
+function DemoCard({ item }: { item: typeof DEMO_COMPANIES[number]; index: number }) {
   const phoneDigits = stripPhone(item.phone);
 
   return (
     <div className="company-card card-hover group flex flex-col">
       <Link href="/register-business" className="block">
-        <div className="relative h-[125px] md:h-[140px] overflow-hidden bg-gray-800">
-          <img
-            src={fallbackPhoto}
-            alt=""
-            loading="lazy"
-            className="w-full h-full object-cover opacity-60 transition-transform duration-500 group-hover:scale-105"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/75" />
+        <div className="relative h-[125px] md:h-[140px] overflow-hidden border-b border-gray-200" style={HASH_BG}>
           <div className="absolute inset-0 flex items-center justify-center px-3">
-            <h3 className="text-white text-[14px] md:text-[15px] font-bold text-center leading-tight drop-shadow-md">
+            <h3 className="text-gray-900 text-[14px] md:text-[15px] font-bold text-center leading-tight bg-white/85 backdrop-blur-sm px-3 py-2 rounded-md">
               {item.title}
             </h3>
           </div>
@@ -102,8 +104,8 @@ export default function MainCompaniesSection({ buyers, loading, compact = false,
   const fillCount = Math.max(0, maxCount - realCount);
   const fillItems = DEMO_COMPANIES.slice(0, fillCount);
   const gridCls = compact
-    ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5'
-    : 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5';
+    ? 'grid grid-cols-2 md:grid-cols-3 gap-3'
+    : 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3';
 
   return (
     <section className={compact ? '' : 'mb-6'}>
@@ -127,7 +129,7 @@ export default function MainCompaniesSection({ buyers, loading, compact = false,
             <CompanyCard key={b.id} company={b} isNew={i < 3} fallbackIndex={i} />
           ))}
           {fillItems.map((item, i) => (
-            <DemoCard key={`demo-${i}`} item={item} index={realCount + i} />
+            <DemoCard key={`demo-${i}`} item={item} index={i} />
           ))}
         </div>
       )}

@@ -237,8 +237,8 @@ function SearchContent() {
                     )}
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5">
-                    {(tab === 'all' ? buyers.slice(0, 10) : buyers).map((b, i) => (
-                      <CompanyCard key={b.id} company={b} fallbackIndex={i} />
+                    {(tab === 'all' ? buyers.slice(0, 10) : buyers).map((b) => (
+                      <CompanyCard key={b.id} company={b} />
                     ))}
                   </div>
                 </section>
