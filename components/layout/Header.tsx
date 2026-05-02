@@ -64,52 +64,53 @@ export default function Header() {
           {/* Spacer (모바일) */}
           <div className="flex-1 md:hidden" />
 
-          {/* 우측 액션 — 시각적 위계: 텍스트 링크 < 아웃라인 < 솔리드 CTA */}
-          <div className="hidden md:flex items-center gap-2.5">
+          {/* 우측 액션 — 강한 콘트라스트 (검정 / 흰 outline / 파란 그라디언트) */}
+          <div className="hidden md:flex items-center gap-2">
             {isLoggedIn && <NotificationBell />}
 
-            {/* 글쓰기 — accent 아웃라인 (자주 쓰는 액션) */}
+            {/* 글쓰기 — 검정 솔리드 (눈에 확 띄는 어두운 톤) */}
             <Link
               href="/board/write?type=sell"
-              className="group inline-flex items-center gap-1.5 h-10 px-4 border-1.5 border-accent text-accent hover:bg-accent hover:text-white text-[13px] font-bold rounded-full transition-all"
-              style={{ borderWidth: '1.5px' }}
+              className="inline-flex items-center gap-1.5 h-11 px-4 bg-gray-900 hover:bg-black text-white text-[13.5px] font-extrabold rounded-full shadow-sm hover:shadow-md transition-all"
             >
-              <PenSquare size={14} strokeWidth={2.4} /> 글쓰기
+              <PenSquare size={15} strokeWidth={2.6} /> 글쓰기
             </Link>
 
             {isLoggedIn ? (
               <>
-                {/* 대시보드 — solid CTA */}
+                {/* 대시보드 — 진한 파란 그라디언트 */}
                 <Link
                   href="/dashboard"
-                  className="inline-flex items-center gap-1.5 h-10 px-4 bg-accent hover:bg-blue-700 text-white text-[13px] font-bold rounded-full shadow-sm shadow-blue-500/30 hover:shadow-md hover:shadow-blue-500/40 transition-all"
+                  className="inline-flex items-center gap-1.5 h-11 px-5 text-white text-[13.5px] font-extrabold rounded-full shadow-md hover:shadow-lg transition-all"
+                  style={{ background: 'linear-gradient(135deg, #1E3A8A, #2563EB)' }}
                 >
-                  <LayoutDashboard size={14} strokeWidth={2.4} />
-                  <span className="max-w-20 truncate">{user?.name ?? '내 대시보드'}</span>
+                  <LayoutDashboard size={15} strokeWidth={2.6} />
+                  <span className="max-w-24 truncate">{user?.name ?? '내 대시보드'}</span>
                 </Link>
                 <button
                   onClick={logout}
-                  className="text-[12px] text-gray-400 hover:text-gray-700 px-1 transition-colors"
+                  className="text-[12.5px] font-bold text-gray-500 hover:text-gray-900 px-2 transition-colors"
                 >
                   로그아웃
                 </button>
               </>
             ) : (
               <>
-                {/* 로그인 — 텍스트 링크 스타일 (낮은 위계) */}
+                {/* 로그인 — 흰 배경 + 진한 outline (명확한 박스) */}
                 <Link
                   href="/login"
-                  className="inline-flex items-center gap-1.5 h-10 px-3 text-gray-600 hover:text-gray-900 text-[13px] font-bold transition-colors"
+                  className="inline-flex items-center gap-1.5 h-11 px-4 bg-white border-2 border-gray-300 hover:border-gray-900 hover:bg-gray-50 text-gray-900 text-[13.5px] font-extrabold rounded-full transition-colors"
                 >
-                  <LogIn size={14} strokeWidth={2.2} /> 로그인
+                  <LogIn size={15} strokeWidth={2.6} /> 로그인
                 </Link>
 
-                {/* 회원가입 — Primary CTA (가장 강조) */}
+                {/* 회원가입 — 그라디언트 + 강한 그림자 + 떠오름 (Primary CTA) */}
                 <Link
                   href="/register"
-                  className="inline-flex items-center gap-1.5 h-10 px-5 bg-accent hover:bg-blue-700 text-white text-[13px] font-bold rounded-full shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 hover:-translate-y-px transition-all"
+                  className="inline-flex items-center gap-1.5 h-11 px-5 text-white text-[13.5px] font-extrabold rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
+                  style={{ background: 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)', boxShadow: '0 6px 20px -4px rgba(37, 99, 235, 0.5)' }}
                 >
-                  <UserPlus size={14} strokeWidth={2.4} /> 회원가입
+                  <UserPlus size={15} strokeWidth={2.6} /> 회원가입
                 </Link>
               </>
             )}
