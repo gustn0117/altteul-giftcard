@@ -144,32 +144,32 @@ export default function Header() {
         </form>
       </div>
 
-      {/* Sub Navigation — 데스크탑 카테고리 바 */}
+      {/* Sub Navigation — 칩(pill) 스타일 카테고리 바 */}
       <nav className="hidden md:block bg-white border-t border-gray-100">
-        <div className="container-main">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
+        <div className="container-main py-2.5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-1.5 flex-wrap">
               {PRIMARY_NAV.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="group inline-flex items-center gap-1.5 px-4 py-3 text-[13px] font-bold text-gray-800 hover:text-accent border-b-2 border-transparent hover:border-accent transition-colors"
+                  className="inline-flex items-center gap-1.5 h-8 px-3.5 bg-gray-50 hover:bg-accent hover:text-white text-gray-700 text-[12.5px] font-bold rounded-full transition-colors"
                 >
                   {item.label}
                   {item.badge && (
-                    <span className={`text-[10px] text-white px-1 rounded-sm ${item.badge === 'HOT' ? 'bg-accent' : 'bg-emerald-600'}`}>
+                    <span className={`text-[9.5px] text-white px-1 rounded-sm ${item.badge === 'HOT' ? 'bg-rose-500' : 'bg-emerald-500'}`}>
                       {item.badge}
                     </span>
                   )}
                 </Link>
               ))}
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center gap-1">
               {SECONDARY_NAV.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="inline-flex items-center gap-1 px-3 py-3 text-[12px] text-gray-500 hover:text-accent transition-colors"
+                  className="inline-flex items-center gap-1 h-8 px-2.5 text-[11.5px] text-gray-500 hover:text-accent transition-colors"
                 >
                   {item.href === '/fraud' && <ShieldAlert size={11} />}
                   {item.label}

@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ChevronRight, ShoppingCart, PenSquare } from 'lucide-react';
 import MainBanners from '@/components/home/MainBanners';
-import LeftSidebar from '@/components/layout/LeftSidebar';
-import RightSidebar from '@/components/layout/RightSidebar';
+import HomeAside from '@/components/layout/HomeAside';
 import MainCompaniesSection from '@/components/home/MainCompaniesSection';
 import BuyerFinder from '@/components/home/BuyerFinder';
 import RealtimeSellPosts from '@/components/home/RealtimeSellPosts';
@@ -18,7 +17,6 @@ import { getCache, setCache } from '@/lib/cache';
 type PostWithAuthor = DBPost & { author: DBUser };
 
 export default function Home() {
-  // 캐시가 있으면 즉시 초기화 (첫 렌더부터 데이터 표시)
   const [sellPosts, setSellPosts] = useState<PostWithAuthor[]>(() => getCache<PostWithAuthor[]>('home_sell') ?? []);
   const [buyPosts, setBuyPosts] = useState<PostWithAuthor[]>(() => getCache<PostWithAuthor[]>('home_buy') ?? []);
   const [buyers, setBuyers] = useState<DBPremiumBuyer[]>(() => getCache<DBPremiumBuyer[]>('home_buyers') ?? []);
@@ -40,22 +38,21 @@ export default function Home() {
     <div>
       <MainBanners />
 
-      <div className="container-main py-6">
-        <div className="flex gap-4">
-          <LeftSidebar />
+      <div className="container-main py-8">
+        {/* 1. 검색 / 필터 */}
+        <BuyerFinder />
 
-          <div className="flex-1 min-w-0">
-            {/* 1. 지역으로 / 상품으로 업체찾기 */}
-            <BuyerFinder />
-
-            {/* 2. 메인 등록업체 (전체 폭) */}
+        {/* 2. 메인 그리드: 콘텐츠 풀와이드 + 우측 사이드 280px */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6 mt-6">
+          <div className="space-y-6 min-w-0">
+            {/* 메인 등록업체 */}
             <MainCompaniesSection buyers={buyers} loading={loading} />
 
-            {/* 3. 사이트 메뉴 */}
+            {/* 사이트 메뉴 */}
             <SiteMenu />
 
-            {/* 4. 상품권 삽니다 (줄광고) */}
-            <section className="mb-6">
+            {/* 상품권 삽니다 (줄광고) */}
+            <section>
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-[16px] font-bold text-gray-800 flex items-center gap-2">
                   <ShoppingCart size={15} className="text-accent" />
@@ -75,14 +72,14 @@ export default function Home() {
               {loading ? (
                 <div className="py-10 text-center text-gray-400 text-[13px]">불러오는 중...</div>
               ) : buyPosts.length === 0 ? (
-                <div className="bg-white border border-dashed border-gray-200 py-10 text-center">
+                <div className="bg-white border border-dashed border-gray-200 rounded-xl py-10 text-center">
                   <p className="text-[13px] text-gray-500 mb-2">아직 등록된 구매글이 없습니다.</p>
                   <Link href="/board/write?type=buy" className="text-[12px] text-accent font-bold hover:underline">
                     첫 구매글 작성하기 →
                   </Link>
                 </div>
               ) : (
-                <div className="bg-white border border-gray-200 overflow-hidden">
+                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
                   {buyPosts.slice(0, 10).map((post, idx) => (
                     <SellPostItem key={post.id} post={post} num={idx + 1} />
                   ))}
@@ -95,11 +92,12 @@ export default function Home() {
               )}
             </section>
 
-            {/* 5. 실시간 판매문의 (맨 밑) */}
+            {/* 실시간 판매문의 */}
             <RealtimeSellPosts posts={sellPosts} loading={loading} />
           </div>
 
-          <RightSidebar />
+          {/* 우측 사이드 — 통합 위젯 */}
+          <HomeAside />
         </div>
       </div>
     </div>
