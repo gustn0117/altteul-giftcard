@@ -291,7 +291,6 @@ export default function AdminPage() {
     { key: 'users' as const, label: '회원', icon: Users, count: users.length },
     { key: 'posts' as const, label: '게시글', icon: FileText, count: posts.length },
     { key: 'notices' as const, label: '공지', icon: Bell, count: notices.length },
-    { key: 'chats' as const, label: '거래', icon: MessageCircle, count: chats.length },
     { key: 'premium' as const, label: '프리미엄', icon: Crown, count: premiumBuyers.length },
     { key: 'ads' as const, label: '광고', icon: Megaphone, count: ads.length },
   ];
@@ -304,18 +303,30 @@ export default function AdminPage() {
       </div>
 
       {/* 신규 운영자 페이지 빠른 링크 */}
-      <div className="grid grid-cols-3 gap-2 mb-3">
-        <a href="/admin/banners" className="card card-hover p-3 text-left bg-blue-50 border-blue-200">
-          <span className="text-[11px] text-blue-700">메인 배너 관리</span>
-          <p className="text-[13px] font-bold text-blue-900 mt-0.5">3×2 광고 슬롯</p>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 mb-3">
+        <a href="/admin/banners" className="card card-hover p-3 text-left">
+          <span className="text-[10.5px] text-gray-500">메인 배너</span>
+          <p className="text-[12.5px] font-bold text-gray-900 mt-0.5">3×2 광고 슬롯</p>
         </a>
-        <a href="/admin/blinded" className="card card-hover p-3 text-left bg-amber-50 border-amber-200">
-          <span className="text-[11px] text-amber-700">블라인드 관리</span>
-          <p className="text-[13px] font-bold text-amber-900 mt-0.5">잠긴 글 풀기</p>
+        <a href="/admin/blinded" className="card card-hover p-3 text-left">
+          <span className="text-[10.5px] text-amber-600 font-bold">블라인드</span>
+          <p className="text-[12.5px] font-bold text-gray-900 mt-0.5">잠긴 글 풀기</p>
         </a>
-        <a href="/admin/points" className="card card-hover p-3 text-left bg-emerald-50 border-emerald-200">
-          <span className="text-[11px] text-emerald-700">포인트 관리</span>
-          <p className="text-[13px] font-bold text-emerald-900 mt-0.5">충전 / 차감</p>
+        <a href="/admin/inquiries" className="card card-hover p-3 text-left">
+          <span className="text-[10.5px] text-rose-600 font-bold">문의</span>
+          <p className="text-[12.5px] font-bold text-gray-900 mt-0.5">광고 / 1:1</p>
+        </a>
+        <a href="/admin/reports" className="card card-hover p-3 text-left">
+          <span className="text-[10.5px] text-rose-600 font-bold">신고</span>
+          <p className="text-[12.5px] font-bold text-gray-900 mt-0.5">사기 신고 처리</p>
+        </a>
+        <a href="/admin/notify" className="card card-hover p-3 text-left">
+          <span className="text-[10.5px] text-blue-600 font-bold">알림 발송</span>
+          <p className="text-[12.5px] font-bold text-gray-900 mt-0.5">전체/개인/업체</p>
+        </a>
+        <a href="/admin/points" className="card card-hover p-3 text-left">
+          <span className="text-[10.5px] text-emerald-600 font-bold">포인트</span>
+          <p className="text-[12.5px] font-bold text-gray-900 mt-0.5">충전 / 차감</p>
         </a>
       </div>
 
