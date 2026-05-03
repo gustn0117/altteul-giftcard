@@ -46,7 +46,7 @@ export default function Footer() {
           {/* 좌측: 로고 + 슬로건 + 고객센터 */}
           <div className="col-span-4">
             <Link href="/" className="inline-block">
-              <Image src="/logo-dark.svg" alt="알뜰상품권" width={180} height={40}
+              <Image src="/logo.jpg" alt="예판상품권" width={180} height={40}
                 className="h-9 w-auto object-contain" />
             </Link>
             <p className="text-[12px] text-gray-500 mt-3 leading-relaxed">
@@ -118,16 +118,16 @@ export default function Footer() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="text-[10.5px] text-gray-400 leading-relaxed">
               <p>
-                <span className="font-medium text-gray-500">알뜰상품권</span> · 대표 운영팀 ·
+                <span className="font-medium text-gray-500">예판상품권</span> · 대표 운영팀 ·
                 사업자등록번호 255-62-00840 · 통신판매업신고 제2025-서울강남-03876호
               </p>
               <p className="mt-1">
-                서울특별시 강남구 · 팩스 02-543-4569 · 알뜰상품권은 광고 플랫폼만 제공할 뿐 직접 매입·중개를 하지 않으며,
+                서울특별시 강남구 · 팩스 02-543-4569 · 예판상품권은 광고 플랫폼만 제공할 뿐 직접 매입·중개를 하지 않으며,
                 등록 업체가 제공하는 정보로 인한 손해에 책임지지 않습니다.
               </p>
             </div>
             <div className="text-[10.5px] text-gray-400 whitespace-nowrap">
-              © 2026 알뜰상품권. All rights reserved.
+              © 2026 예판상품권. All rights reserved.
               <Link href="/admin" className="ml-2 text-gray-300 hover:text-accent">· 관리자</Link>
             </div>
           </div>

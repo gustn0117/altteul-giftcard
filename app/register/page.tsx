@@ -135,7 +135,7 @@ function RegisterContent() {
   }
 
   const headline = type === 'normal'
-    ? '무료로 시작하세요.\n알뜰상품권에서.'
+    ? '무료로 시작하세요.\n예판상품권에서.'
     : '매입 업체로\n등록해보세요.';
   const sub = type === 'normal'
     ? '가입하면 매입 업체의 매입률을 한 눈에 비교하고 거래할 수 있습니다.'

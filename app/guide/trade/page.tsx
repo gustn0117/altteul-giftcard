@@ -18,12 +18,12 @@ export default function TradeGuidePage() {
   return (
     <div className="max-w-[800px] mx-auto px-5 py-8">
       <h1 className="text-xl font-bold text-zinc-900 mb-2">구매 및 판매 방법</h1>
-      <p className="text-[13px] text-zinc-500 mb-6">알뜰상품권의 거래 방법을 안내해 드립니다.</p>
+      <p className="text-[13px] text-zinc-500 mb-6">예판상품권의 거래 방법을 안내해 드립니다.</p>
 
       {/* Warning Banner */}
       <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-8">
         <p className="text-[13px] font-semibold text-amber-800 mb-2">본 플랫폼은 중개 서비스만을 제공하며, 거래 당사자 간 발생하는 법적 분쟁에 대한 책임을 지지 않습니다.</p>
-        <p className="text-[12px] text-amber-700 mb-2">알뜰상품권는 상품권 거래를 위한 게시글 등록·업체 정보 노출 등 중개 기능만을 제공합니다. 결제 대행(에스크로) 서비스는 제공하지 않으며, 거래 대금의 지급 및 상품권 전달은 회원·업체 간 직접 이루어집니다.</p>
+        <p className="text-[12px] text-amber-700 mb-2">예판상품권는 상품권 거래를 위한 게시글 등록·업체 정보 노출 등 중개 기능만을 제공합니다. 결제 대행(에스크로) 서비스는 제공하지 않으며, 거래 대금의 지급 및 상품권 전달은 회원·업체 간 직접 이루어집니다.</p>
         <ul className="text-[12px] text-amber-700 list-disc pl-4 space-y-0.5">
           <li>금전거래 금지</li>
           <li>상품권을 이용한 금융행위 금지</li>

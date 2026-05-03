@@ -22,7 +22,7 @@ interface AuthShellProps {
 export default function AuthShell({
   children,
   eyebrow,
-  headline = '상품권을 더 똑똑하게,\n알뜰상품권에서.',
+  headline = '상품권을 더 똑똑하게,\n예판상품권에서.',
   sub = '전국 매입 업체와 한 곳에서 비교하고 거래하세요.',
 }: AuthShellProps) {
   return (
@@ -40,7 +40,7 @@ export default function AuthShell({
 
           <div className="relative z-10">
             <Link href="/" className="inline-block">
-              <Image src="/logo.svg" alt="알뜰상품권" width={180} height={40} className="h-10 w-auto" priority />
+              <Image src="/logo.jpg" alt="예판상품권" width={180} height={40} className="h-10 w-auto" priority />
             </Link>
             <h2 className="text-[24px] font-bold mt-8 leading-snug whitespace-pre-line">
               {headline}
@@ -63,7 +63,7 @@ export default function AuthShell({
           </ul>
 
           <p className="relative z-10 text-[10px] text-blue-200/70 mt-10">
-            © 알뜰상품권 — 안전한 상품권 매입 중개 플랫폼
+            © 예판상품권 — 안전한 상품권 매입 중개 플랫폼
           </p>
         </aside>
 
@@ -71,7 +71,7 @@ export default function AuthShell({
         <section className="p-7 sm:p-10">
           {/* 모바일에서만 보이는 로고 */}
           <Link href="/" className="lg:hidden flex justify-center mb-5">
-            <Image src="/logo-dark.svg" alt="알뜰상품권" width={160} height={36} className="h-9 w-auto" priority />
+            <Image src="/logo.jpg" alt="예판상품권" width={160} height={36} className="h-9 w-auto" priority />
           </Link>
           {eyebrow && (
             <p className="text-[11px] font-bold tracking-[2px] text-accent uppercase mb-2">{eyebrow}</p>

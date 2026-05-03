@@ -94,7 +94,7 @@ export default function BuyerDetailPage({ params }: { params: Promise<{ id: stri
 
         <div className="px-6 py-3 flex items-center gap-2 text-[11px] text-zinc-400">
           <ShieldCheck size={13} />
-          <span>알뜰상품권 프리미엄 인증 업체입니다. 거래 시 계약서를 반드시 확인하세요.</span>
+          <span>예판상품권 프리미엄 인증 업체입니다. 거래 시 계약서를 반드시 확인하세요.</span>
         </div>
       </div>
 

@@ -8,8 +8,8 @@ import VisitorTracker from "@/components/VisitorTracker";
 import { AuthProvider } from "@/contexts/AuthContext";
 
 export const metadata: Metadata = {
-  title: "알뜰상품권 - 상품권 매입/매도 중개 플랫폼",
-  description: "안전하고 빠른 온라인 상품권 거래, 알뜰상품권에서 시작하세요.",
+  title: "예판상품권 - 상품권 매입/매도 중개 플랫폼",
+  description: "안전하고 빠른 온라인 상품권 거래, 예판상품권에서 시작하세요.",
 };
 
 export default function RootLayout({

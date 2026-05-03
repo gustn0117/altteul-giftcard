@@ -5,7 +5,7 @@ import { Phone, User, HelpCircle, MessageSquare } from 'lucide-react';
 import CompanyCard from './CompanyCard';
 import type { DBPremiumBuyer } from '@/lib/types';
 
-const SMS_BODY = '알뜰상품권 보고 연락드립니다.';
+const SMS_BODY = '예판상품권 보고 연락드립니다.';
 const stripPhone = (p: string) => p.replace(/[^0-9+]/g, '');
 
 // 빗금 패턴 (이미지 placeholder)
@@ -30,7 +30,7 @@ interface Props {
 
 /** 실 데이터가 부족할 때 채우는 데모 업체 카드 (15개까지) */
 const DEMO_COMPANIES = [
-  { title: '간편한 비대면 매입', desc: '24시간 상담\n빠르고 안전하게', phone: '010-2158-5161', name: '알뜰상품권 매입팀', region: '전국' },
+  { title: '간편한 비대면 매입', desc: '24시간 상담\n빠르고 안전하게', phone: '010-2158-5161', name: '예판상품권 매입팀', region: '전국' },
   { title: '즉시 입금 매입', desc: '전화 한통 바로 매입\n간편심사 빠른지급', phone: '010-4454-9991', name: '스마트 상품권', region: '전국' },
   { title: '24시 간편 매입', desc: '신용조회 x 등급 무관\n누구나 간편 매입', phone: '010-2158-5161', name: '리얼 상품권', region: '전국' },
   { title: '당일 비대면 매입', desc: '소액에서 1000만원까지\n당일 송금 원칙', phone: '010-6518-8030', name: '24시 프라임', region: '전국' },

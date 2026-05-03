@@ -56,7 +56,7 @@ function GuideContent() {
             <div className="p-8 text-center bg-gradient-to-b from-gray-50 to-white">
               <div className="flex items-center justify-center gap-6 mb-8">
                 <div className="w-[110px] h-[110px] rounded-full bg-accent/20 flex items-center justify-center">
-                  <span className="text-[14px] font-bold text-accent">알뜰상품권</span>
+                  <span className="text-[14px] font-bold text-accent">예판상품권</span>
                 </div>
                 <div className="flex flex-col gap-3">
                   <div className="w-[90px] h-[90px] rounded-full bg-gray-200 flex items-center justify-center">
@@ -74,7 +74,7 @@ function GuideContent() {
               </p>
               <div className="mt-4 inline-block bg-accent/10 border border-accent/20 px-4 py-2 text-[12px] text-gray-700">
                 <span className="text-accent font-bold mr-1">TIP</span>
-                알뜰상품권에 광고 중인 등록업체마다 기준과 상품, 할인율이 모두 다르기 때문에 여러 업체와 상담해보시는게 유리합니다.
+                예판상품권에 광고 중인 등록업체마다 기준과 상품, 할인율이 모두 다르기 때문에 여러 업체와 상담해보시는게 유리합니다.
               </div>
             </div>
 
@@ -185,7 +185,7 @@ function GuideContent() {
               <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-3">
                 <Users size={28} className="text-accent" />
               </div>
-              <h2 className="text-[20px] font-bold text-gray-800 mb-2">알뜰상품권 회사소개</h2>
+              <h2 className="text-[20px] font-bold text-gray-800 mb-2">예판상품권 회사소개</h2>
               <p className="text-[13px] text-gray-500">안전하고 빠른 상품권 거래 플랫폼</p>
             </div>
 
@@ -193,7 +193,7 @@ function GuideContent() {
               <section>
                 <h3 className="text-[14px] font-bold mb-2 text-gray-800">플랫폼 소개</h3>
                 <p className="text-[13px] text-gray-600 leading-relaxed">
-                  알뜰상품권는 전국의 상품권 매입 업체와 고객을 연결하는 중개 플랫폼입니다.
+                  예판상품권는 전국의 상품권 매입 업체와 고객을 연결하는 중개 플랫폼입니다.
                   고객이 직접 업체를 비교/선택할 수 있도록 정보를 제공하며, 상담부터 거래까지 한 번에 진행할 수 있도록 지원합니다.
                 </p>
               </section>
@@ -218,7 +218,7 @@ function GuideContent() {
               <section>
                 <h3 className="text-[14px] font-bold mb-2 text-gray-800">사업자 정보</h3>
                 <div className="border border-gray-200 p-4 text-[12px] text-gray-600 space-y-1.5">
-                  <div className="flex"><span className="w-[100px] text-gray-400">사이트명</span><span>알뜰상품권</span></div>
+                  <div className="flex"><span className="w-[100px] text-gray-400">사이트명</span><span>예판상품권</span></div>
                   <div className="flex"><span className="w-[100px] text-gray-400">대표자</span><span>운영팀</span></div>
                   <div className="flex"><span className="w-[100px] text-gray-400">사업자번호</span><span>255-62-00840</span></div>
                   <div className="flex"><span className="w-[100px] text-gray-400">통신판매업</span><span>제2025-서울강남-03876호</span></div>
@@ -232,7 +232,7 @@ function GuideContent() {
                   <span className="inline-flex items-center gap-1 text-accent font-bold mr-2">
                     <span className="bg-accent text-white text-[10px] px-1.5 py-0.5 rounded-sm">공지</span>
                   </span>
-                  알뜰상품권는 광고 플랫폼만 제공할 뿐 직접적인 매입 및 중개를 하지 않습니다.
+                  예판상품권는 광고 플랫폼만 제공할 뿐 직접적인 매입 및 중개를 하지 않습니다.
                 </p>
               </div>
             </div>

@@ -5,7 +5,7 @@ import { Phone, User, MessageSquare } from 'lucide-react';
 import type { DBPremiumBuyer } from '@/lib/types';
 import { addRecentBuyer } from '@/lib/recentBuyers';
 
-const SMS_BODY = '알뜰상품권 보고 연락드립니다.';
+const SMS_BODY = '예판상품권 보고 연락드립니다.';
 const stripPhone = (p?: string | null) => (p || '').replace(/[^0-9+]/g, '');
 
 const HASH_BG = {

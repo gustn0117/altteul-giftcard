@@ -42,7 +42,7 @@ export default function Header() {
         <div className="md:grid md:grid-cols-[auto_1fr_auto] md:gap-6 flex items-center h-17 md:h-19">
           {/* Logo (좌) */}
           <Link href="/" className="flex items-center shrink-0">
-            <Image src="/logo-dark.svg" alt="알뜰상품권" width={180} height={40}
+            <Image src="/logo.jpg" alt="예판상품권" width={180} height={40}
               className="h-8 md:h-9 w-auto object-contain" priority />
           </Link>
 

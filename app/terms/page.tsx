@@ -7,7 +7,7 @@ export default function TermsPage() {
       <div className="card p-6 space-y-6 text-[13px] text-zinc-600 leading-relaxed">
         <section>
           <h2 className="text-[14px] font-semibold text-zinc-800 mb-2">제1조 (목적)</h2>
-          <p>본 약관은 알뜰상품권(이하 &quot;회사&quot;)가 운영하는 상품권 거래 중개 플랫폼(이하 &quot;서비스&quot;)의 이용 조건 및 절차, 회원과 회사 간의 권리·의무 및 책임사항을 규정함을 목적으로 합니다.</p>
+          <p>본 약관은 예판상품권(이하 &quot;회사&quot;)가 운영하는 상품권 거래 중개 플랫폼(이하 &quot;서비스&quot;)의 이용 조건 및 절차, 회원과 회사 간의 권리·의무 및 책임사항을 규정함을 목적으로 합니다.</p>
         </section>
 
         <section>
