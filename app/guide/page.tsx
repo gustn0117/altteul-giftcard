@@ -97,7 +97,7 @@ function GuideContent() {
                     <ShoppingCart size={14} className="text-accent" /> 상품별 업체찾기
                   </h3>
                   <div className="flex flex-wrap gap-2">
-                    {['전체', '직장인', '무직자', '여성', '비상금', '모바일', '소액', '당일'].map(t => (
+                    {['전체', '신세계', '롯데', '문화상품권', '컬쳐랜드', '스타벅스', '해피머니', '온캐시'].map(t => (
                       <Link key={t} href={`/category/product?type=${t}`} className="px-3 py-1.5 text-[11px] border border-gray-200 text-gray-600 hover:text-accent hover:border-accent transition-colors">
                         {t}
                       </Link>
