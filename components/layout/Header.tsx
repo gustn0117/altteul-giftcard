@@ -12,9 +12,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import NotificationBell from '@/components/layout/NotificationBell';
 
 const PRIMARY_NAV = [
-  { href: '/category/area',    label: '지역별 업체찾기', badge: 'N', Icon: MapPin },
-  { href: '/category/product', label: '상품별 업체찾기', badge: 'N', Icon: TagIcon },
-  { href: '/recommended',      label: '오늘의 추천업체', badge: 'N', Icon: Star },
+  { href: '/board?tab=sell', label: '지역별 판매찾기', badge: 'N', Icon: TagIcon },
+  { href: '/board?tab=buy',  label: '지역별 매입찾기', badge: 'N', Icon: MapPin },
+  { href: '/recommended',    label: '오늘의 추천업체', badge: 'N', Icon: Star },
 ];
 
 const SECONDARY_NAV = [
@@ -171,14 +171,13 @@ export default function Header() {
             </div>
           </div>
 
-          {/* 모바일 카테고리 nav */}
-          <div className="flex items-center justify-around border-t border-gray-100 py-2 overflow-x-auto">
-            {PRIMARY_NAV.map(({ href, label, badge, Icon }) => (
+          {/* 모바일 카테고리 nav — 스크롤 없이 한 줄에 균등 배치 */}
+          <div className="grid grid-cols-3 border-t border-gray-100">
+            {PRIMARY_NAV.map(({ href, label, badge }) => (
               <Link key={href} href={href}
-                className="inline-flex items-center gap-1 px-2 py-1 text-[12.5px] font-extrabold text-gray-900 hover:text-accent transition-colors whitespace-nowrap">
-                <Icon size={13} strokeWidth={2.2} className="text-accent" />
-                <span>{label}</span>
-                <span className="text-[9px] font-black text-white px-1 rounded bg-rose-500">{badge}</span>
+                className="inline-flex items-center justify-center gap-0.5 py-2.5 text-[11.5px] font-extrabold text-gray-900 hover:text-accent transition-colors">
+                <span className="truncate">{label}</span>
+                <span className="shrink-0 text-[8.5px] font-black text-white px-1 rounded bg-rose-500">{badge}</span>
               </Link>
             ))}
           </div>

@@ -29,8 +29,8 @@ export default function NationalAds() {
   }, []);
 
   return (
-    <section className="container-main pt-4">
-      <div className="grid grid-cols-2 gap-3">
+    <section>
+      <div className="grid grid-cols-2 gap-2">
         {[1, 2, 3, 4].map((pos) => {
           const b = banners[pos];
           if (!b) {
