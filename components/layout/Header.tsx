@@ -239,12 +239,19 @@ function FullMenu({ onClose }: { onClose: () => void }) {
           ) : (
             <>
               <Link href="/login" onClick={onClose}
-                className="inline-flex items-center gap-1.5 justify-center h-9 px-4 border border-gray-300 text-gray-800 text-[12.5px] font-bold rounded-md hover:border-accent hover:text-accent">
-                <LogIn size={13} /> 로그인
+                className="inline-flex items-center gap-2 justify-center h-11 px-6 text-[14px] font-extrabold rounded-md transition-colors"
+                style={{ background: '#FFFFFF', color: '#0F172A', border: '2px solid #0F172A' }}>
+                <LogIn size={16} strokeWidth={2.6} /> 로그인
               </Link>
               <Link href="/register" onClick={onClose}
-                className="inline-flex items-center gap-1.5 justify-center h-9 px-4 bg-accent text-white text-[12.5px] font-bold rounded-md hover:bg-blue-700">
-                <UserPlus size={13} /> 회원가입
+                className="inline-flex items-center gap-2 justify-center h-11 px-6 text-[14px] font-extrabold rounded-md transition-all hover:-translate-y-px"
+                style={{
+                  background: '#1E3A8A',
+                  color: '#FFFFFF',
+                  boxShadow: '0 4px 14px -2px rgba(30, 58, 138, 0.5)',
+                }}>
+                <UserPlus size={16} strokeWidth={2.6} style={{ color: '#FFFFFF' }} />
+                <span style={{ color: '#FFFFFF' }}>회원가입</span>
               </Link>
             </>
           )}
