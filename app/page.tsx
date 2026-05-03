@@ -5,7 +5,7 @@ import VisitorCounter from '@/components/home/VisitorCounter';
 
 export default function Home() {
   return (
-    <div className="bg-gradient-to-b from-gray-50/50 to-white min-h-[calc(100vh-200px)] pb-8">
+    <div className="bg-linear-to-b from-gray-50/50 to-white min-h-[calc(100vh-200px)] pb-8">
       {/* 1. 전국 광고 (2x2) — 최상단 */}
       <NationalAds />
 
