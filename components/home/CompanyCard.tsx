@@ -46,7 +46,7 @@ export default function CompanyCard({ company, isNew }: CompanyCardProps) {
         className="block"
       >
         {/* Header: 이미지가 있으면 이미지 + 오버레이, 없으면 빗금 + 흰 패널 */}
-        <div className="relative h-[125px] md:h-[140px] overflow-hidden border-b border-gray-200" style={!hasImage ? HASH_BG : undefined}>
+        <div className="relative h-25 md:h-30 overflow-hidden border-b border-gray-200" style={!hasImage ? HASH_BG : undefined}>
           {hasImage ? (
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}

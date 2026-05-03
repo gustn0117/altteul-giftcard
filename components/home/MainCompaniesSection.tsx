@@ -53,7 +53,7 @@ function DemoCard({ item }: { item: typeof DEMO_COMPANIES[number]; index: number
   return (
     <div className="company-card card-hover group flex flex-col">
       <Link href="/register-business" className="block">
-        <div className="relative h-[125px] md:h-[140px] overflow-hidden border-b border-gray-200" style={HASH_BG}>
+        <div className="relative h-25 md:h-30 overflow-hidden border-b border-gray-200" style={HASH_BG}>
           <div className="absolute inset-0 flex items-center justify-center px-3">
             <h3 className="text-gray-900 text-[14px] md:text-[15px] font-bold text-center leading-tight bg-white/85 backdrop-blur-sm px-3 py-2 rounded-md">
               {item.title}
@@ -108,21 +108,17 @@ export default function MainCompaniesSection({ buyers, loading, compact = false,
     : 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3';
 
   return (
-    <section className={compact ? '' : 'mb-6'}>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-3 relative">
-        <p className="text-[11px] text-gray-400">* 배너위치는 실시간으로 랜덤 배치됩니다.</p>
-        <h2 className="text-[15px] md:text-[17px] font-bold text-gray-800 absolute left-1/2 -translate-x-1/2 hidden md:block">
-          메인 등록업체
-        </h2>
-        <Link href="/advertising" className="flex items-center gap-1 text-[11px] text-gray-500 hover:text-accent border border-gray-200 px-2 py-1 rounded-sm">
+    <section className={compact ? '' : ''}>
+      {/* Header — 컴팩트 */}
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-[13px] font-bold text-gray-800">메인 광고</h2>
+        <Link href="/advertising" className="inline-flex items-center gap-1 text-[10.5px] text-gray-500 hover:text-accent">
           광고문의 <HelpCircle size={10} />
         </Link>
       </div>
-      <h2 className="text-[15px] font-bold text-gray-800 text-center mb-3 md:hidden">메인 등록업체</h2>
 
       {loading ? (
-        <div className="py-16 text-center text-gray-400 text-[13px]">불러오는 중...</div>
+        <div className="py-10 text-center text-gray-400 text-[12px]">불러오는 중...</div>
       ) : (
         <div className={gridCls}>
           {buyers.slice(0, maxCount).map((b, i) => (
@@ -132,12 +128,6 @@ export default function MainCompaniesSection({ buyers, loading, compact = false,
             <DemoCard key={`demo-${i}`} item={item} index={i} />
           ))}
         </div>
-      )}
-
-      {realCount === 0 && !compact && (
-        <p className="text-center text-[11px] text-gray-400 mt-3">
-          샘플 카드가 표시됩니다. <Link href="/register-business" className="text-accent font-bold hover:underline">업체 등록하기 →</Link>
-        </p>
       )}
     </section>
   );
