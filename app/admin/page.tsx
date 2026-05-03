@@ -305,8 +305,8 @@ export default function AdminPage() {
       {/* 신규 운영자 페이지 빠른 링크 */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 mb-3">
         <a href="/admin/banners" className="card card-hover p-3 text-left">
-          <span className="text-[10.5px] text-gray-500">메인 배너</span>
-          <p className="text-[12.5px] font-bold text-gray-900 mt-0.5">3×2 광고 슬롯</p>
+          <span className="text-[10.5px] text-gray-500">전국 광고</span>
+          <p className="text-[12.5px] font-bold text-gray-900 mt-0.5">2×2 광고 슬롯</p>
         </a>
         <a href="/admin/grants" className="card card-hover p-3 text-left">
           <span className="text-[10.5px] text-amber-600 font-bold">연락처 권한</span>

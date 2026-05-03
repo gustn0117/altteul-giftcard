@@ -73,7 +73,7 @@ export default function AdminBannersPage() {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Link href="/admin" className="text-[12px] text-gray-500 hover:text-accent flex items-center gap-1"><ArrowLeft size={12}/>운영자홈</Link>
-          <h1 className="text-[18px] font-bold text-gray-800 ml-3">메인 배너 관리 (3×2)</h1>
+          <h1 className="text-[18px] font-bold text-gray-800 ml-3">전국 광고 관리 (2×2)</h1>
         </div>
         <button onClick={() => setShowForm(v => !v)} className="btn-accent h-9 px-4 text-[13px] flex items-center gap-1">
           <Plus size={14}/> 새 배너
@@ -86,7 +86,7 @@ export default function AdminBannersPage() {
             <div>
               <label className="text-[12px] font-medium text-gray-600">위치 (1~6)</label>
               <select value={form.position} onChange={(e) => setForm({...form, position: Number(e.target.value)})} className="input">
-                {[1,2,3,4,5,6].map(n => <option key={n} value={n}>{n}번</option>)}
+                {[1,2,3,4].map(n => <option key={n} value={n}>{n}번</option>)}
               </select>
             </div>
             <div>

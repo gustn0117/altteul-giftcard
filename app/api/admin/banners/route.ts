@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
   }
   const body = await req.json();
   const { position, title, subtitle, image_url, link_url, business_id, bg_color, duration_days } = body;
-  if (!position || position < 1 || position > 6) return NextResponse.json({ error: 'position(1~6) 필요' }, { status: 400 });
+  if (!position || position < 1 || position > 4) return NextResponse.json({ error: 'position(1~4) 필요' }, { status: 400 });
   if (!title) return NextResponse.json({ error: 'title 필요' }, { status: 400 });
 
   const supabase = createServiceClient();
