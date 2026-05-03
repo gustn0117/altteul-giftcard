@@ -56,7 +56,7 @@ export default function CompanyCard({ company, isNew }: CompanyCardProps) {
                 loading="lazy"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/75" />
+              <div className="absolute inset-0 bg-linear-to-b from-black/20 via-black/40 to-black/75" />
               <div className="absolute inset-0 flex items-center justify-center px-3">
                 <h3 className="text-white text-[14px] md:text-[15px] font-bold text-center leading-tight drop-shadow-md">
                   {displayTitle}
@@ -81,7 +81,7 @@ export default function CompanyCard({ company, isNew }: CompanyCardProps) {
 
         {/* Body */}
         <div className="px-3 pt-3 pb-2.5">
-          <p className="text-[12.5px] text-gray-600 leading-snug text-center line-clamp-2 min-h-[38px]">
+          <p className="text-[12.5px] text-gray-600 leading-snug text-center line-clamp-2 min-h-9.5">
             {company.description || '상품권 매입 전문 업체입니다.'}
           </p>
           <div className="flex items-center justify-center gap-1.5 mt-2.5 text-[14px] md:text-[15px] font-bold text-gray-900 whitespace-nowrap">
