@@ -87,14 +87,22 @@ export default function Header() {
                 </>
               ) : (
                 <>
+                  {/* 로그인 — 흰 배경 + 진한 검정 outline (강한 대비) */}
                   <Link href="/login"
-                    className="inline-flex items-center gap-1.5 h-9 px-3.5 text-[13px] font-bold text-gray-700 hover:text-accent transition-colors">
-                    <LogIn size={14} /> 로그인
+                    className="inline-flex items-center gap-1.5 h-10 px-4 text-[13.5px] font-extrabold rounded-full transition-colors"
+                    style={{ background: '#FFFFFF', color: '#0F172A', border: '2px solid #0F172A' }}>
+                    <LogIn size={15} strokeWidth={2.6} /> 로그인
                   </Link>
+                  {/* 회원가입 — 진한 파랑 + 흰 글씨 강제 + 그림자 */}
                   <Link href="/register"
-                    className="inline-flex items-center gap-1.5 h-9 px-4 text-[13px] font-bold text-white rounded-full transition-colors"
-                    style={{ background: '#1E40AF', color: '#FFFFFF' }}>
-                    <UserPlus size={14} /> 회원가입
+                    className="inline-flex items-center gap-1.5 h-10 px-5 text-[13.5px] font-extrabold rounded-full transition-all hover:-translate-y-px"
+                    style={{
+                      background: '#1E3A8A',
+                      color: '#FFFFFF',
+                      boxShadow: '0 4px 14px -2px rgba(30, 58, 138, 0.5)',
+                    }}>
+                    <UserPlus size={15} strokeWidth={2.6} style={{ color: '#FFFFFF' }} />
+                    <span style={{ color: '#FFFFFF' }}>회원가입</span>
                   </Link>
                 </>
               )}
