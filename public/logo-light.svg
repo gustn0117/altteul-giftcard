@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 100" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="goldL" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F0D88C"/>
+      <stop offset="45%" stop-color="#D4AF53"/>
+      <stop offset="100%" stop-color="#A88534"/>
+    </linearGradient>
+  </defs>
+  <text x="0" y="70" font-family="Georgia, 'Times New Roman', serif" font-weight="900"
+        font-size="86" fill="url(#goldL)" letter-spacing="-2">?</text>
+  <text x="78" y="48" font-family="'Pretendard', 'Apple SD Gothic Neo', sans-serif"
+        font-weight="900" font-size="36" fill="#FFFFFF" letter-spacing="-1.5">예판상품권</text>
+  <text x="78" y="82" font-family="'Pretendard', 'Apple SD Gothic Neo', sans-serif"
+        font-weight="600" font-size="17" fill="#CBD5E1" letter-spacing="-0.5">상품권중개플랫폼1위</text>
+</svg>
