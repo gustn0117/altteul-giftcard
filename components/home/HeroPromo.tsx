@@ -9,12 +9,12 @@ export default function HeroPromo() {
         {/* 미묘한 그라디언트 글로우 */}
         <div
           aria-hidden
-          className="absolute -top-1/3 -right-1/4 w-[600px] h-[600px] rounded-full opacity-50 blur-3xl"
+          className="absolute -top-1/3 -right-1/4 w-150 h-150 rounded-full opacity-50 blur-3xl"
           style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.12), transparent 70%)' }}
         />
         <div
           aria-hidden
-          className="absolute -bottom-1/3 -left-1/4 w-[500px] h-[500px] rounded-full opacity-40 blur-3xl"
+          className="absolute -bottom-1/3 -left-1/4 w-125 h-125 rounded-full opacity-40 blur-3xl"
           style={{ background: 'radial-gradient(circle, rgba(251,191,36,0.10), transparent 70%)' }}
         />
 
