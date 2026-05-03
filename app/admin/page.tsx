@@ -308,6 +308,10 @@ export default function AdminPage() {
           <span className="text-[10.5px] text-gray-500">전국 광고</span>
           <p className="text-[12.5px] font-bold text-gray-900 mt-0.5">2×2 광고 슬롯</p>
         </a>
+        <a href="/admin/hero-promo" className="card card-hover p-3 text-left">
+          <span className="text-[10.5px] text-violet-600 font-bold">메인 홍보</span>
+          <p className="text-[12.5px] font-bold text-gray-900 mt-0.5">홍보 박스 편집</p>
+        </a>
         <a href="/admin/grants" className="card card-hover p-3 text-left">
           <span className="text-[10.5px] text-amber-600 font-bold">연락처 권한</span>
           <p className="text-[12.5px] font-bold text-gray-900 mt-0.5">회원별 시간/일 부여</p>
