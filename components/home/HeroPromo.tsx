@@ -1,58 +1,110 @@
-import { Sparkles } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowRight, ShieldCheck, Zap } from 'lucide-react';
 
-/** 메인 히어로 — 큰 카피 + 일러스트 영역 */
+/** 메인 히어로 — 핀테크 톤의 모던 카피 */
 export default function HeroPromo() {
   return (
     <section>
-      <div className="bg-linear-to-br from-orange-50 via-amber-50 to-yellow-50 border border-amber-200 rounded-2xl overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-2 items-center">
+      <div
+        className="relative overflow-hidden rounded-2xl border border-slate-800/10"
+        style={{
+          background:
+            'radial-gradient(1200px 400px at 0% 0%, rgba(59,130,246,0.18), transparent 60%), radial-gradient(800px 300px at 100% 100%, rgba(251,191,36,0.18), transparent 60%), linear-gradient(135deg, #0F172A 0%, #1E293B 60%, #1E40AF 100%)',
+        }}
+      >
+        {/* 장식 도트 패턴 */}
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.4) 1px, transparent 0)',
+            backgroundSize: '20px 20px',
+          }}
+        />
+
+        <div className="relative grid grid-cols-1 md:grid-cols-[1.2fr_1fr] items-center gap-4 px-6 py-7 md:px-10 md:py-12">
           {/* 좌: 카피 */}
-          <div className="px-6 py-7 md:px-9 md:py-10">
-            <p className="inline-flex items-center gap-1 text-[11.5px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full mb-3">
-              <Sparkles size={11} /> 전국 최대 규모
-            </p>
-            <h2 className="text-[20px] md:text-[24px] font-extrabold text-gray-900 leading-tight mb-1">
-              상품권 매입업체가 모두 한곳에!
+          <div className="text-white">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-widest uppercase text-blue-200 bg-white/10 backdrop-blur-sm px-2.5 py-1 rounded-full mb-4">
+              상품권 중개 No.1
+            </span>
+            <h2 className="text-[26px] md:text-[34px] font-black tracking-tight leading-[1.15] mb-3">
+              상품권, <br className="md:hidden" />
+              <span className="bg-gradient-to-r from-amber-300 to-yellow-200 bg-clip-text text-transparent">
+                더 똑똑하게.
+              </span>
             </h2>
-            <p className="text-[24px] md:text-[30px] font-black text-gray-900 leading-tight">
-              상품권 중개<br/>플랫폼 <span className="text-accent">1위!</span>
+            <p className="text-[13px] md:text-[14.5px] text-slate-300 leading-relaxed mb-5 max-w-[420px]">
+              검증된 매입 업체와 즉시 연결.<br className="hidden sm:inline" />
+              가장 높은 매입률을 한눈에 비교하세요.
             </p>
+
+            {/* 미니 통계 + CTA */}
+            <div className="flex items-center gap-4 mb-5">
+              <div className="flex items-center gap-1.5 text-[12px] text-slate-300">
+                <ShieldCheck size={14} className="text-emerald-300" />
+                <span><strong className="text-white font-bold">검증 업체</strong> 1,000+</span>
+              </div>
+              <div className="w-px h-3 bg-white/20" aria-hidden />
+              <div className="flex items-center gap-1.5 text-[12px] text-slate-300">
+                <Zap size={14} className="text-amber-300" />
+                <span><strong className="text-white font-bold">평균 응답</strong> 12분</span>
+              </div>
+            </div>
+
+            <Link
+              href="/recommended"
+              className="inline-flex items-center gap-1.5 h-11 px-5 bg-white text-slate-900 text-[13.5px] font-extrabold rounded-full shadow-lg shadow-blue-900/30 hover:shadow-xl hover:-translate-y-0.5 transition-all"
+            >
+              지금 매입률 비교하기 <ArrowRight size={15} strokeWidth={2.6} />
+            </Link>
           </div>
-          {/* 우: 일러스트 (간단 SVG) */}
-          <div className="hidden md:flex items-center justify-center px-6 py-6">
-            <svg viewBox="0 0 220 180" className="w-full max-w-70">
+
+          {/* 우: 모던 일러스트 (카드 + 그래프) */}
+          <div className="hidden md:flex items-center justify-center">
+            <svg viewBox="0 0 280 220" className="w-full max-w-72">
               <defs>
-                <linearGradient id="card1" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#FBBF24"/>
-                  <stop offset="100%" stopColor="#D97706"/>
+                <linearGradient id="cardGradA" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="#FBBF24" />
+                  <stop offset="100%" stopColor="#D97706" />
                 </linearGradient>
-                <linearGradient id="card2" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#60A5FA"/>
-                  <stop offset="100%" stopColor="#2563EB"/>
+                <linearGradient id="cardGradB" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="#3B82F6" />
+                  <stop offset="100%" stopColor="#1E3A8A" />
+                </linearGradient>
+                <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#34D399" stopOpacity="0.45" />
+                  <stop offset="100%" stopColor="#34D399" stopOpacity="0" />
                 </linearGradient>
               </defs>
-              {/* 배경 원 */}
-              <circle cx="110" cy="90" r="78" fill="#FFF7ED"/>
-              {/* 카드 1 */}
-              <g transform="translate(35, 55) rotate(-8 50 30)">
-                <rect width="100" height="60" rx="6" fill="url(#card1)"/>
-                <rect x="8" y="10" width="32" height="6" rx="2" fill="white" opacity="0.7"/>
-                <rect x="8" y="22" width="60" height="4" rx="1" fill="white" opacity="0.5"/>
-                <text x="74" y="48" fontFamily="serif" fontWeight="900" fontSize="22" fill="white">₩</text>
+
+              {/* 백그라운드 카드 (블러 느낌) */}
+              <g transform="translate(40, 28) rotate(-6 80 50)" opacity="0.85">
+                <rect width="160" height="100" rx="14" fill="url(#cardGradA)" />
+                <circle cx="135" cy="22" r="10" fill="white" opacity="0.7" />
+                <circle cx="148" cy="22" r="10" fill="white" opacity="0.4" />
+                <rect x="16" y="60" width="80" height="6" rx="2" fill="white" opacity="0.5" />
+                <rect x="16" y="72" width="50" height="6" rx="2" fill="white" opacity="0.35" />
               </g>
-              {/* 카드 2 */}
-              <g transform="translate(80, 70) rotate(6 50 30)">
-                <rect width="100" height="60" rx="6" fill="url(#card2)"/>
-                <rect x="8" y="10" width="32" height="6" rx="2" fill="white" opacity="0.7"/>
-                <rect x="8" y="22" width="60" height="4" rx="1" fill="white" opacity="0.5"/>
-                <text x="74" y="48" fontFamily="serif" fontWeight="900" fontSize="22" fill="white">₩</text>
+
+              {/* 메인 카드 */}
+              <g transform="translate(60, 60) rotate(4 80 50)">
+                <rect width="170" height="106" rx="16" fill="url(#cardGradB)" />
+                <text x="20" y="36" fontFamily="system-ui" fontWeight="700" fontSize="11" fill="white" opacity="0.7">매입률</text>
+                <text x="20" y="68" fontFamily="system-ui" fontWeight="900" fontSize="32" fill="white">92<tspan fontSize="20">%</tspan></text>
+                <text x="20" y="86" fontFamily="system-ui" fontWeight="600" fontSize="10" fill="#A7F3D0">▲ 어제보다 +1.2%</text>
+                <text x="142" y="36" textAnchor="end" fontFamily="serif" fontWeight="900" fontSize="22" fill="white" opacity="0.9">₩</text>
+                {/* 미니 차트 */}
+                <path d="M105 92 L120 80 L135 86 L150 70 L160 76" stroke="#34D399" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M105 92 L120 80 L135 86 L150 70 L160 76 L160 100 L105 100 Z" fill="url(#chartFill)" />
               </g>
-              {/* 별 장식 */}
+
+              {/* 작은 별 장식 */}
               <g fill="#FBBF24">
-                <circle cx="40" cy="40" r="3"/>
-                <circle cx="180" cy="50" r="4"/>
-                <circle cx="190" cy="130" r="3"/>
-                <circle cx="35" cy="140" r="3.5"/>
+                <circle cx="20" cy="60" r="2.5" />
+                <circle cx="260" cy="40" r="3" />
+                <circle cx="250" cy="190" r="2.5" />
               </g>
             </svg>
           </div>
