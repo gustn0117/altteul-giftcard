@@ -1,30 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 130" preserveAspectRatio="xMidYMid meet">
   <defs>
     <linearGradient id="gold" x1="0.2" y1="0" x2="0.5" y2="1">
-      <stop offset="0%" stop-color="#F5DC8E"/>
-      <stop offset="25%" stop-color="#E5BC52"/>
-      <stop offset="55%" stop-color="#B88A2B"/>
-      <stop offset="100%" stop-color="#6E4F11"/>
+      <stop offset="0%" stop-color="#E8C46C"/>
+      <stop offset="30%" stop-color="#C99A38"/>
+      <stop offset="65%" stop-color="#9C701E"/>
+      <stop offset="100%" stop-color="#5C420C"/>
     </linearGradient>
-    <linearGradient id="goldHighlight" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#FFF4D0" stop-opacity="0.6"/>
-      <stop offset="60%" stop-color="#FFF4D0" stop-opacity="0"/>
+    <linearGradient id="goldShine" x1="0.3" y1="0" x2="0.3" y2="0.6">
+      <stop offset="0%" stop-color="#FFE9B0" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#FFE9B0" stop-opacity="0"/>
     </linearGradient>
   </defs>
 
-  <!-- 골드 ? 마크 (큰 사이즈, 두껍게) -->
+  <!-- 골드 ? 마크 -->
   <g>
     <text x="0" y="100" font-family="Georgia, 'Times New Roman', serif" font-weight="900"
           font-size="120" fill="url(#gold)" letter-spacing="-3">?</text>
     <text x="0" y="100" font-family="Georgia, 'Times New Roman', serif" font-weight="900"
-          font-size="120" fill="url(#goldHighlight)" letter-spacing="-3">?</text>
+          font-size="120" fill="url(#goldShine)" letter-spacing="-3">?</text>
   </g>
 
   <!-- 예판상품권 메인 -->
   <text x="100" y="58" font-family="'Pretendard', 'Apple SD Gothic Neo', sans-serif"
-        font-weight="900" font-size="46" fill="#0a0a0a" letter-spacing="-2.2">예판상품권</text>
+        font-weight="900" font-size="46" fill="#0a0a0a" letter-spacing="-2.5">예판상품권</text>
 
   <!-- 서브 카피 -->
   <text x="100" y="100" font-family="'Pretendard', 'Apple SD Gothic Neo', sans-serif"
-        font-weight="700" font-size="20" fill="#525252" letter-spacing="-0.8">상품권중개플랫폼1위</text>
+        font-weight="800" font-size="22" fill="#3f3f46" letter-spacing="-1">상품권중개플랫폼1위</text>
 </svg>
