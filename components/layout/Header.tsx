@@ -87,21 +87,21 @@ export default function Header() {
                 </>
               ) : (
                 <>
-                  {/* 로그인 — 흰 배경 + 진한 검정 outline (강한 대비) */}
+                  {/* 로그인 — 흰 배경 + 1.5px 진회색 outline (간결) */}
                   <Link href="/login"
-                    className="inline-flex items-center gap-1.5 h-10 px-4 text-[13.5px] font-extrabold rounded-full transition-colors"
-                    style={{ background: '#FFFFFF', color: '#0F172A', border: '2px solid #0F172A' }}>
-                    <LogIn size={15} strokeWidth={2.6} /> 로그인
+                    className="inline-flex items-center gap-1 h-9 px-3.5 text-[12.5px] font-bold rounded-full transition-colors hover:bg-gray-50"
+                    style={{ background: '#FFFFFF', color: '#1E293B', border: '1.5px solid #334155' }}>
+                    <LogIn size={13} strokeWidth={2.4} /> 로그인
                   </Link>
-                  {/* 회원가입 — 진한 파랑 + 흰 글씨 강제 + 그림자 */}
+                  {/* 회원가입 — 진한 파랑 솔리드 + 흰 글씨 (가벼운 그림자) */}
                   <Link href="/register"
-                    className="inline-flex items-center gap-1.5 h-10 px-5 text-[13.5px] font-extrabold rounded-full transition-all hover:-translate-y-px"
+                    className="inline-flex items-center gap-1 h-9 px-4 text-[12.5px] font-bold rounded-full transition-colors hover:opacity-95"
                     style={{
-                      background: '#1E3A8A',
+                      background: '#1E40AF',
                       color: '#FFFFFF',
-                      boxShadow: '0 4px 14px -2px rgba(30, 58, 138, 0.5)',
+                      boxShadow: '0 2px 6px -1px rgba(30, 64, 175, 0.3)',
                     }}>
-                    <UserPlus size={15} strokeWidth={2.6} style={{ color: '#FFFFFF' }} />
+                    <UserPlus size={13} strokeWidth={2.4} style={{ color: '#FFFFFF' }} />
                     <span style={{ color: '#FFFFFF' }}>회원가입</span>
                   </Link>
                 </>
@@ -239,18 +239,18 @@ function FullMenu({ onClose }: { onClose: () => void }) {
           ) : (
             <>
               <Link href="/login" onClick={onClose}
-                className="inline-flex items-center gap-2 justify-center h-11 px-6 text-[14px] font-extrabold rounded-md transition-colors"
-                style={{ background: '#FFFFFF', color: '#0F172A', border: '2px solid #0F172A' }}>
-                <LogIn size={16} strokeWidth={2.6} /> 로그인
+                className="inline-flex items-center gap-1.5 justify-center h-10 px-5 text-[13px] font-bold rounded-md transition-colors hover:bg-gray-50"
+                style={{ background: '#FFFFFF', color: '#1E293B', border: '1.5px solid #334155' }}>
+                <LogIn size={14} strokeWidth={2.4} /> 로그인
               </Link>
               <Link href="/register" onClick={onClose}
-                className="inline-flex items-center gap-2 justify-center h-11 px-6 text-[14px] font-extrabold rounded-md transition-all hover:-translate-y-px"
+                className="inline-flex items-center gap-1.5 justify-center h-10 px-5 text-[13px] font-bold rounded-md transition-colors hover:opacity-95"
                 style={{
-                  background: '#1E3A8A',
+                  background: '#1E40AF',
                   color: '#FFFFFF',
-                  boxShadow: '0 4px 14px -2px rgba(30, 58, 138, 0.5)',
+                  boxShadow: '0 2px 6px -1px rgba(30, 64, 175, 0.3)',
                 }}>
-                <UserPlus size={16} strokeWidth={2.6} style={{ color: '#FFFFFF' }} />
+                <UserPlus size={14} strokeWidth={2.4} style={{ color: '#FFFFFF' }} />
                 <span style={{ color: '#FFFFFF' }}>회원가입</span>
               </Link>
             </>
