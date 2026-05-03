@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import {
-  Search, Menu, X, Home, MapPin, Tag as TagIcon, Star,
+  Search, Menu, X, MapPin, Tag as TagIcon, Star,
   LogIn, UserPlus, LayoutDashboard, PenSquare, Megaphone, ShieldAlert, HelpCircle,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -143,19 +143,15 @@ export default function Header() {
       {/* ───────────────── 모바일 헤더 (사진 스타일) ───────────────── */}
       <div className="md:hidden">
         <div className="container-main">
-          <div className="grid grid-cols-3 items-center h-16">
-            {/* 좌: 홈 + 검색 아이콘 */}
-            <div className="flex items-center gap-1">
-              <Link href="/" aria-label="홈"
-                className="inline-flex items-center justify-center w-10 h-10 border border-gray-200 rounded-md text-gray-700 hover:border-accent hover:text-accent transition-colors">
-                <Home size={18} strokeWidth={1.8} />
-              </Link>
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center h-16 gap-2">
+            {/* 좌: 검색 아이콘만 */}
+            <div className="flex items-center justify-start">
               <Link href="/search" aria-label="검색"
                 className="inline-flex items-center justify-center w-10 h-10 border border-gray-200 rounded-md text-gray-700 hover:border-accent hover:text-accent transition-colors">
                 <Search size={18} strokeWidth={1.8} />
               </Link>
             </div>
-            {/* 중앙: 로고 */}
+            {/* 중앙: 로고 (정중앙) */}
             <Link href="/" className="flex items-center justify-center">
               <Image src="/logo.svg" alt="예판상품권" width={200} height={54}
                 className="h-11 w-auto object-contain" priority />
