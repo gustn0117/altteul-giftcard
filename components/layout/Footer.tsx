@@ -46,8 +46,8 @@ export default function Footer() {
           {/* 좌측: 로고 + 슬로건 + 고객센터 */}
           <div className="col-span-4">
             <Link href="/" className="inline-block">
-              <Image src="/logo.svg" alt="예판상품권" width={180} height={40}
-                className="h-9 w-auto object-contain" />
+              <Image src="/logo.svg" alt="예판상품권" width={220} height={60}
+                className="h-12 w-auto object-contain" />
             </Link>
             <p className="text-[12px] text-gray-500 mt-3 leading-relaxed">
               상품권을 더 똑똑하게.<br/>
