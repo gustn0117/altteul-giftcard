@@ -1,15 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 100" preserveAspectRatio="xMidYMid meet">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 130" preserveAspectRatio="xMidYMid meet">
   <defs>
-    <linearGradient id="goldL" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#F0D88C"/>
-      <stop offset="45%" stop-color="#D4AF53"/>
-      <stop offset="100%" stop-color="#A88534"/>
+    <linearGradient id="goldL" x1="0.2" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#FCEAA8"/>
+      <stop offset="30%" stop-color="#EFCB6E"/>
+      <stop offset="65%" stop-color="#C9962F"/>
+      <stop offset="100%" stop-color="#8B6914"/>
+    </linearGradient>
+    <linearGradient id="goldHighlightL" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.55"/>
+      <stop offset="60%" stop-color="#FFFFFF" stop-opacity="0"/>
     </linearGradient>
   </defs>
-  <text x="0" y="70" font-family="Georgia, 'Times New Roman', serif" font-weight="900"
-        font-size="86" fill="url(#goldL)" letter-spacing="-2">?</text>
-  <text x="78" y="48" font-family="'Pretendard', 'Apple SD Gothic Neo', sans-serif"
-        font-weight="900" font-size="36" fill="#FFFFFF" letter-spacing="-1.5">예판상품권</text>
-  <text x="78" y="82" font-family="'Pretendard', 'Apple SD Gothic Neo', sans-serif"
-        font-weight="600" font-size="17" fill="#CBD5E1" letter-spacing="-0.5">상품권중개플랫폼1위</text>
+
+  <g>
+    <text x="0" y="100" font-family="Georgia, 'Times New Roman', serif" font-weight="900"
+          font-size="120" fill="url(#goldL)" letter-spacing="-3">?</text>
+    <text x="0" y="100" font-family="Georgia, 'Times New Roman', serif" font-weight="900"
+          font-size="120" fill="url(#goldHighlightL)" letter-spacing="-3">?</text>
+  </g>
+
+  <text x="100" y="58" font-family="'Pretendard', 'Apple SD Gothic Neo', sans-serif"
+        font-weight="900" font-size="46" fill="#FFFFFF" letter-spacing="-2.2">예판상품권</text>
+
+  <text x="100" y="100" font-family="'Pretendard', 'Apple SD Gothic Neo', sans-serif"
+        font-weight="700" font-size="20" fill="#CBD5E1" letter-spacing="-0.8">상품권중개플랫폼1위</text>
 </svg>

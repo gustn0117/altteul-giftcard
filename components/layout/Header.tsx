@@ -39,11 +39,11 @@ export default function Header() {
     <header className="bg-white sticky top-0 z-50 border-b border-gray-200">
       {/* Main row: 3분할 그리드 (좌:로고 / 중:검색 / 우:액션) */}
       <div className="container-main">
-        <div className="md:grid md:grid-cols-[auto_1fr_auto] md:gap-6 flex items-center h-17 md:h-19">
+        <div className="md:grid md:grid-cols-[auto_1fr_auto] md:gap-6 flex items-center h-20 md:h-24">
           {/* Logo (좌) */}
           <Link href="/" className="flex items-center shrink-0">
-            <Image src="/logo.svg" alt="예판상품권" width={180} height={40}
-              className="h-8 md:h-9 w-auto object-contain" priority />
+            <Image src="/logo.svg" alt="예판상품권" width={240} height={64}
+              className="h-12 md:h-14 w-auto object-contain" priority />
           </Link>
 
           {/* Search (가운데, 데스크탑) */}
