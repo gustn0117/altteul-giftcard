@@ -9,9 +9,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import NotificationBell from '@/components/layout/NotificationBell';
 
 const PRIMARY_NAV = [
-  { href: '/board?tab=sell', label: '상품권 팝니다', badge: 'HOT', dot: 'bg-rose-500', glow: 'group-hover:shadow-[0_0_8px_2px_rgba(244,63,94,0.5)]' },
-  { href: '/board?tab=buy', label: '상품권 삽니다', badge: 'HOT', dot: 'bg-blue-500', glow: 'group-hover:shadow-[0_0_8px_2px_rgba(59,130,246,0.5)]' },
-  { href: '/recommended', label: '매입업체', badge: 'N', dot: 'bg-emerald-500', glow: 'group-hover:shadow-[0_0_8px_2px_rgba(16,185,129,0.5)]' },
+  { href: '/board?tab=sell', label: '지역별 판매찾기', badge: 'HOT', dot: 'bg-rose-500', glow: 'group-hover:shadow-[0_0_8px_2px_rgba(244,63,94,0.5)]' },
+  { href: '/board?tab=buy', label: '지역별 매입찾기', badge: 'HOT', dot: 'bg-blue-500', glow: 'group-hover:shadow-[0_0_8px_2px_rgba(59,130,246,0.5)]' },
+  { href: '/recommended', label: '오늘의 추천업체', badge: 'N', dot: 'bg-emerald-500', glow: 'group-hover:shadow-[0_0_8px_2px_rgba(16,185,129,0.5)]' },
 ];
 
 const SECONDARY_NAV = [
