@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Crown, Clock, Phone, X, ExternalLink } from 'lucide-react';
+import { Crown, Clock, Phone, X } from 'lucide-react';
 import { getRecentBuyers, clearRecentBuyers, RECENT_BUYERS_EVENT, addRecentBuyer, type RecentBuyer } from '@/lib/recentBuyers';
 import { getPremiumBuyers } from '@/lib/api';
 import { getCache, setCache } from '@/lib/cache';
@@ -78,15 +78,6 @@ export default function HomeAside() {
           </ul>
         </div>
       )}
-
-      {/* 스폰서 광고 — 컴팩트 */}
-      <div className="bg-linear-to-br from-blue-50 to-white border border-blue-100 rounded-xl p-3 text-center">
-        <p className="text-[10px] text-blue-600 font-bold mb-1">SPONSORED</p>
-        <p className="text-[12px] font-bold text-gray-900">광고 모집중</p>
-        <Link href="/advertising" className="inline-flex items-center gap-1 mt-1.5 text-[10.5px] font-bold text-accent">
-          자세히 <ExternalLink size={10} />
-        </Link>
-      </div>
 
       {/* 최근 본 업체 — 컴팩트 */}
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
