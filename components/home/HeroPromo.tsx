@@ -35,12 +35,14 @@ export default function HeroPromo() {
             검증된 매입 업체와 즉시 매칭. 비교는 한 곳에서.
           </p>
 
-          {/* CTA */}
+          {/* CTA — 검정 솔리드 + 흰 글씨 (inline 강제) */}
           <Link
             href="/recommended"
-            className="mt-9 md:mt-11 inline-flex items-center gap-2 h-12 px-7 bg-gray-900 hover:bg-black text-white text-[13.5px] font-bold rounded-full transition-colors"
+            className="mt-9 md:mt-11 inline-flex items-center gap-2 h-12 px-7 text-[13.5px] font-bold rounded-full transition-colors hover:opacity-90"
+            style={{ background: '#0F172A', color: '#FFFFFF' }}
           >
-            매입률 비교하기 <ArrowRight size={15} strokeWidth={2.4} />
+            <span style={{ color: '#FFFFFF' }}>매입률 비교하기</span>
+            <ArrowRight size={15} strokeWidth={2.4} style={{ color: '#FFFFFF' }} />
           </Link>
         </div>
       </div>
