@@ -20,7 +20,7 @@ export default function HeroPromo() {
           </div>
           {/* 우: 일러스트 (간단 SVG) */}
           <div className="hidden md:flex items-center justify-center px-6 py-6">
-            <svg viewBox="0 0 220 180" className="w-full max-w-[280px]">
+            <svg viewBox="0 0 220 180" className="w-full max-w-70">
               <defs>
                 <linearGradient id="card1" x1="0" y1="0" x2="1" y2="1">
                   <stop offset="0%" stopColor="#FBBF24"/>
