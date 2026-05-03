@@ -2,83 +2,185 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Search, Menu, X, Home, MapPin, Tag as TagIcon, Star } from 'lucide-react';
+import {
+  Search, Menu, X, Home, MapPin, Tag as TagIcon, Star,
+  LogIn, UserPlus, LayoutDashboard, PenSquare, Megaphone, ShieldAlert, HelpCircle,
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import NotificationBell from '@/components/layout/NotificationBell';
 
 const PRIMARY_NAV = [
-  { href: '/category/area', label: '지역별 업체찾기', badge: 'N', Icon: MapPin },
+  { href: '/category/area',    label: '지역별 업체찾기', badge: 'N', Icon: MapPin },
   { href: '/category/product', label: '상품별 업체찾기', badge: 'N', Icon: TagIcon },
-  { href: '/recommended', label: '오늘의 추천업체', badge: 'N', Icon: Star },
+  { href: '/recommended',      label: '오늘의 추천업체', badge: 'N', Icon: Star },
+];
+
+const SECONDARY_NAV = [
+  { href: '/board?tab=sell',   label: '판매찾기' },
+  { href: '/board?tab=buy',    label: '매입찾기' },
+  { href: '/fraud',            label: '사기방지', Icon: ShieldAlert },
+  { href: '/guide',            label: '이용안내', Icon: HelpCircle },
+  { href: '/advertising',      label: '광고문의', Icon: Megaphone },
 ];
 
 export default function Header() {
-  const { isLoggedIn } = useAuth();
+  const router = useRouter();
+  const { user, isLoggedIn, logout } = useAuth();
+  const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [fullMenuOpen, setFullMenuOpen] = useState(false);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    if (!q) return;
+    router.push(`/search?q=${encodeURIComponent(q)}`);
+  };
 
   return (
     <header className="bg-white sticky top-0 z-50 border-b border-gray-200">
-      {/* Main row: 좌(아이콘) - 중앙(로고) - 우(햄버거/메뉴) */}
-      <div className="container-main">
-        <div className="grid grid-cols-3 items-center h-16 md:h-20">
-          {/* 좌: 홈 + 검색 아이콘 */}
-          <div className="flex items-center gap-1">
-            <Link href="/" aria-label="홈"
-              className="inline-flex items-center justify-center w-10 h-10 md:w-11 md:h-11 border border-gray-200 rounded-md text-gray-700 hover:border-accent hover:text-accent transition-colors">
-              <Home size={18} strokeWidth={1.8} />
+      {/* ───────────────── 데스크탑 헤더 ───────────────── */}
+      <div className="hidden md:block">
+        <div className="container-main">
+          {/* 윗줄: 로고(좌) | 검색(중앙) | 액션(우) */}
+          <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6 h-20">
+            {/* 로고 */}
+            <Link href="/" className="flex items-center shrink-0">
+              <Image src="/logo.svg" alt="예판상품권" width={260} height={70}
+                className="h-14 w-auto object-contain" priority />
             </Link>
-            <Link href="/search" aria-label="검색"
-              className="inline-flex items-center justify-center w-10 h-10 md:w-11 md:h-11 border border-gray-200 rounded-md text-gray-700 hover:border-accent hover:text-accent transition-colors">
-              <Search size={18} strokeWidth={1.8} />
-            </Link>
+
+            {/* 검색 */}
+            <form onSubmit={handleSearch} className="w-full max-w-130 mx-auto relative">
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="상품권, 업체 통합검색"
+                maxLength={80}
+                className="w-full h-11 pl-11 pr-4 bg-gray-50 hover:bg-gray-100 focus:bg-white border border-gray-200 focus:border-accent rounded-full text-[13.5px] focus:outline-none transition-colors"
+              />
+            </form>
+
+            {/* 우측 액션 */}
+            <div className="flex items-center gap-1.5">
+              {isLoggedIn && <NotificationBell />}
+              <Link href="/board/write?type=sell"
+                className="inline-flex items-center gap-1.5 h-9 px-3.5 text-[13px] font-bold text-gray-700 hover:text-accent transition-colors">
+                <PenSquare size={14} /> 글쓰기
+              </Link>
+              <span className="w-px h-4 bg-gray-200" aria-hidden />
+              {isLoggedIn ? (
+                <>
+                  <Link href="/dashboard"
+                    className="inline-flex items-center gap-1.5 h-9 px-3.5 text-[13px] font-bold text-gray-800 hover:text-accent transition-colors">
+                    <LayoutDashboard size={14} />
+                    <span className="max-w-24 truncate">{user?.name ?? '내 대시보드'}</span>
+                  </Link>
+                  <button onClick={logout}
+                    className="h-9 px-3 text-[12.5px] text-gray-500 hover:text-gray-900 transition-colors">
+                    로그아웃
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login"
+                    className="inline-flex items-center gap-1.5 h-9 px-3.5 text-[13px] font-bold text-gray-700 hover:text-accent transition-colors">
+                    <LogIn size={14} /> 로그인
+                  </Link>
+                  <Link href="/register"
+                    className="inline-flex items-center gap-1.5 h-9 px-4 text-[13px] font-bold text-white rounded-full transition-colors"
+                    style={{ background: '#1E40AF', color: '#FFFFFF' }}>
+                    <UserPlus size={14} /> 회원가입
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
 
-          {/* 중앙: 로고 */}
-          <Link href="/" className="flex items-center justify-center">
-            <Image src="/logo.svg" alt="예판상품권" width={240} height={64}
-              className="h-11 md:h-14 w-auto object-contain" priority />
-          </Link>
+          {/* 아랫줄: 카테고리 nav (좌) + 보조 메뉴 (우) */}
+          <nav className="border-t border-gray-100">
+            <div className="flex items-center justify-between py-2.5 gap-3">
+              <div className="flex items-center gap-1">
+                {PRIMARY_NAV.map(({ href, label, badge, Icon }) => (
+                  <Link key={href} href={href}
+                    className="inline-flex items-center gap-1.5 h-10 px-4 rounded-lg text-[14px] font-extrabold text-gray-900 hover:bg-gray-50 transition-colors">
+                    <Icon size={15} strokeWidth={2.2} className="text-accent" />
+                    <span>{label}</span>
+                    <span className="text-[9.5px] font-black text-white px-1 py-0.5 rounded bg-rose-500">{badge}</span>
+                  </Link>
+                ))}
+              </div>
+              <div className="flex items-center gap-0.5">
+                {SECONDARY_NAV.map(({ href, label, Icon }) => (
+                  <Link key={href} href={href}
+                    className="inline-flex items-center gap-1 h-8 px-2.5 text-[12px] text-gray-500 hover:text-accent transition-colors">
+                    {Icon && <Icon size={11} />}
+                    {label}
+                  </Link>
+                ))}
+                <button onClick={() => setFullMenuOpen(!fullMenuOpen)}
+                  className="inline-flex items-center gap-1 h-8 px-3 ml-1 border border-gray-200 rounded text-[12px] text-gray-700 hover:border-accent hover:text-accent transition-colors">
+                  <Menu size={12} /> 전체메뉴
+                </button>
+              </div>
+            </div>
+          </nav>
+        </div>
+      </div>
 
-          {/* 우: 알림 + 햄버거(전체메뉴) */}
-          <div className="flex items-center justify-end gap-1">
-            {isLoggedIn && <NotificationBell />}
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="inline-flex items-center gap-1.5 h-10 md:h-11 px-3 md:px-4 border border-gray-200 rounded-md text-gray-700 hover:border-accent hover:text-accent text-[12px] md:text-[13px] font-bold transition-colors"
-              aria-label="전체메뉴">
-              {mobileMenuOpen ? <X size={16} /> : <Menu size={16} />}
-              <span className="hidden md:inline">전체메뉴</span>
-            </button>
+      {/* ───────────────── 모바일 헤더 (사진 스타일) ───────────────── */}
+      <div className="md:hidden">
+        <div className="container-main">
+          <div className="grid grid-cols-3 items-center h-16">
+            {/* 좌: 홈 + 검색 아이콘 */}
+            <div className="flex items-center gap-1">
+              <Link href="/" aria-label="홈"
+                className="inline-flex items-center justify-center w-10 h-10 border border-gray-200 rounded-md text-gray-700 hover:border-accent hover:text-accent transition-colors">
+                <Home size={18} strokeWidth={1.8} />
+              </Link>
+              <Link href="/search" aria-label="검색"
+                className="inline-flex items-center justify-center w-10 h-10 border border-gray-200 rounded-md text-gray-700 hover:border-accent hover:text-accent transition-colors">
+                <Search size={18} strokeWidth={1.8} />
+              </Link>
+            </div>
+            {/* 중앙: 로고 */}
+            <Link href="/" className="flex items-center justify-center">
+              <Image src="/logo.svg" alt="예판상품권" width={200} height={54}
+                className="h-11 w-auto object-contain" priority />
+            </Link>
+            {/* 우: 알림 + 햄버거 */}
+            <div className="flex items-center justify-end gap-1">
+              {isLoggedIn && <NotificationBell />}
+              <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="inline-flex items-center gap-1 h-10 px-3 border border-gray-200 rounded-md text-gray-700 hover:border-accent hover:text-accent text-[12px] font-bold transition-colors"
+                aria-label="전체메뉴">
+                {mobileMenuOpen ? <X size={16} /> : <Menu size={16} />}
+              </button>
+            </div>
+          </div>
+
+          {/* 모바일 카테고리 nav */}
+          <div className="flex items-center justify-around border-t border-gray-100 py-2 overflow-x-auto">
+            {PRIMARY_NAV.map(({ href, label, badge, Icon }) => (
+              <Link key={href} href={href}
+                className="inline-flex items-center gap-1 px-2 py-1 text-[12.5px] font-extrabold text-gray-900 hover:text-accent transition-colors whitespace-nowrap">
+                <Icon size={13} strokeWidth={2.2} className="text-accent" />
+                <span>{label}</span>
+                <span className="text-[9px] font-black text-white px-1 rounded bg-rose-500">{badge}</span>
+              </Link>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* 카테고리 nav */}
-      <nav className="bg-white border-t border-gray-100">
-        <div className="container-main">
-          <div className="flex items-center justify-around md:justify-start md:gap-2 py-2.5 overflow-x-auto">
-            {PRIMARY_NAV.map((item) => {
-              const Icon = item.Icon;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="group inline-flex items-center gap-1.5 h-10 px-3 md:px-4 rounded-lg text-[13.5px] md:text-[14.5px] font-extrabold text-gray-900 hover:bg-gray-50 transition-colors whitespace-nowrap"
-                >
-                  <Icon size={15} strokeWidth={2.2} className="text-accent" />
-                  <span>{item.label}</span>
-                  <span className="text-[9.5px] font-black text-white px-1 py-0.5 rounded bg-rose-500">
-                    {item.badge}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </nav>
-
-      {/* 전체메뉴 drawer */}
-      {mobileMenuOpen && <FullMenu onClose={() => setMobileMenuOpen(false)} />}
+      {/* 데스크탑 전체메뉴 + 모바일 햄버거 (공통 drawer) */}
+      {(mobileMenuOpen || fullMenuOpen) && (
+        <FullMenu onClose={() => { setMobileMenuOpen(false); setFullMenuOpen(false); }} />
+      )}
     </header>
   );
 }
@@ -88,32 +190,31 @@ function FullMenu({ onClose }: { onClose: () => void }) {
   return (
     <div className="border-t border-gray-200 bg-white shadow-lg">
       <div className="container-main py-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          {PRIMARY_NAV.map((item) => {
-            const Icon = item.Icon;
-            return (
-              <Link key={item.href} href={item.href} onClick={onClose}
-                className="flex items-center gap-2 px-3 py-3 border border-gray-200 rounded-lg hover:border-accent hover:bg-accent/5 transition-colors">
-                <Icon size={15} className="text-accent" />
-                <span className="text-[13px] font-bold text-gray-800">{item.label}</span>
-              </Link>
-            );
-          })}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+          {PRIMARY_NAV.map(({ href, label, Icon }) => (
+            <Link key={href} href={href} onClick={onClose}
+              className="flex items-center gap-2 px-3 py-3 border border-gray-200 rounded-lg hover:border-accent hover:bg-accent/5 transition-colors">
+              <Icon size={15} className="text-accent" />
+              <span className="text-[13px] font-bold text-gray-800">{label}</span>
+            </Link>
+          ))}
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
           {[
             { href: '/board/write?type=sell', label: '판매글 작성' },
-            { href: '/board?tab=sell', label: '지역별 판매찾기' },
-            { href: '/board?tab=buy', label: '지역별 매입찾기' },
-            { href: '/guide', label: '이용안내' },
-            { href: '/fraud', label: '사기방지 가이드' },
-            { href: '/notice', label: '공지사항' },
-            { href: '/contact', label: '1:1 문의' },
-            { href: '/advertising', label: '광고 신청' },
-          ].map((item) => (
-            <Link key={item.href} href={item.href} onClick={onClose}
+            { href: '/board?tab=sell',        label: '판매글 둘러보기' },
+            { href: '/board?tab=buy',         label: '매입글 둘러보기' },
+            { href: '/recommended',           label: '추천업체' },
+            { href: '/guide',                 label: '이용안내' },
+            { href: '/fraud',                 label: '사기방지' },
+            { href: '/notice',                label: '공지사항' },
+            { href: '/contact',               label: '1:1 문의' },
+            { href: '/advertising',           label: '광고 신청' },
+            { href: '/faq',                   label: '자주묻는 질문' },
+          ].map(({ href, label }) => (
+            <Link key={href} href={href} onClick={onClose}
               className="px-3 py-2.5 text-[12.5px] text-gray-600 hover:text-accent transition-colors">
-              {item.label}
+              {label}
             </Link>
           ))}
         </div>
@@ -122,7 +223,7 @@ function FullMenu({ onClose }: { onClose: () => void }) {
             <>
               <Link href="/dashboard" onClick={onClose}
                 className="inline-flex items-center gap-1.5 h-9 px-4 bg-accent text-white text-[12.5px] font-bold rounded-md">
-                {user?.name ?? '내 대시보드'}
+                <LayoutDashboard size={13} /> {user?.name ?? '내 대시보드'}
               </Link>
               <button onClick={() => { logout(); onClose(); }}
                 className="h-9 px-4 text-[12.5px] text-gray-500 hover:text-gray-900">로그아웃</button>
@@ -130,12 +231,12 @@ function FullMenu({ onClose }: { onClose: () => void }) {
           ) : (
             <>
               <Link href="/login" onClick={onClose}
-                className="inline-flex items-center justify-center h-9 px-4 border border-gray-300 text-gray-800 text-[12.5px] font-bold rounded-md hover:border-accent hover:text-accent">
-                로그인
+                className="inline-flex items-center gap-1.5 justify-center h-9 px-4 border border-gray-300 text-gray-800 text-[12.5px] font-bold rounded-md hover:border-accent hover:text-accent">
+                <LogIn size={13} /> 로그인
               </Link>
               <Link href="/register" onClick={onClose}
-                className="inline-flex items-center justify-center h-9 px-4 bg-accent text-white text-[12.5px] font-bold rounded-md hover:bg-blue-700">
-                회원가입
+                className="inline-flex items-center gap-1.5 justify-center h-9 px-4 bg-accent text-white text-[12.5px] font-bold rounded-md hover:bg-blue-700">
+                <UserPlus size={13} /> 회원가입
               </Link>
             </>
           )}

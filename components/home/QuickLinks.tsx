@@ -4,7 +4,7 @@ import { Info, AlertTriangle } from 'lucide-react';
 /** 메인 — 이용안내 / 주의사항 2개 박스 */
 export default function QuickLinks() {
   return (
-    <section className="container-main mt-3">
+    <section>
       <div className="grid grid-cols-2 gap-2">
         <Link
           href="/guide"

@@ -98,7 +98,7 @@ export default function VisitorCounter() {
   }, []);
 
   return (
-    <section className="container-main mt-3">
+    <section>
       <div className="grid grid-cols-2 bg-white border border-gray-200 rounded-xl overflow-hidden divide-x divide-gray-200">
         <Stat label="오늘 방문자" value={state.today} unit="명" />
         <Stat label="누적 상담" value={state.total} unit="건" />

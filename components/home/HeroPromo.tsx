@@ -3,7 +3,7 @@ import { Sparkles } from 'lucide-react';
 /** 메인 히어로 — 큰 카피 + 일러스트 영역 */
 export default function HeroPromo() {
   return (
-    <section className="container-main pt-4">
+    <section>
       <div className="bg-linear-to-br from-orange-50 via-amber-50 to-yellow-50 border border-amber-200 rounded-2xl overflow-hidden">
         <div className="grid grid-cols-1 md:grid-cols-2 items-center">
           {/* 좌: 카피 */}
