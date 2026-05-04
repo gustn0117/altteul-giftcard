@@ -58,7 +58,7 @@ export default function HeroPromo() {
 
   return (
     <section>
-      <div className="relative bg-white border border-gray-200 rounded-2xl overflow-hidden">
+      <div className="relative bg-white overflow-hidden -mx-3.75 md:mx-0 md:border md:border-gray-200 md:rounded-2xl">
         {/* 이미지 모드: PC와 모바일에 다른 이미지를 자동 분기 */}
         {hasImage && (
           <>
