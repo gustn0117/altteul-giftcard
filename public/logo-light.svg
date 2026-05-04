@@ -1,27 +1,29 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 130" preserveAspectRatio="xMidYMid meet">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 240" preserveAspectRatio="xMidYMid meet">
   <defs>
-    <linearGradient id="goldL" x1="0.2" y1="0" x2="0.5" y2="1">
-      <stop offset="0%" stop-color="#F0D88C"/>
-      <stop offset="30%" stop-color="#D4AF53"/>
-      <stop offset="65%" stop-color="#B08534"/>
-      <stop offset="100%" stop-color="#7A5A1F"/>
-    </linearGradient>
-    <linearGradient id="goldShineL" x1="0.3" y1="0" x2="0.3" y2="0.6">
-      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.55"/>
-      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    <linearGradient id="navyGradL" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#CBD5E1"/>
     </linearGradient>
   </defs>
 
-  <g>
-    <text x="0" y="100" font-family="Georgia, 'Times New Roman', serif" font-weight="900"
-          font-size="120" fill="url(#goldL)" letter-spacing="-3">?</text>
-    <text x="0" y="100" font-family="Georgia, 'Times New Roman', serif" font-weight="900"
-          font-size="120" fill="url(#goldShineL)" letter-spacing="-3">?</text>
+  <!-- Pre-order 메인 텍스트 (밝은 톤 — 어두운 배경용) -->
+  <text x="260" y="118" text-anchor="middle"
+        font-family="'Helvetica Neue', 'Arial Black', sans-serif" font-weight="900"
+        font-size="100" fill="url(#navyGradL)" letter-spacing="-3">Pre-order</text>
+
+  <circle cx="234" cy="92" r="5" fill="#FB923C"/>
+
+  <g stroke="#FB923C" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <line x1="370" y1="58" x2="408" y2="22"/>
+    <polyline points="388,18 408,22 404,42"/>
   </g>
 
-  <text x="100" y="58" font-family="'Pretendard', 'Apple SD Gothic Neo', sans-serif"
-        font-weight="900" font-size="46" fill="#FFFFFF" letter-spacing="-2.5">예판상품권</text>
+  <circle cx="260" cy="170" r="4" fill="#FB923C"/>
 
-  <text x="100" y="100" font-family="'Pretendard', 'Apple SD Gothic Neo', sans-serif"
-        font-weight="800" font-size="22" fill="#D4D4D8" letter-spacing="-1">상품권중개플랫폼1위</text>
+  <line x1="118" y1="200" x2="158" y2="200" stroke="#CBD5E1" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="362" y1="200" x2="402" y2="200" stroke="#CBD5E1" stroke-width="2.5" stroke-linecap="round"/>
+
+  <text x="260" y="212" text-anchor="middle"
+        font-family="'Pretendard', 'Apple SD Gothic Neo', sans-serif" font-weight="700"
+        font-size="38" fill="#E2E8F0" letter-spacing="13">예 판 상 품 권</text>
 </svg>
