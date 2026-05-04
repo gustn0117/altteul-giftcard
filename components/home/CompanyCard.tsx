@@ -46,7 +46,7 @@ export default function CompanyCard({ company, isNew }: CompanyCardProps) {
         className="block"
       >
         {/* Header: 이미지가 있으면 이미지 + 오버레이, 없으면 빗금 + 흰 패널 */}
-        <div className="relative h-25 md:h-30 overflow-hidden border-b border-gray-200" style={!hasImage ? HASH_BG : undefined}>
+        <div className="relative h-25 md:h-30 overflow-hidden" style={!hasImage ? HASH_BG : undefined}>
           {hasImage ? (
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -80,18 +80,20 @@ export default function CompanyCard({ company, isNew }: CompanyCardProps) {
         </div>
 
         {/* Body */}
-        <div className="px-3 pt-3 pb-2.5">
-          <p className="text-[12.5px] text-gray-600 leading-snug text-center line-clamp-2 min-h-9.5">
+        <div className="px-3 pt-2 pb-1.5">
+          <p className="text-[12.5px] text-gray-600 leading-snug text-center line-clamp-2 min-h-7">
             {company.description || '상품권 매입 전문 업체입니다.'}
           </p>
-          <div className="flex items-center justify-center gap-1.5 mt-2.5 text-[14px] md:text-[15px] font-bold text-gray-900 whitespace-nowrap">
+          <div className="mx-3 mt-1.5 h-px bg-gray-200" />
+          <div className="flex items-center justify-center gap-1.5 mt-1.5 text-[14px] md:text-[15px] font-bold text-gray-900 whitespace-nowrap">
             <Phone size={14} className="text-gray-500 shrink-0" />
             <span className="tabular-nums whitespace-nowrap">{company.phone}</span>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="flex justify-between items-center px-3 py-2 border-t border-gray-100 text-[11px]">
+        {/* Footer (inset divider) */}
+        <div className="mx-3 h-px bg-gray-200" />
+        <div className="flex justify-between items-center px-3 py-1.5 text-[11px]">
           <span className="text-accent font-bold flex items-center gap-1 truncate">
             <User size={10} className="shrink-0" />
             <span className="truncate">{company.name}</span>
@@ -102,24 +104,27 @@ export default function CompanyCard({ company, isNew }: CompanyCardProps) {
 
       {/* 모바일 전용: 통화하기 / 문자하기 버튼 */}
       {phoneDigits && (
-        <div className="grid grid-cols-2 border-t border-gray-100 md:hidden">
-          <a
-            href={`tel:${phoneDigits}`}
-            onClick={(e) => e.stopPropagation()}
-            className="flex items-center justify-center gap-1.5 py-2.5 text-[12.5px] font-bold text-accent bg-white hover:bg-accent-bg transition-colors whitespace-nowrap border-r border-gray-100"
-            aria-label={`${company.name} 통화하기`}
-          >
-            <Phone size={13} /> 통화하기
-          </a>
-          <a
-            href={`sms:${phoneDigits}?&body=${encodeURIComponent(SMS_BODY)}`}
-            onClick={(e) => e.stopPropagation()}
-            className="flex items-center justify-center gap-1.5 py-2.5 text-[12.5px] font-bold text-gray-700 bg-white hover:bg-gray-50 transition-colors whitespace-nowrap"
-            aria-label={`${company.name} 문자하기`}
-          >
-            <MessageSquare size={13} /> 문자하기
-          </a>
-        </div>
+        <>
+          <div className="mx-3 h-px bg-gray-200 md:hidden" />
+          <div className="grid grid-cols-2 md:hidden">
+            <a
+              href={`tel:${phoneDigits}`}
+              onClick={(e) => e.stopPropagation()}
+              className="flex items-center justify-center gap-1.5 py-2 text-[12.5px] font-bold text-accent bg-white hover:bg-accent-bg transition-colors whitespace-nowrap"
+              aria-label={`${company.name} 통화하기`}
+            >
+              <Phone size={13} /> 통화하기
+            </a>
+            <a
+              href={`sms:${phoneDigits}?&body=${encodeURIComponent(SMS_BODY)}`}
+              onClick={(e) => e.stopPropagation()}
+              className="flex items-center justify-center gap-1.5 py-2 text-[12.5px] font-bold text-gray-700 bg-white hover:bg-gray-50 transition-colors whitespace-nowrap"
+              aria-label={`${company.name} 문자하기`}
+            >
+              <MessageSquare size={13} /> 문자하기
+            </a>
+          </div>
+        </>
       )}
     </div>
   );
