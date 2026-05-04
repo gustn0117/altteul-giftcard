@@ -45,11 +45,11 @@ export default function Header() {
       <div className="hidden md:block">
         <div className="container-main">
           {/* 윗줄: 로고(좌) | 검색(중앙) | 액션(우) */}
-          <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6 h-26">
+          <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6 h-20">
             {/* 로고 */}
             <Link href="/" className="flex items-center shrink-0">
               <Image src="/logo.png" alt="예판상품권" width={612} height={277}
-                className="h-20 w-auto object-contain" priority />
+                className="h-14 w-auto object-contain" priority />
             </Link>
 
             {/* 검색 */}
