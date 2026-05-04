@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Save, Eye, RotateCcw } from 'lucide-react';
+import ImageUploader from '@/components/ImageUploader';
 
 interface HeroPromo {
   eyebrow: string;
@@ -121,10 +122,13 @@ export default function AdminHeroPromoPage() {
                 </Field>
               </div>
 
-              <Field label="배경 이미지 URL (선택)" hint="비워두면 흰 배경 + 그라디언트 글로우.">
-                <input type="url" value={form.image_url} onChange={(e) => change('image_url', e.target.value)}
-                  placeholder="https://..." className="auth-input" />
-              </Field>
+              <ImageUploader
+                value={form.image_url}
+                onChange={(url) => change('image_url', url)}
+                folder="hero-promo"
+                label="배경 이미지 (선택)"
+                hint="업로드 시 Supabase Storage(altteul-giftcard 버킷)에 자동 저장됩니다. 비워두면 흰 배경 + 그라디언트 글로우."
+              />
 
               <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                 <button type="button" onClick={handleReset}

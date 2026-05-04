@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { getMessages, getPremiumBuyers, createNotice as apiCreateNotice, deleteNotice as apiDeleteNotice, deleteUser as apiDeleteUser, updateUser, deletePost as apiDeletePost, deleteChat as apiDeleteChat, createPremiumBuyer, updatePremiumBuyer, deletePremiumBuyer as apiDeletePremiumBuyer } from '@/lib/api';
 import ImageUpload from '@/components/ImageUpload';
 import type { DBUser, DBPost, DBNotice, DBChat, DBMessage, DBPremiumBuyer, DBCommunityPost, CommunityCategory } from '@/lib/types';
+import ImageUploader from '@/components/ImageUploader';
 import type { Ad, AdSlot } from '@/lib/ads';
 import { AD_SLOT_LABELS, AD_SLOT_SIZES } from '@/lib/ads';
 import Link from 'next/link';
@@ -57,6 +58,7 @@ export default function AdminPage() {
   const [noticeTitle, setNoticeTitle] = useState('');
   const [noticeContent, setNoticeContent] = useState('');
   const [noticePinned, setNoticePinned] = useState(false);
+  const [noticeImage, setNoticeImage] = useState('');
 
   // Premium buyer form
   const [showPremiumForm, setShowPremiumForm] = useState(false);
@@ -173,10 +175,12 @@ export default function AdminPage() {
       title: noticeTitle.trim(),
       content: noticeContent.trim() || undefined,
       is_pinned: noticePinned,
-    });
+      ...(noticeImage ? { image_url: noticeImage } : {}),
+    } as Parameters<typeof apiCreateNotice>[0]);
     setNoticeTitle('');
     setNoticeContent('');
     setNoticePinned(false);
+    setNoticeImage('');
     fetchData();
   };
   const toggleUserType = async (id: string, t: string) => { await updateUser(id, { type: t === 'normal' ? 'business' : 'normal' } as any); fetchData(); };
@@ -752,6 +756,15 @@ export default function AdminPage() {
                 rows={5}
                 className="input resize-y"
                 style={{ height: 'auto', minHeight: '110px', padding: '10px 12px' }}
+              />
+            </div>
+            <div>
+              <ImageUploader
+                value={noticeImage}
+                onChange={setNoticeImage}
+                folder="notices"
+                label="배경 이미지 (선택)"
+                hint="공지에 첨부할 이미지를 업로드하세요. Supabase Storage(altteul-giftcard 버킷)에 자동 저장됩니다."
               />
             </div>
             <div className="flex items-center justify-between">
