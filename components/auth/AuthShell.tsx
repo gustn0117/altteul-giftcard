@@ -40,7 +40,7 @@ export default function AuthShell({
 
           <div className="relative z-10">
             <Link href="/" className="inline-block">
-              <Image src="/logo-light.svg" alt="예판상품권" width={240} height={64} className="h-14 w-auto" priority />
+              <Image src="/logo-light.svg" alt="예판상품권" width={360} height={206} className="h-20 w-auto" priority />
             </Link>
             <h2 className="text-[24px] font-bold mt-8 leading-snug whitespace-pre-line">
               {headline}
@@ -71,7 +71,7 @@ export default function AuthShell({
         <section className="p-7 sm:p-10">
           {/* 모바일에서만 보이는 로고 */}
           <Link href="/" className="lg:hidden flex justify-center mb-5">
-            <Image src="/logo.png" alt="예판상품권" width={200} height={54} className="h-12 w-auto" priority />
+            <Image src="/logo.png" alt="예판상품권" width={300} height={172} className="h-16 w-auto" priority />
           </Link>
           {eyebrow && (
             <p className="text-[11px] font-bold tracking-[2px] text-accent uppercase mb-2">{eyebrow}</p>

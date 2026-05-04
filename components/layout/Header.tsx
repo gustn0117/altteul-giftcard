@@ -45,11 +45,11 @@ export default function Header() {
       <div className="hidden md:block">
         <div className="container-main">
           {/* 윗줄: 로고(좌) | 검색(중앙) | 액션(우) */}
-          <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6 h-20">
+          <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6 h-26">
             {/* 로고 */}
             <Link href="/" className="flex items-center shrink-0">
-              <Image src="/logo.png" alt="예판상품권" width={260} height={70}
-                className="h-14 w-auto object-contain" priority />
+              <Image src="/logo.png" alt="예판상품권" width={420} height={240}
+                className="h-20 w-auto object-contain" priority />
             </Link>
 
             {/* 검색 */}
@@ -143,7 +143,7 @@ export default function Header() {
       {/* ───────────────── 모바일 헤더 (사진 스타일) ───────────────── */}
       <div className="md:hidden">
         <div className="container-main">
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center h-16 gap-2">
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center h-20 gap-2">
             {/* 좌: 검색 아이콘만 */}
             <div className="flex items-center justify-start">
               <Link href="/search" aria-label="검색"
@@ -153,8 +153,8 @@ export default function Header() {
             </div>
             {/* 중앙: 로고 (정중앙) */}
             <Link href="/" className="flex items-center justify-center">
-              <Image src="/logo.png" alt="예판상품권" width={200} height={54}
-                className="h-11 w-auto object-contain" priority />
+              <Image src="/logo.png" alt="예판상품권" width={320} height={184}
+                className="h-15 w-auto object-contain" priority />
             </Link>
             {/* 우: 알림 + 햄버거 */}
             <div className="flex items-center justify-end gap-1">
