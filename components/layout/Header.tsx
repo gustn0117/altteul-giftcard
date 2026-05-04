@@ -143,7 +143,7 @@ export default function Header() {
       {/* ───────────────── 모바일 헤더 (사진 스타일) ───────────────── */}
       <div className="md:hidden">
         <div className="container-main">
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center h-22 gap-1">
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center h-18 gap-1">
             {/* 좌: 검색 아이콘만 */}
             <div className="flex items-center justify-start">
               <Link href="/search" aria-label="검색"
@@ -154,7 +154,7 @@ export default function Header() {
             {/* 중앙: 로고 (정중앙) */}
             <Link href="/" className="flex items-center justify-center">
               <Image src="/logo.png" alt="예판상품권" width={612} height={277}
-                className="h-22 w-auto object-contain" priority />
+                className="h-16 w-auto object-contain" priority />
             </Link>
             {/* 우: 알림 + 햄버거 */}
             <div className="flex items-center justify-end gap-1">
