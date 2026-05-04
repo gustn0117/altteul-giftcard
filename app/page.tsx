@@ -23,8 +23,8 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="bg-linear-to-b from-gray-50/50 to-white min-h-[calc(100vh-200px)] pb-8">
-      <div className="container-main pt-3">
+    <div className="bg-linear-to-b from-gray-50/50 to-white min-h-[calc(100vh-200px)] pb-3 md:pb-8">
+      <div className="container-main pt-1 md:pt-3">
         <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-5">
           {/* 좌측 사이드 (PC만) */}
           <div className="hidden lg:block">
