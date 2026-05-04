@@ -65,11 +65,6 @@ function DemoCard({ item }: { item: typeof DEMO_COMPANIES[number]; index: number
           <p className="text-[12.5px] text-gray-600 leading-snug text-center line-clamp-2 min-h-7 whitespace-pre-line">
             {item.desc}
           </p>
-          <div className="mx-3 mt-1.5 h-px bg-gray-200" />
-          <div className="flex items-center justify-center gap-1.5 mt-1.5 text-[14px] md:text-[15px] font-bold text-gray-900 whitespace-nowrap">
-            <Phone size={14} className="text-gray-500 shrink-0" />
-            <span className="tabular-nums whitespace-nowrap">{item.phone}</span>
-          </div>
         </div>
         <div className="mx-3 h-px bg-gray-200" />
         <div className="flex justify-between items-center px-3 py-1.5 text-[11px]">
