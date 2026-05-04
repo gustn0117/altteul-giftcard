@@ -71,7 +71,7 @@ export default function AuthShell({
         <section className="p-7 sm:p-10">
           {/* 모바일에서만 보이는 로고 */}
           <Link href="/" className="lg:hidden flex justify-center mb-5">
-            <Image src="/logo.png" alt="예판상품권" width={300} height={172} className="h-16 w-auto" priority />
+            <Image src="/logo.png" alt="예판상품권" width={612} height={277} className="h-16 w-auto" priority />
           </Link>
           {eyebrow && (
             <p className="text-[11px] font-bold tracking-[2px] text-accent uppercase mb-2">{eyebrow}</p>
