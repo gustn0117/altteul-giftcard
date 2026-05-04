@@ -31,7 +31,7 @@ export default function Home() {
             <HomeAside />
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2 md:space-y-3">
             {/* 1. 우리 업체 홍보 (작게) */}
             <HeroPromo />
             {/* 2. 이용안내 / 주의사항 */}
