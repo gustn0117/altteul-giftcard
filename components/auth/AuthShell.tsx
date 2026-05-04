@@ -26,8 +26,8 @@ export default function AuthShell({
   sub = '전국 매입 업체와 한 곳에서 비교하고 거래하세요.',
 }: AuthShellProps) {
   return (
-    <div className="min-h-[calc(100vh-200px)] flex items-center justify-center px-4 py-8 bg-gradient-to-br from-blue-50/40 via-white to-blue-50/30">
-      <div className="w-full max-w-[960px] grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] bg-white border border-gray-200 rounded-2xl shadow-[0_8px_32px_rgba(15,23,42,0.06)] overflow-hidden">
+    <div className="min-h-[calc(100vh-200px)] flex items-center justify-center px-4 py-8 bg-linear-to-br from-blue-50/40 via-white to-blue-50/30">
+      <div className="w-full max-w-240 grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] bg-white border border-gray-200 rounded-2xl shadow-[0_8px_32px_rgba(15,23,42,0.06)] overflow-hidden">
 
         {/* 좌측 브랜드 패널 */}
         <aside
