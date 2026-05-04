@@ -62,21 +62,21 @@ export default function HeroPromo() {
         {/* 이미지 모드: PC와 모바일에 다른 이미지를 자동 분기 */}
         {hasImage && (
           <>
-            {/* PC 이미지 (md 이상에서만 보임) — 3:1 비율 */}
+            {/* PC 이미지 — 자연 비율 그대로, 잘림 없음 */}
             {data.image_url && (
-              <div className="hidden md:block aspect-3/1 w-full">
+              <div className="hidden md:block w-full bg-white">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={data.image_url} alt="" className="w-full h-full object-cover" />
+                <img src={data.image_url} alt="" className="block w-full h-auto" />
               </div>
             )}
-            {/* 모바일 이미지 (md 미만) — 16:9 가까움. 모바일 이미지 없으면 PC 이미지로 fallback */}
+            {/* 모바일 이미지 — 자연 비율 그대로 */}
             {(data.image_url_mobile || data.image_url) && (
-              <div className="md:hidden aspect-video w-full">
+              <div className="md:hidden w-full bg-white">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={data.image_url_mobile || data.image_url || ''}
                   alt=""
-                  className="w-full h-full object-cover"
+                  className="block w-full h-auto"
                 />
               </div>
             )}
