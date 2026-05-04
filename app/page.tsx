@@ -7,6 +7,7 @@ import QuickLinks from '@/components/home/QuickLinks';
 import VisitorCounter from '@/components/home/VisitorCounter';
 import HomeAside from '@/components/layout/HomeAside';
 import MainCompaniesSection from '@/components/home/MainCompaniesSection';
+import SellLineAds from '@/components/home/SellLineAds';
 import { getPremiumBuyers } from '@/lib/api';
 import type { DBPremiumBuyer } from '@/lib/types';
 import { getCache, setCache } from '@/lib/cache';
@@ -42,6 +43,8 @@ export default function Home() {
             <NationalAds />
             {/* 5. 메인 광고 — 등록업체 카드 그리드 */}
             <MainCompaniesSection buyers={buyers} loading={loading} />
+            {/* 6. 팝니다 줄광고 — 10개씩 페이지 */}
+            <SellLineAds />
           </div>
         </div>
       </div>
