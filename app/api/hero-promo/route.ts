@@ -6,7 +6,7 @@ export async function GET() {
   const supabase = createServiceClient();
   const { data, error } = await supabase
     .from('hero_promo')
-    .select('eyebrow, headline, sub, cta_text, cta_link, image_url, updated_at')
+    .select('eyebrow, headline, sub, cta_text, cta_link, image_url, image_url_mobile, updated_at')
     .eq('id', 1)
     .maybeSingle();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

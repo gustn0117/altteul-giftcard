@@ -12,6 +12,7 @@ interface HeroPromo {
   cta_text: string;
   cta_link: string;
   image_url: string;
+  image_url_mobile: string;
 }
 
 const DEFAULT: HeroPromo = {
@@ -21,6 +22,7 @@ const DEFAULT: HeroPromo = {
   cta_text: '매입률 비교하기',
   cta_link: '/recommended',
   image_url: '',
+  image_url_mobile: '',
 };
 
 export default function AdminHeroPromoPage() {
@@ -40,6 +42,7 @@ export default function AdminHeroPromoPage() {
           cta_text: data?.cta_text ?? DEFAULT.cta_text,
           cta_link: data?.cta_link ?? DEFAULT.cta_link,
           image_url: data?.image_url ?? '',
+          image_url_mobile: data?.image_url_mobile ?? '',
         });
       })
       .catch(() => {})
@@ -98,9 +101,9 @@ export default function AdminHeroPromoPage() {
                   placeholder="예: No. 1 Giftcard Marketplace" className="auth-input" />
               </Field>
 
-              <Field label="헤드라인 *" hint="가장 큰 메인 카피. 짧고 임팩트 있게.">
+              <Field label="헤드라인" hint="가장 큰 메인 카피. 비워두면 이미지만 노출됩니다.">
                 <input type="text" value={form.headline} onChange={(e) => change('headline', e.target.value)}
-                  placeholder="예: 상품권, 가장 높은 가격에." className="auth-input" required />
+                  placeholder="예: 상품권, 가장 높은 가격에." className="auth-input" />
               </Field>
 
               <Field label="서브 카피" hint="헤드라인 아래 보조 설명.">
@@ -122,13 +125,23 @@ export default function AdminHeroPromoPage() {
                 </Field>
               </div>
 
-              <ImageUploader
-                value={form.image_url}
-                onChange={(url) => change('image_url', url)}
-                folder="hero-promo"
-                label="배경 이미지 (선택)"
-                hint="업로드 시 Supabase Storage(altteul-giftcard 버킷)에 자동 저장됩니다. 비워두면 흰 배경 + 그라디언트 글로우."
-              />
+              <div className="border border-gray-200 rounded-xl p-4 bg-gray-50/50 space-y-4">
+                <p className="text-[12px] font-bold text-gray-700">홍보 이미지 (선택, PC + 모바일 따로)</p>
+                <ImageUploader
+                  value={form.image_url}
+                  onChange={(url) => change('image_url', url)}
+                  folder="hero-promo"
+                  label="🖥️ PC 이미지 — 권장 1800 × 600px (3:1 비율)"
+                  hint="실제 노출 약 890×297px (PC). 텍스트 가독성 위해 안전영역 좌우 8% 여백 권장."
+                />
+                <ImageUploader
+                  value={form.image_url_mobile}
+                  onChange={(url) => change('image_url_mobile', url)}
+                  folder="hero-promo"
+                  label="📱 모바일 이미지 — 권장 750 × 420px (16:9 비율)"
+                  hint="실제 노출 약 345×195px (모바일). 모바일 이미지 비워두면 PC 이미지가 자동으로 사용됨."
+                />
+              </div>
 
               <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                 <button type="button" onClick={handleReset}
