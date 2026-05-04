@@ -48,7 +48,7 @@ export default function Header() {
           <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6 h-20">
             {/* 로고 */}
             <Link href="/" className="flex items-center shrink-0">
-              <Image src="/logo.svg" alt="예판상품권" width={260} height={70}
+              <Image src="/logo.png" alt="예판상품권" width={260} height={70}
                 className="h-14 w-auto object-contain" priority />
             </Link>
 
@@ -153,7 +153,7 @@ export default function Header() {
             </div>
             {/* 중앙: 로고 (정중앙) */}
             <Link href="/" className="flex items-center justify-center">
-              <Image src="/logo.svg" alt="예판상품권" width={200} height={54}
+              <Image src="/logo.png" alt="예판상품권" width={200} height={54}
                 className="h-11 w-auto object-contain" priority />
             </Link>
             {/* 우: 알림 + 햄버거 */}
