@@ -6,6 +6,7 @@ import HeroPromo from '@/components/home/HeroPromo';
 import QuickLinks from '@/components/home/QuickLinks';
 import VisitorCounter from '@/components/home/VisitorCounter';
 import HomeAside from '@/components/layout/HomeAside';
+import RecommendedCompanies from '@/components/home/RecommendedCompanies';
 import MainCompaniesSection from '@/components/home/MainCompaniesSection';
 import SellLineAds from '@/components/home/SellLineAds';
 import { getPremiumBuyers } from '@/lib/api';
@@ -41,9 +42,11 @@ export default function Home() {
             <VisitorCounter />
             {/* 4. 전국 광고 (2x2) */}
             <NationalAds />
-            {/* 5. 메인 광고 — 등록업체 카드 그리드 */}
+            {/* 5. 오늘의 추천 업체 — 우선순위 상위 20 (승인된 업체만) */}
+            <RecommendedCompanies buyers={buyers} loading={loading} />
+            {/* 6. 메인 광고 — 등록업체 카드 그리드 (접속/새로고침마다 랜덤) */}
             <MainCompaniesSection buyers={buyers} loading={loading} />
-            {/* 6. 팝니다 줄광고 — 10개씩 페이지 */}
+            {/* 7. 팝니다 줄광고 — 10개씩 페이지 */}
             <SellLineAds />
           </div>
         </div>

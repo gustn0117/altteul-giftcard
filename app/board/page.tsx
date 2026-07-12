@@ -18,7 +18,19 @@ const SELL_PER_PAGE = 15;     // 팝니다 줄광고 페이지당
 const BUY_BOX_PER_PAGE = 50;  // 삽니다 박스광고 페이지당
 const SELL_INTERLEAVE = 10;   // 박스광고 아래 끼워넣을 판매글 개수
 
+// 지역 탭 — 첫 진입 기본값은 '전국'(전체 표시)
+const REGIONS = ['전국', '서울', '경기', '인천', '대전', '대구', '부산', '광주', '울산', '세종', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'] as const;
+
 type PostWithAuthor = DBPost & { author: DBUser };
+
+// 글의 지역 매칭 — region 컬럼 / 태그 / 제목 어디에 있어도 인식
+function matchRegion(post: PostWithAuthor, region: string): boolean {
+  if (region === '전국') return true;
+  if (post.region?.includes(region)) return true;
+  if (post.tags?.some((t) => t.includes(region))) return true;
+  if (post.title.includes(region)) return true;
+  return false;
+}
 
 // Fisher-Yates shuffle (in-place 복사 후)
 function shuffle<T>(arr: T[]): T[] {
@@ -41,6 +53,8 @@ function BoardContent() {
   const [loading, setLoading] = useState(() => !getCache(`board_${activeTab}`));
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  // 지역 필터 — 첫 진입 시 자동 '전국'
+  const [selectedRegion, setSelectedRegion] = useState<string>('전국');
   // shuffleSeed: 페이지 진입 / 새로고침 시 새로 생성됨 → 박스광고 매번 다른 순서
   const [shuffleSeed, setShuffleSeed] = useState(0);
 
@@ -54,6 +68,7 @@ function BoardContent() {
     else { setLoading(true); }
     setError(null);
     setPage(1);
+    setSelectedRegion('전국'); // 탭 변경 시 지역도 전국으로 초기화
     setShuffleSeed(Math.random()); // 탭 변경 시도 다시 셔플
 
     Promise.all([
@@ -76,11 +91,20 @@ function BoardContent() {
     return shuffle(posts);
   }, [posts, activeTab, shuffleSeed]);
 
-  const sellInterleave = useMemo(() => otherPosts.slice(0, SELL_INTERLEAVE), [otherPosts]);
+  const sellInterleave = useMemo(
+    () => otherPosts.filter((p) => matchRegion(p, selectedRegion)).slice(0, SELL_INTERLEAVE),
+    [otherPosts, selectedRegion],
+  );
+
+  // 지역 필터 적용 (전국이면 전체)
+  const baseList = activeTab === 'buy' ? shuffledBuy : posts;
+  const list = useMemo(
+    () => (selectedRegion === '전국' ? baseList : baseList.filter((p) => matchRegion(p, selectedRegion))),
+    [baseList, selectedRegion],
+  );
 
   // 페이지 분할
   const perPage = activeTab === 'buy' ? BUY_BOX_PER_PAGE : SELL_PER_PAGE;
-  const list = activeTab === 'buy' ? shuffledBuy : posts;
   const totalPages = Math.max(1, Math.ceil(list.length / perPage));
   const pagedPosts = list.slice((page - 1) * perPage, page * perPage);
 
@@ -125,7 +149,7 @@ function BoardContent() {
                 <span className="text-[11.5px] text-gray-600">
                   {activeTab === 'buy'
                     ? `박스광고 — 새로고침마다 순서가 바뀝니다. 50개당 한 묶음`
-                    : '최신순 — 점프한 글이 우선'}
+                    : '최신 등록순 — 최근에 올린 글이 위로'}
                 </span>
                 {writeType === 'buy' && !isLoggedIn ? (
                   <Link href={`/login?redirect=${encodeURIComponent('/board/write?type=buy')}`}
@@ -141,6 +165,27 @@ function BoardContent() {
               </div>
             </div>
 
+            {/* 지역 탭 — 첫 진입 자동 '전국' */}
+            <div className="mb-4 -mx-1 overflow-x-auto scrollbar-hide">
+              <div className="flex items-center gap-1.5 px-1 min-w-max">
+                {REGIONS.map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => { setSelectedRegion(r); setPage(1); }}
+                    className={`shrink-0 px-3 py-1.5 text-[12px] font-bold rounded-full border transition-colors ${
+                      selectedRegion === r
+                        ? 'border-accent bg-accent text-white'
+                        : 'border-gray-200 bg-white text-gray-600 hover:border-accent hover:text-accent'
+                    }`}
+                    style={selectedRegion === r ? { color: '#FFFFFF' } : undefined}
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* 본문 */}
             {loading ? (
               <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
@@ -148,9 +193,13 @@ function BoardContent() {
               </div>
             ) : error ? (
               <div className="py-20 text-center text-red-500 text-[13px]">{error}</div>
-            ) : posts.length === 0 ? (
+            ) : list.length === 0 ? (
               <div className="py-20 text-center bg-white border border-dashed border-gray-200 rounded-xl">
-                <p className="text-[13px] text-gray-500 mb-2">아직 등록된 {activeTab === 'sell' ? '판매' : '구매'}글이 없습니다.</p>
+                <p className="text-[13px] text-gray-500 mb-2">
+                  {selectedRegion === '전국'
+                    ? `아직 등록된 ${activeTab === 'sell' ? '판매' : '구매'}글이 없습니다.`
+                    : `'${selectedRegion}' 지역에 등록된 ${activeTab === 'sell' ? '판매' : '구매'}글이 없습니다.`}
+                </p>
                 <Link href={`/board/write?type=${writeType}`} className="text-[12px] text-accent font-bold hover:underline">
                   첫 글 작성하기 →
                 </Link>

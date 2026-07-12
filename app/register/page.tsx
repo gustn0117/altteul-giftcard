@@ -3,7 +3,7 @@
 import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { User, Building2, Mail, Lock, Phone, Hash, MessageCircle, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { User, Building2, Mail, Lock, Phone, MessageCircle, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthShell from '@/components/auth/AuthShell';
 
@@ -27,7 +27,6 @@ function RegisterContent() {
     phone: '',
     // 업체
     businessName: '',
-    businessNumber: '',
     representative: '',
     messenger: '',
     messengerId: '',
@@ -72,14 +71,14 @@ function RegisterContent() {
         type: 'normal',
       };
     } else {
+      const phoneDigits = form.phone.replace(/[^0-9]/g, '');
       if (!form.businessName.trim()) return setError('사업체명을 입력해주세요.');
-      if (!/^\d{10}$/.test(form.businessNumber.replace(/-/g, ''))) return setError('사업자등록번호는 숫자 10자리여야 합니다.');
       if (!form.representative.trim()) return setError('대표자명을 입력해주세요.');
-      if (!form.phone.trim()) return setError('연락처를 입력해주세요.');
+      if (phoneDigits.length < 10) return setError('휴대폰 번호를 정확히 입력해주세요. (로그인 시 사용됩니다)');
       if (!form.messenger || !form.messengerId.trim()) return setError('메신저 종류와 아이디를 모두 입력해주세요.');
       payload = {
         name: form.businessName.trim(),
-        email: `${form.businessNumber.replace(/-/g, '')}@biz.altteul-giftcard`,
+        email: `${phoneDigits}@biz.altteul-giftcard`,
         password: form.password,
         phone: form.phone || null,
         type: 'business',
@@ -124,7 +123,7 @@ function RegisterContent() {
           </div>
           <h1 className="text-[22px] font-bold text-gray-900 mb-2">신청이 완료되었습니다</h1>
           <p className="text-[13px] text-gray-500 mb-6">
-            사업자등록번호와 설정하신 비밀번호로<br/>바로 로그인할 수 있습니다.
+            휴대폰 번호와 설정하신 비밀번호로<br/>바로 로그인할 수 있습니다.
           </p>
           <Link href="/login" className="inline-flex items-center gap-2 h-11 px-6 bg-accent hover:bg-blue-700 text-white text-[13px] font-bold rounded-md transition-colors">
             로그인 하러가기 <ArrowRight size={14} />
@@ -188,21 +187,17 @@ function RegisterContent() {
         ) : (
           /* 업체 폼 */
           <>
-            <Field icon={Building2} label="사업체명">
-              <input type="text" value={form.businessName} onChange={(e) => change('businessName', e.target.value)}
-                placeholder="사업체명을 입력하세요" className="auth-input" required />
-            </Field>
             <div className="grid grid-cols-2 gap-3">
-              <Field icon={Hash} label="사업자등록번호" hint="10자리 숫자">
-                <input type="text" value={form.businessNumber} onChange={(e) => change('businessNumber', e.target.value)}
-                  placeholder="000-00-00000" className="auth-input" required />
+              <Field icon={Building2} label="사업체명">
+                <input type="text" value={form.businessName} onChange={(e) => change('businessName', e.target.value)}
+                  placeholder="사업체명" className="auth-input" required />
               </Field>
               <Field icon={User} label="대표자명">
                 <input type="text" value={form.representative} onChange={(e) => change('representative', e.target.value)}
                   placeholder="대표자 이름" className="auth-input" required />
               </Field>
             </div>
-            <Field icon={Phone} label="연락처">
+            <Field icon={Phone} label="휴대폰 번호" hint="로그인 시 아이디로 사용됩니다.">
               <input type="tel" value={form.phone} onChange={(e) => change('phone', e.target.value)}
                 placeholder="010-0000-0000" className="auth-input" required />
             </Field>
@@ -212,7 +207,6 @@ function RegisterContent() {
                   className="auth-input" required>
                   <option value="">선택</option>
                   <option value="kakaotalk">카카오톡</option>
-                  <option value="line">라인 (LINE)</option>
                   <option value="telegram">텔레그램</option>
                 </select>
               </Field>

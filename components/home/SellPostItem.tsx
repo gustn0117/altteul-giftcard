@@ -1,18 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { CheckCircle, Rocket, Calendar } from 'lucide-react';
+import { CheckCircle, Calendar } from 'lucide-react';
 import type { DBPost, DBUser } from '@/lib/types';
 import { getCategoryName } from '@/data/mock';
 import { BRAND_STYLES, normalizeBrandKey } from '@/components/BrandLogo';
-import { useAuth } from '@/contexts/AuthContext';
-import { useState } from 'react';
 
 interface SellPostItemProps {
   post: DBPost & { author?: DBUser };
   num?: number;
   showStatus?: boolean;
-  onJumped?: () => void;
 }
 
 const TAG_COLORS: { pattern: RegExp; cls: string }[] = [
@@ -45,41 +42,13 @@ function timeAgo(iso: string): string {
   return `${date.getMonth() + 1}.${String(date.getDate()).padStart(2, '0')}`;
 }
 
-export default function SellPostItem({ post, num, onJumped }: SellPostItemProps) {
-  const { user } = useAuth();
-  const [jumping, setJumping] = useState(false);
+export default function SellPostItem({ post, num }: SellPostItemProps) {
   const isCompleted = !!post.completed_at;
-  const isOwner = !!user && post.author_id === user.id;
 
   const isNew = Date.now() - new Date(post.created_at).getTime() < 3 * 86400000;
   const categoryName = getCategoryName(post.category);
   const brandKey = normalizeBrandKey(categoryName);
   const bs = BRAND_STYLES[brandKey];
-
-  const handleJump = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (jumping) return;
-    setJumping(true);
-    try {
-      const res = await fetch('/api/posts/jump', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ post_id: post.id, user_id: user?.id }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '점프에 실패했습니다.');
-      const msg = data.used_free
-        ? `점프 완료! (오늘 무료 ${data.free_remaining}회 남음)`
-        : `점프 완료! (포인트 ${data.points_used}p 차감, 잔액 ${data.balance}p)`;
-      alert(msg);
-      onJumped?.();
-    } catch (err) {
-      alert(err instanceof Error ? err.message : '점프 실패');
-    } finally {
-      setJumping(false);
-    }
-  };
 
   const dimmed = isCompleted;
 
@@ -162,19 +131,6 @@ export default function SellPostItem({ post, num, onJumped }: SellPostItemProps)
             <span className="text-[12px] font-bold text-amber-600">가격 협의</span>
           )}
         </div>
-
-        {/* 점프 버튼 (작성자만) */}
-        {isOwner && !isCompleted && (
-          <button
-            type="button"
-            onClick={handleJump}
-            disabled={jumping}
-            className="shrink-0 inline-flex items-center gap-1 h-7 px-2.5 text-[10.5px] font-bold rounded-full border border-accent/40 text-accent bg-accent/5 hover:bg-accent hover:text-white hover:border-accent transition-colors disabled:opacity-50"
-            title="이 글을 맨 위로 점프 (무료 일 3회, 이후 100p)"
-          >
-            <Rocket size={11} /> 점프
-          </button>
-        )}
 
         {/* 작성자 + 시간 (데스크탑만) */}
         <div className="hidden lg:flex flex-col items-end shrink-0 w-[80px] text-[10.5px] text-gray-400">

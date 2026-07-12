@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Phone, User, MessageSquare } from 'lucide-react';
+import { Phone, Bell, MapPin, MessageSquare } from 'lucide-react';
 import type { DBPremiumBuyer } from '@/lib/types';
 import { addRecentBuyer } from '@/lib/recentBuyers';
 
@@ -24,8 +24,10 @@ interface CompanyCardProps {
 }
 
 export default function CompanyCard({ company, isNew }: CompanyCardProps) {
-  const displayTitle = company.headline?.trim() || company.description?.split('\n')[0]?.slice(0, 20) || company.name;
+  // ① 이미지 및 제목 — 헤드라인 우선, 없으면 업체명
+  const displayTitle = company.headline?.trim() || company.name;
   const hasImage = !!company.image_url;
+  const phoneDigits = stripPhone(company.phone);
 
   const handleClick = () => {
     addRecentBuyer({
@@ -36,17 +38,19 @@ export default function CompanyCard({ company, isNew }: CompanyCardProps) {
     });
   };
 
-  const phoneDigits = stripPhone(company.phone);
-
   return (
     <div className="company-card card-hover group flex flex-col">
+      {/* 본문: 좌측 이미지 + 우측 제목·홍보문구·알리미/지역 */}
       <Link
         href={`/buyer/${company.id}`}
         onClick={handleClick}
-        className="block"
+        className="flex gap-2.5 p-2.5"
       >
-        {/* Header: 이미지가 있으면 이미지 + 오버레이, 없으면 빗금 + 흰 패널 */}
-        <div className="relative h-25 md:h-30 overflow-hidden" style={!hasImage ? HASH_BG : undefined}>
+        {/* 좌: 이미지 / 로고 */}
+        <div
+          className="relative shrink-0 w-16 md:w-24 aspect-square rounded-md overflow-hidden"
+          style={!hasImage ? HASH_BG : undefined}
+        >
           {hasImage ? (
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -56,51 +60,47 @@ export default function CompanyCard({ company, isNew }: CompanyCardProps) {
                 loading="lazy"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-linear-to-b from-black/20 via-black/40 to-black/75" />
-              <div className="absolute inset-0 flex items-center justify-center px-3">
-                <h3 className="text-white text-[14px] md:text-[15px] font-bold text-center leading-tight drop-shadow-md">
-                  {displayTitle}
-                </h3>
-              </div>
             </>
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center px-3">
-              <h3 className="text-gray-900 text-[14px] md:text-[15px] font-bold text-center leading-tight bg-white/85 backdrop-blur-sm px-3 py-2 rounded-md">
-                {displayTitle}
-              </h3>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-[10px] font-bold text-gray-400">로고</span>
             </div>
           )}
-          {/* Badges */}
-          {isNew && (
-            <span className="absolute top-1.5 right-1.5 text-[9px] text-white bg-red-500 px-1.5 py-0.5 rounded-sm font-bold z-10">NEW</span>
-          )}
           {company.tier === 'premium' && (
-            <span className="absolute top-1.5 left-1.5 text-[9px] text-white bg-accent px-1.5 py-0.5 rounded-sm font-bold z-10">BEST</span>
+            <span className="absolute top-1 left-1 text-[9px] text-white bg-accent px-1 py-0.5 rounded-sm font-bold z-10">BEST</span>
+          )}
+          {isNew && (
+            <span className="absolute top-1 right-1 text-[9px] text-white bg-red-500 px-1 py-0.5 rounded-sm font-bold z-10">NEW</span>
           )}
         </div>
 
-        {/* Body */}
-        <div className="px-3 pt-2 pb-1.5">
-          <p className="text-[12.5px] text-gray-600 leading-snug text-center line-clamp-2 min-h-7">
+        {/* 우: 제목 + 홍보문구(2줄) + 알리미·지역 */}
+        <div className="flex-1 min-w-0 flex flex-col">
+          {/* ① 제목 */}
+          <h3 className="text-[13px] md:text-[14px] font-bold text-gray-900 leading-tight line-clamp-1">
+            {displayTitle}
+          </h3>
+          {/* ② 홍보 문구 — 최대 2줄, 넘으면 말줄임 */}
+          <p className="mt-1 text-[11.5px] md:text-[12.5px] text-gray-600 leading-snug line-clamp-2 whitespace-pre-line flex-1 min-h-8">
             {company.description || '상품권 매입 전문 업체입니다.'}
           </p>
-        </div>
-
-        {/* Footer (inset divider) */}
-        <div className="mx-3 h-px bg-gray-200" />
-        <div className="flex justify-between items-center px-3 py-1.5 text-[11px]">
-          <span className="text-accent font-bold flex items-center gap-1 truncate">
-            <User size={10} className="shrink-0" />
-            <span className="truncate">{company.name}</span>
-          </span>
-          <span className="text-gray-500 shrink-0 ml-2">{company.region || '전국'}</span>
+          {/* ③ 알리미 · 지역 */}
+          <div className="mt-1.5 flex items-center justify-between gap-1 text-[10.5px]">
+            <span className="text-accent font-bold flex items-center gap-1 truncate">
+              <Bell size={10} className="shrink-0" />
+              <span className="truncate">{company.name}</span>
+            </span>
+            <span className="text-gray-500 shrink-0 flex items-center gap-0.5">
+              <MapPin size={9} className="shrink-0" /> {company.region || '전국'}
+            </span>
+          </div>
         </div>
       </Link>
 
       {/* 모바일 전용: 통화하기 / 문자하기 버튼 */}
       {phoneDigits && (
         <>
-          <div className="mx-3 h-px bg-gray-200 md:hidden" />
+          <div className="mx-2.5 h-px bg-gray-200 md:hidden" />
           <div className="grid grid-cols-2 md:hidden">
             <a
               href={`tel:${phoneDigits}`}

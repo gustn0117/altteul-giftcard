@@ -23,24 +23,6 @@ function extractRegion(post: SellPost): string {
   return '전국';
 }
 
-const DEMO: { title: string; author: string; region: string }[] = [
-  { title: '24시 비대면 간단서류 당일입금ok', author: '예판상품권 매입팀', region: '서울' },
-  { title: '전국 비대면 24시 당일입금', author: '스마트 상품권', region: '경기' },
-  { title: '직장인 주부 월변전문 무방문 전문', author: '리얼 상품권', region: '서울' },
-  { title: '24시간 무서류 무방문 전국어디든 승인', author: '24시 프라임', region: '부산' },
-  { title: '24시 비대면 무서류 승인 당일입금OK', author: '24시 안심매입', region: '경기' },
-  { title: '전국 무방문 팩스 월변전문 당일입금가능', author: '한국상품권몰', region: '경기' },
-  { title: '36개월 분할상환 연5프로', author: '365 퍼스트', region: '제주' },
-  { title: '당일 200까지 안전 거래 무직자 무서류', author: '24시 믿음상품권', region: '경기' },
-  { title: '24시 비대면 특급 매입', author: '24시 정안상품권', region: '제주' },
-  { title: '전국 24시 연중무휴 당일입금 사업자우대', author: '페어프라임', region: '서울' },
-  { title: '자동차담보거래 당일거래 높은승인율 정식등록', author: '365 프라임', region: '대구' },
-  { title: '신속 당일입금 비대면 매입 친절 상담', author: '24시 서민안심', region: '인천' },
-  { title: '간편한 비대면 월매출 분할결제 OK', author: '미소지움', region: '광주' },
-  { title: '소액부터 1000만원까지 당일 송금', author: '뉴스타트', region: '대전' },
-  { title: '24시 ARS 매입 신용조회 X', author: '365 더퍼스트', region: '울산' },
-];
-
 export default function SellLineAds() {
   const [page, setPage] = useState(1);
   const [posts, setPosts] = useState<SellPost[]>(() => getCache<SellPost[]>('home_sell_posts') ?? []);
@@ -56,18 +38,12 @@ export default function SellLineAds() {
       .finally(() => setLoading(false));
   }, []);
 
-  // 실 데이터 + 데모 채움 (1페이지에서 10개 미만일 때만)
-  const realCount = posts.length;
-  const totalReal = Math.max(realCount, PAGE_SIZE);
-  const totalPages = Math.max(1, Math.ceil(totalReal / PAGE_SIZE));
+  // 실제 등록된 판매글만 10개씩 페이지네이션 (등록순: 최신 → 오래된)
+  const totalPages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
 
   const start = (safePage - 1) * PAGE_SIZE;
-  const end = start + PAGE_SIZE;
-  const pagePosts = posts.slice(start, end);
-  const fillCount = Math.max(0, PAGE_SIZE - pagePosts.length);
-  const fillStart = Math.max(0, start - realCount);
-  const fillItems = DEMO.slice(fillStart, fillStart + fillCount);
+  const pagePosts = posts.slice(start, start + PAGE_SIZE);
 
   return (
     <section>
@@ -82,6 +58,10 @@ export default function SellLineAds() {
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         {loading ? (
           <div className="py-10 text-center text-gray-400 text-[12px]">불러오는 중...</div>
+        ) : posts.length === 0 ? (
+          <div className="py-10 text-center text-gray-400 text-[12px]">
+            아직 등록된 팝니다 줄광고가 없습니다.
+          </div>
         ) : (
           <>
             {pagePosts.map((post, i) => {
@@ -111,28 +91,6 @@ export default function SellLineAds() {
                 </div>
               );
             })}
-            {fillItems.map((item, i) => (
-              <div key={`demo-${safePage}-${i}`}>
-                {(pagePosts.length + i) > 0 && <div className="mx-4 h-px bg-gray-200" />}
-                <Link
-                  href="/board?tab=sell"
-                  className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[13.5px] text-gray-800 truncate">{item.title}</span>
-                      <span className="shrink-0 text-[9px] font-black text-white bg-orange-500 px-1 py-px rounded-sm">N</span>
-                    </div>
-                    <p className="text-[11.5px] text-orange-500 mt-0.5 truncate">
-                      <span className="font-medium">{item.author}</span>
-                      <span className="text-orange-300 mx-1.5">|</span>
-                      <span>{item.region}</span>
-                    </p>
-                  </div>
-                  <ChevronRight size={14} className="shrink-0 text-gray-300" />
-                </Link>
-              </div>
-            ))}
           </>
         )}
       </div>

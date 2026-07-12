@@ -3,7 +3,7 @@
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { User, Building2, Mail, Lock, Hash, ArrowRight } from 'lucide-react';
+import { User, Building2, Mail, Lock, Phone, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthShell from '@/components/auth/AuthShell';
 
@@ -24,7 +24,7 @@ function LoginContent() {
   const [loginType, setLoginType] = useState<LoginType>('normal');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [businessNumber, setBusinessNumber] = useState('');
+  const [businessPhone, setBusinessPhone] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const { login } = useAuth();
@@ -39,7 +39,7 @@ function LoginContent() {
     try {
       const loginEmail =
         loginType === 'business'
-          ? `${businessNumber.replace(/-/g, '')}@biz.altteul-giftcard`
+          ? `${businessPhone.replace(/[^0-9]/g, '')}@biz.altteul-giftcard`
           : email.trim();
 
       const res = await fetch('/api/auth/login', {
@@ -103,12 +103,12 @@ function LoginContent() {
             />
           </Field>
         ) : (
-          <Field icon={Hash} label="사업자 등록번호" hint="가입 시 입력한 사업자번호">
+          <Field icon={Phone} label="휴대폰 번호" hint="가입 시 입력한 휴대폰 번호">
             <input
-              type="text"
-              value={businessNumber}
-              onChange={(e) => setBusinessNumber(e.target.value)}
-              placeholder="000-00-00000"
+              type="tel"
+              value={businessPhone}
+              onChange={(e) => setBusinessPhone(e.target.value)}
+              placeholder="010-0000-0000"
               className="auth-input"
               required
             />
