@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Phone, Bell, MapPin, MessageSquare } from 'lucide-react';
 import type { DBPremiumBuyer } from '@/lib/types';
 import { addRecentBuyer } from '@/lib/recentBuyers';
+import { useCallModal } from '@/contexts/CallModalContext';
 
 const SMS_BODY = '예판상품권 보고 연락드립니다.';
 const stripPhone = (p?: string | null) => (p || '').replace(/[^0-9+]/g, '');
@@ -24,6 +25,7 @@ interface CompanyCardProps {
 }
 
 export default function CompanyCard({ company, isNew }: CompanyCardProps) {
+  const { openCall } = useCallModal();
   // ① 이미지 및 제목 — 헤드라인 우선, 없으면 업체명
   const displayTitle = company.headline?.trim() || company.name;
   const hasImage = !!company.image_url;
@@ -102,14 +104,14 @@ export default function CompanyCard({ company, isNew }: CompanyCardProps) {
         <>
           <div className="mx-2.5 h-px bg-gray-200 md:hidden" />
           <div className="grid grid-cols-2 md:hidden">
-            <a
-              href={`tel:${phoneDigits}`}
-              onClick={(e) => e.stopPropagation()}
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); openCall(company.name, company.phone); }}
               className="flex items-center justify-center gap-1.5 py-2 text-[12.5px] font-bold text-accent bg-white hover:bg-accent-bg transition-colors whitespace-nowrap"
               aria-label={`${company.name} 통화하기`}
             >
               <Phone size={13} /> 통화하기
-            </a>
+            </button>
             <a
               href={`sms:${phoneDigits}?&body=${encodeURIComponent(SMS_BODY)}`}
               onClick={(e) => e.stopPropagation()}

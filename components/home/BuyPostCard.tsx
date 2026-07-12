@@ -5,6 +5,7 @@ import { Phone, MessageSquare, MapPin } from 'lucide-react';
 import type { DBPost, DBUser } from '@/lib/types';
 import { getCategoryName } from '@/data/mock';
 import { BRAND_STYLES, normalizeBrandKey } from '@/components/BrandLogo';
+import { useCallModal } from '@/contexts/CallModalContext';
 
 interface BuyPostCardProps {
   post: DBPost & { author?: DBUser };
@@ -24,6 +25,7 @@ const HASH_BG = {
  * 표시 정보: 카테고리·제목·태그(지역/배송)·매입가/액면가
  */
 export default function BuyPostCard({ post }: BuyPostCardProps) {
+  const { openCall } = useCallModal();
   const categoryName = getCategoryName(post.category);
   const brandKey = normalizeBrandKey(categoryName);
   const bs = BRAND_STYLES[brandKey];
@@ -84,13 +86,13 @@ export default function BuyPostCard({ post }: BuyPostCardProps) {
       {/* 모바일/공통: 전화·문자 버튼 (연락처 권한 회원만 실제 작동, 비회원은 상세로 라우팅) */}
       {phone && (
         <div className="grid grid-cols-2 border-t border-gray-100">
-          <a
-            href={`tel:${phoneDigits}`}
-            onClick={(e) => e.stopPropagation()}
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); openCall(post.author?.name || post.guest_name || '업체', phone); }}
             className="flex items-center justify-center gap-1 py-1.5 text-[10.5px] font-bold text-accent bg-white hover:bg-blue-50 transition-colors border-r border-gray-100"
           >
             <Phone size={11} /> 통화
-          </a>
+          </button>
           <a
             href={`sms:${phoneDigits}`}
             onClick={(e) => e.stopPropagation()}

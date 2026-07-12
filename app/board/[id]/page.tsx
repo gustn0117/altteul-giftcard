@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Eye, Clock, Pencil, Tag, ShoppingCart, Phone, MessageSquare, CheckCircle, Timer, RotateCcw } from 'lucide-react';
 import { getPost, togglePostComplete, extendPostExpiry } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCallModal } from '@/contexts/CallModalContext';
 import type { DBPost, DBUser } from '@/lib/types';
 import { getCategoryName } from '@/data/mock';
 import { BrandLogo } from '@/components/BrandLogo';
@@ -37,6 +38,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   const { id } = use(params);
   const router = useRouter();
   const { user, isLoggedIn } = useAuth();
+  const { openCall } = useCallModal();
   const [post, setPost] = useState<PostWithAuthor | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -126,7 +128,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
 
   const handleCall = () => {
     if (!contactPhone) return;
-    window.location.href = `tel:${contactPhone.replace(/[^0-9]/g, '')}`;
+    openCall(authorName, contactPhone);
   };
 
   const handleSms = () => {

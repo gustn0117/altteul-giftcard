@@ -6,6 +6,7 @@ import MobileNav from "@/components/layout/MobileNav";
 import ChatWidget from "@/components/chat/ChatWidget";
 import VisitorTracker from "@/components/VisitorTracker";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { CallModalProvider } from "@/contexts/CallModalContext";
 
 export const metadata: Metadata = {
   title: "예판상품권 - 상품권 매입/매도 중개 플랫폼",
@@ -28,12 +29,14 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col bg-background antialiased">
         <AuthProvider>
-          <Header />
-          <main className="flex-1 pb-16 md:pb-0">{children}</main>
-          <Footer />
-          <ChatWidget />
-          <VisitorTracker />
-          <MobileNav />
+          <CallModalProvider>
+            <Header />
+            <main className="flex-1 pb-16 md:pb-0">{children}</main>
+            <Footer />
+            <ChatWidget />
+            <VisitorTracker />
+            <MobileNav />
+          </CallModalProvider>
         </AuthProvider>
       </body>
     </html>

@@ -6,6 +6,7 @@ import { ArrowLeft, Phone, MapPin, ShieldCheck } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { getPosts } from '@/lib/api';
 // useAuth removed - 비회원도 번호 공개
+import { useCallModal } from '@/contexts/CallModalContext';
 import SellPostItem from '@/components/home/SellPostItem';
 import type { DBPremiumBuyer } from '@/lib/types';
 import type { DBPost, DBUser } from '@/lib/types';
@@ -14,6 +15,7 @@ type PostWithAuthor = DBPost & { author: DBUser };
 
 export default function BuyerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { openCall } = useCallModal();
   // 비회원도 번호 공개
   const [buyer, setBuyer] = useState<DBPremiumBuyer | null>(null);
   const [posts, setPosts] = useState<PostWithAuthor[]>([]);
@@ -70,10 +72,13 @@ export default function BuyerDetailPage({ params }: { params: Promise<{ id: stri
 
         <div className="px-6 py-4 flex flex-wrap gap-4 border-b border-zinc-100">
           {buyer.phone && (
-            <div className="flex items-center gap-2 text-[13px] whitespace-nowrap">
-              <Phone size={14} className="text-zinc-400 shrink-0" />
-              <span className="font-medium tabular-nums whitespace-nowrap">{buyer.phone}</span>
-            </div>
+            <button
+              type="button"
+              onClick={() => openCall(buyer.name, buyer.phone)}
+              className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-accent text-white text-[13px] font-bold hover:bg-blue-700 transition-colors"
+            >
+              <Phone size={14} className="shrink-0" /> 통화하기
+            </button>
           )}
           {buyer.region && (
             <div className="flex items-center gap-2 text-[13px]">
