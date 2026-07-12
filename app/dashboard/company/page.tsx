@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function CompanyPage() {
   const { user, isLoggedIn, login } = useAuth();
   const router = useRouter();
-  const [form, setForm] = useState({ name: '', email: '', phone: '' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', representative: '', messenger: '', messengerId: '' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -27,6 +27,9 @@ export default function CompanyPage() {
             name: data.user.name || '',
             email: data.user.email || '',
             phone: data.user.phone || '',
+            representative: data.user.representative || '',
+            messenger: data.user.messenger || '',
+            messengerId: data.user.messenger_id || '',
           });
         }
       })
@@ -47,7 +50,12 @@ export default function CompanyPage() {
       const res = await fetch('/api/user', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: user.id, name: form.name, phone: form.phone }),
+        body: JSON.stringify({
+          id: user.id,
+          name: form.name,
+          phone: form.phone,
+          ...(isBusiness ? { representative: form.representative, messenger: form.messenger, messengerId: form.messengerId } : {}),
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '저장 실패');
@@ -129,6 +137,45 @@ export default function CompanyPage() {
               className="input"
             />
           </div>
+
+          {isBusiness && (
+            <>
+              <div>
+                <label className="block text-[12px] font-medium text-zinc-600 mb-1">대표자명</label>
+                <input
+                  type="text"
+                  value={form.representative}
+                  onChange={(e) => handleChange('representative', e.target.value)}
+                  placeholder="대표자 이름"
+                  className="input"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[12px] font-medium text-zinc-600 mb-1">메신저</label>
+                  <select
+                    value={form.messenger}
+                    onChange={(e) => handleChange('messenger', e.target.value)}
+                    className="input"
+                  >
+                    <option value="">선택</option>
+                    <option value="kakaotalk">카카오톡</option>
+                    <option value="telegram">텔레그램</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[12px] font-medium text-zinc-600 mb-1">메신저 아이디</label>
+                  <input
+                    type="text"
+                    value={form.messengerId}
+                    onChange={(e) => handleChange('messengerId', e.target.value)}
+                    placeholder="아이디"
+                    className="input"
+                  />
+                </div>
+              </div>
+            </>
+          )}
 
           {error && <p className="text-[12px] text-red-500">{error}</p>}
 

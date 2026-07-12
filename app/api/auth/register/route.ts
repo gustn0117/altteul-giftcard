@@ -7,7 +7,7 @@ function hashPassword(password: string): string {
 }
 
 export async function POST(req: NextRequest) {
-  const { name, email, password, phone, type } = await req.json();
+  const { name, email, password, phone, type, representative, messenger, messengerId } = await req.json();
 
   if (!name || !email || !password) {
     return NextResponse.json({ error: '필수 항목을 입력해주세요.' }, { status: 400 });
@@ -30,9 +30,17 @@ export async function POST(req: NextRequest) {
 
   const password_hash = hashPassword(password);
 
+  // 업체 회원만 대표자명/메신저 컬럼을 포함 (개인 가입은 기존과 동일하게 유지)
+  const insertData: Record<string, unknown> = { name, email, password_hash, phone: phone || null, type: userType };
+  if (userType === 'business') {
+    insertData.representative = representative || null;
+    insertData.messenger = messenger || null;
+    insertData.messenger_id = messengerId || null;
+  }
+
   const { data: user, error } = await supabase
     .from('users')
-    .insert({ name, email, password_hash, phone: phone || null, type: userType })
+    .insert(insertData)
     .select('id, name, email, phone, type, created_at, updated_at')
     .single();
 

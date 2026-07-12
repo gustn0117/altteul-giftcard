@@ -82,6 +82,9 @@ function RegisterContent() {
         password: form.password,
         phone: form.phone || null,
         type: 'business',
+        representative: form.representative.trim(),
+        messenger: form.messenger,
+        messengerId: form.messengerId.trim(),
       };
     }
 

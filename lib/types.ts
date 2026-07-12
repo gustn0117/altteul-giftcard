@@ -47,6 +47,12 @@ export interface DBUser {
   phone: string | null;
   type: 'normal' | 'business';
   password_hash?: string;
+  /** 업체 회원: 대표자명 */
+  representative?: string | null;
+  /** 업체 회원: 메신저 종류 (kakaotalk | telegram) */
+  messenger?: string | null;
+  /** 업체 회원: 메신저 아이디 */
+  messenger_id?: string | null;
   /** 점프 등에 사용하는 포인트 — 운영자만 충전 */
   points: number;
   /** 팝니다 글 연락처 열람 권한 만료 시각 — 운영자가 부여 */
