@@ -87,6 +87,13 @@ export default function SellLineAds() {
                         <span>{extractRegion(post)}</span>
                       </p>
                     </div>
+                    {/* 판매율 */}
+                    {post.percentage != null && (
+                      <span className="shrink-0 whitespace-nowrap text-accent leading-none">
+                        <span className="text-[10.5px] font-medium text-gray-400">판매율 </span>
+                        <span className="text-[15px] font-extrabold tabular-nums">{post.percentage}<span className="text-[11px]">%</span></span>
+                      </span>
+                    )}
                     {/* 거래완료 배지 — 맨 오른쪽 */}
                     {isCompleted ? (
                       <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold rounded-full bg-zinc-700 text-white">
