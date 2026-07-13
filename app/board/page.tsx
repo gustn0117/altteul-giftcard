@@ -178,13 +178,13 @@ function BoardContent() {
               <p className="flex items-center gap-1 text-[12.5px] font-bold text-gray-700 mb-2.5">
                 <MapPin size={14} className="text-accent" /> 현재 선택지역 : <span className="text-accent">{selectedRegion}</span>
               </p>
-              <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5">
+              <div className="grid grid-cols-6 gap-1">
                 {REGIONS.map((r) => (
                   <button
                     key={r}
                     type="button"
                     onClick={() => { setSelectedRegion(r); setPage(1); }}
-                    className={`h-9 text-[12.5px] font-bold rounded-md border transition-colors ${
+                    className={`h-8 text-[11px] font-bold rounded-md border transition-colors ${
                       selectedRegion === r
                         ? 'border-accent bg-accent/5 text-accent'
                         : 'border-gray-200 bg-white text-gray-600 hover:border-accent hover:text-accent'
