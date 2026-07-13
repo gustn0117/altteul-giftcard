@@ -13,6 +13,7 @@ import { formatNumber, parseNumber } from '@/lib/format';
 // 만료 정책 (일 단위)
 const SELL_EXPIRE_DAYS = 7;   // 팝니다: 7일 후 잠금 (30일 후 자동삭제)
 const BUY_EXPIRE_DAYS = 7;    // 삽니다: 7일 후 잠금 (운영자 해제)
+const REGION_OPTIONS = ['전국', '서울', '경기', '인천', '대전', '대구', '부산', '광주', '울산', '세종', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'];
 
 export default function WritePostPage() {
   return (
@@ -90,8 +91,8 @@ function WritePostContent() {
             price: post.price != null ? String(post.price) : '',
             delivery: post.delivery || '7일 이내 발송',
             deliveryMethod: post.delivery_method || 'mobile',
-            description: '',
-            region: '',
+            description: post.description || '',
+            region: post.region || '',
             guestName: post.guest_name || '',
             guestPhone: post.guest_phone || '',
           }));
@@ -165,7 +166,7 @@ function WritePostContent() {
 
     // 팝니다(sell) 신규 검증
     if (form.type === 'sell') {
-      if (!percentage || percentage <= 0 || percentage > 200) return alert('매입률(%)을 1~200 사이로 입력하세요.');
+      if (!percentage || percentage <= 0 || percentage > 200) return alert('판매율(%)을 1~200 사이로 입력하세요.');
       if (!sendMonth || sendMonth < 1 || sendMonth > 12) return alert('발송 월(1~12)을 입력하세요.');
       if (!sendDay || sendDay < 1 || sendDay > 31) return alert('발송 일(1~31)을 입력하세요.');
     }
@@ -182,6 +183,8 @@ function WritePostContent() {
         category: form.category,
         delivery_method: form.deliveryMethod,
         delivery: form.type === 'sell' ? sendTag : form.delivery,
+        region: form.region || null,
+        description: form.description || null,
         tags: [sendTag, form.region ? `#${form.region}` : '', form.deliveryMethod === 'mobile' ? '#모바일' : form.deliveryMethod === 'parcel' ? '#택배' : '#직접만남'].filter(Boolean),
       };
 
@@ -322,11 +325,11 @@ function WritePostContent() {
               placeholder="예: 신세계 10만원권 판매" className="input" required />
           </div>
 
-          {/* 팝니다: 매입률(%) + 월/일 발송 */}
+          {/* 팝니다: 판매율(%) + 월/일 발송 */}
           {form.type === 'sell' ? (
             <>
               <div>
-                <label className="block text-[12px] font-medium text-zinc-600 mb-1">매입률 (%) *</label>
+                <label className="block text-[12px] font-medium text-zinc-600 mb-1">판매율 (%) *</label>
                 <div className="flex items-center gap-2">
                   <input
                     type="number" min={1} max={200} step="0.1"
@@ -336,7 +339,7 @@ function WritePostContent() {
                   />
                   <span className="text-[14px] font-bold text-accent">%</span>
                 </div>
-                <p className="text-[11px] text-zinc-400 mt-1">예: 92 (액면가 대비 92% 매입)</p>
+                <p className="text-[11px] text-zinc-400 mt-1">예: 92 (액면가 대비 92%에 판매)</p>
               </div>
               <div>
                 <label className="block text-[12px] font-medium text-zinc-600 mb-1">발송 예정일 *</label>
@@ -412,8 +415,12 @@ function WritePostContent() {
 
           <div>
             <label className="block text-[12px] font-medium text-zinc-600 mb-1">지역</label>
-            <input type="text" value={form.region} onChange={(e) => handleChange('region', e.target.value)}
-              placeholder="예: 서울, 전국" className="input" />
+            <select value={form.region} onChange={(e) => handleChange('region', e.target.value)} className="input">
+              <option value="">지역 선택</option>
+              {REGION_OPTIONS.map((r) => (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </select>
           </div>
 
           <div>
