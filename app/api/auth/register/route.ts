@@ -28,6 +28,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '이미 등록된 이메일입니다.' }, { status: 409 });
   }
 
+  // 개인 회원: 휴대폰 번호 중복 확인 (휴대폰으로도 로그인하므로)
+  if (userType === 'normal' && phone) {
+    const d = String(phone).replace(/[^0-9]/g, '');
+    const candidates = [String(phone).trim(), d];
+    if (d.length === 11) candidates.push(`${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`);
+    if (d.length === 10) candidates.push(`${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`);
+    const { data: dupPhone } = await supabase
+      .from('users')
+      .select('id')
+      .eq('type', 'normal')
+      .in('phone', candidates)
+      .limit(1);
+    if (dupPhone && dupPhone.length > 0) {
+      return NextResponse.json({ error: '이미 가입된 휴대폰 번호입니다.' }, { status: 409 });
+    }
+  }
+
   const password_hash = hashPassword(password);
 
   // 업체 회원만 대표자명/메신저 컬럼을 포함 (개인 가입은 기존과 동일하게 유지)

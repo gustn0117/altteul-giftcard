@@ -91,15 +91,15 @@ function LoginContent() {
 
       <form onSubmit={handleLogin} className="space-y-3 mt-5">
         {loginType === 'normal' ? (
-          <Field icon={Mail} label="이메일">
+          <Field icon={Mail} label="이메일 또는 휴대폰 번호">
             <input
-              type="email"
+              type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="example@email.com"
+              placeholder="이메일 또는 010-0000-0000"
               className="auth-input"
               required
-              autoComplete="email"
+              autoComplete="username"
             />
           </Field>
         ) : (

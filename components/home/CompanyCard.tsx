@@ -41,16 +41,16 @@ export default function CompanyCard({ company, isNew }: CompanyCardProps) {
   };
 
   return (
-    <div className="company-card card-hover group flex flex-col">
+    <div className="company-card card-hover group flex flex-col rounded-lg">
       {/* 본문: 좌측 이미지 + 우측 제목·홍보문구·알리미/지역 */}
       <Link
         href={`/buyer/${company.id}`}
         onClick={handleClick}
-        className="flex gap-2.5 p-2.5"
+        className="flex gap-2.5 md:gap-3 p-2.5 md:p-3"
       >
         {/* 좌: 이미지 / 로고 */}
         <div
-          className="relative shrink-0 w-16 md:w-24 aspect-square rounded-md overflow-hidden"
+          className="relative shrink-0 w-16 md:w-28 aspect-square rounded-md overflow-hidden"
           style={!hasImage ? HASH_BG : undefined}
         >
           {hasImage ? (
@@ -79,11 +79,11 @@ export default function CompanyCard({ company, isNew }: CompanyCardProps) {
         {/* 우: 제목 + 홍보문구(2줄) + 알리미·지역 */}
         <div className="flex-1 min-w-0 flex flex-col">
           {/* ① 제목 */}
-          <h3 className="text-[13px] md:text-[14px] font-bold text-gray-900 leading-tight line-clamp-1">
+          <h3 className="text-[12.5px] md:text-[14.5px] font-bold text-gray-900 leading-tight line-clamp-1">
             {displayTitle}
           </h3>
           {/* ② 홍보 문구 — 최대 2줄, 넘으면 말줄임 */}
-          <p className="mt-1 text-[11.5px] md:text-[12.5px] text-gray-600 leading-snug line-clamp-2 whitespace-pre-line flex-1 min-h-8">
+          <p className="mt-1 text-[11px] md:text-[12.5px] text-gray-600 leading-snug line-clamp-2 whitespace-pre-line flex-1 min-h-8">
             {company.description || '상품권 매입 전문 업체입니다.'}
           </p>
           {/* ③ 알리미 · 지역 */}

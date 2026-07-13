@@ -63,10 +63,11 @@ function RegisterContent() {
     if (type === 'normal') {
       if (!form.name.trim()) return setError('이름(닉네임)을 입력해주세요.');
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return setError('유효한 이메일 주소를 입력해주세요.');
+      if (form.phone.replace(/[^0-9]/g, '').length < 10) return setError('휴대폰 번호를 정확히 입력해주세요. (로그인 시 사용됩니다)');
       payload = {
         name: form.name.trim(),
         email: form.email.trim(),
-        phone: form.phone.trim() || null,
+        phone: form.phone.trim(),
         password: form.password,
         type: 'normal',
       };
@@ -182,9 +183,9 @@ function RegisterContent() {
               <input type="email" value={form.email} onChange={(e) => change('email', e.target.value)}
                 placeholder="example@email.com" className="auth-input" required autoComplete="email" />
             </Field>
-            <Field icon={Phone} label="연락처 (선택)">
+            <Field icon={Phone} label="휴대폰 번호" hint="이메일과 함께 로그인에 사용됩니다.">
               <input type="tel" value={form.phone} onChange={(e) => change('phone', e.target.value)}
-                placeholder="010-0000-0000" className="auth-input" />
+                placeholder="010-0000-0000" className="auth-input" required />
             </Field>
           </>
         ) : (
