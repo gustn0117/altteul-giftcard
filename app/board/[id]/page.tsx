@@ -25,6 +25,11 @@ function formatRemainingTime(expiresAt: string | null): string | null {
   return `${hours}시간 ${minutes}분 남음`;
 }
 
+const DM_LABELS: Record<string, string> = { mobile: '모바일', parcel: '택배', direct: '직접만남' };
+function deliveryMethodText(dm: string | null | undefined): string {
+  return (dm || '').split(',').map((s) => DM_LABELS[s.trim()] || s.trim()).filter(Boolean).join(', ') || '-';
+}
+
 export default function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
@@ -202,20 +207,24 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
             {/* Info grid */}
             <div className="px-5 py-5 border-b border-gray-100">
               <div className="bg-gray-50 border border-gray-100 p-5">
-                {isSell && post.percentage != null ? (
-                  /* 팝니다: 매입률 + 발송일 */
+                {post.percentage != null ? (
+                  /* 팝니다=판매율+발송일 / 삽니다=매입률+매입가능시간 */
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-[13px]">
                     <div>
                       <p className="text-[11px] text-gray-400 mb-1">상품권 종류</p>
                       <p className="font-bold text-gray-800">{getCategoryName(post.category)}</p>
                     </div>
                     <div>
-                      <p className="text-[11px] text-gray-400 mb-1">매입률</p>
+                      <p className="text-[11px] text-gray-400 mb-1">{isSell ? '판매율' : '매입률'}</p>
                       <p className="font-bold text-accent text-[20px]">{post.percentage}%</p>
                     </div>
                     <div>
-                      <p className="text-[11px] text-gray-400 mb-1">발송 예정일</p>
-                      <p className="font-bold text-gray-800">{post.send_month}월 {post.send_day}일</p>
+                      <p className="text-[11px] text-gray-400 mb-1">{isSell ? '발송 예정일' : '매입 가능 시간'}</p>
+                      <p className="font-bold text-gray-800">
+                        {isSell
+                          ? (post.send_month && post.send_day ? `${post.send_month}월 ${post.send_day}일` : '협의')
+                          : (post.delivery || '-')}
+                      </p>
                     </div>
                   </div>
                 ) : (
@@ -252,13 +261,15 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-[12px]">
                 <div>
-                  <p className="text-[11px] text-gray-400 mb-1">발송 방법</p>
-                  <p className="font-medium text-gray-700">{post.delivery_method || '-'}</p>
+                  <p className="text-[11px] text-gray-400 mb-1">배송 방법</p>
+                  <p className="font-medium text-gray-700">{deliveryMethodText(post.delivery_method)}</p>
                 </div>
-                <div>
-                  <p className="text-[11px] text-gray-400 mb-1">발송 안내</p>
-                  <p className="font-medium text-gray-700">{post.delivery || '판매일로부터 7일 이내 발송'}</p>
-                </div>
+                {isSell && (
+                  <div>
+                    <p className="text-[11px] text-gray-400 mb-1">발송 안내</p>
+                    <p className="font-medium text-gray-700">{post.delivery || '판매일로부터 7일 이내 발송'}</p>
+                  </div>
+                )}
               </div>
             </div>
 

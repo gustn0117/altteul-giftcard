@@ -8,12 +8,12 @@ import Link from 'next/link';
 import { categories } from '@/data/mock';
 import { createPost, getPost, updatePost } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
-import { formatNumber, parseNumber } from '@/lib/format';
 
 // 만료 정책 (일 단위)
 const SELL_EXPIRE_DAYS = 7;   // 팝니다: 7일 후 잠금 (30일 후 자동삭제)
 const BUY_EXPIRE_DAYS = 7;    // 삽니다: 7일 후 잠금 (운영자 해제)
 const REGION_OPTIONS = ['전국', '서울', '경기', '인천', '대전', '대구', '부산', '광주', '울산', '세종', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'];
+const DELIVERY_METHODS = [{ value: 'mobile', label: '모바일', tag: '#모바일' }, { value: 'parcel', label: '택배', tag: '#택배' }, { value: 'direct', label: '직접만남', tag: '#직접만남' }];
 
 export default function WritePostPage() {
   return (
@@ -59,7 +59,7 @@ function WritePostContent() {
     // 삽니다 (기존 금액 방식 유지)
     faceValue: '',
     price: '',
-    delivery: '7일 이내 발송',
+    delivery: postType === 'buy' ? '24시간' : '7일 이내 발송',
     deliveryMethod: 'mobile',
     description: '',
     region: '',
@@ -131,9 +131,16 @@ function WritePostContent() {
     });
   };
 
-  const faceValue = Number(form.faceValue) || 0;
-  const price = Number(form.price) || 0;
-  const discount = faceValue > 0 ? Math.round((1 - price / faceValue) * 100) : 0;
+  // 배송 방법 다중 선택 토글 (콤마 구분 저장)
+  const deliveryList = form.deliveryMethod.split(',').filter(Boolean);
+  const toggleDelivery = (val: string) => {
+    setForm((prev) => {
+      const cur = prev.deliveryMethod.split(',').filter(Boolean);
+      const next = cur.includes(val) ? cur.filter((v) => v !== val) : [...cur, val];
+      return { ...prev, deliveryMethod: next.join(',') };
+    });
+  };
+
   const percentage = Number(form.percentage) || 0;
   const sendMonth = Number(form.sendMonth) || 0;
   const sendDay = Number(form.sendDay) || 0;
@@ -164,11 +171,17 @@ function WritePostContent() {
       if (!form.guestPassword.trim() || form.guestPassword.length < 4) return alert('비밀번호는 4자 이상 입력하세요.');
     }
 
-    // 팝니다(sell) 신규 검증
+    // 판매율/매입률(%) 검증
+    if (!percentage || percentage <= 0 || percentage > 200) {
+      return alert(`${form.type === 'sell' ? '판매율' : '매입률'}(%)을 1~200 사이로 입력하세요.`);
+    }
     if (form.type === 'sell') {
-      if (!percentage || percentage <= 0 || percentage > 200) return alert('판매율(%)을 1~200 사이로 입력하세요.');
-      if (!sendMonth || sendMonth < 1 || sendMonth > 12) return alert('발송 월(1~12)을 입력하세요.');
-      if (!sendDay || sendDay < 1 || sendDay > 31) return alert('발송 일(1~31)을 입력하세요.');
+      // 발송 예정일은 선택(변경 가능) — 입력했을 때만 범위 검증
+      if (form.sendMonth && (sendMonth < 1 || sendMonth > 12)) return alert('발송 월은 1~12 사이로 입력하세요.');
+      if (form.sendDay && (sendDay < 1 || sendDay > 31)) return alert('발송 일은 1~31 사이로 입력하세요.');
+    } else {
+      // 삽니다: 배송 방법 1개 이상
+      if (deliveryList.length === 0) return alert('배송 방법을 1개 이상 선택하세요.');
     }
 
     setSubmitting(true);
@@ -176,29 +189,31 @@ function WritePostContent() {
       const expireDays = form.type === 'sell' ? SELL_EXPIRE_DAYS : BUY_EXPIRE_DAYS;
       const expiresAt = new Date(Date.now() + expireDays * 86400000).toISOString();
 
-      const sendTag = form.type === 'sell' && sendMonth && sendDay ? `${sendMonth}월 ${sendDay}일 발송` : form.delivery;
+      const sellSendText = form.type === 'sell' && sendMonth && sendDay ? `${sendMonth}월 ${sendDay}일 발송` : '';
+      const dmTags = deliveryList
+        .map((v) => DELIVERY_METHODS.find((d) => d.value === v)?.tag)
+        .filter(Boolean) as string[];
       const payload: Record<string, unknown> = {
         type: form.type as 'sell' | 'buy',
         title: form.title,
         category: form.category,
-        delivery_method: form.deliveryMethod,
-        delivery: form.type === 'sell' ? sendTag : form.delivery,
+        delivery_method: form.deliveryMethod,                 // 콤마 구분 다중 선택
+        delivery: form.type === 'sell' ? (sellSendText || '발송일 협의') : form.delivery, // 삽니다=매입 가능 시간
         region: form.region || null,
         description: form.description || null,
-        tags: [sendTag, form.region ? `#${form.region}` : '', form.deliveryMethod === 'mobile' ? '#모바일' : form.deliveryMethod === 'parcel' ? '#택배' : '#직접만남'].filter(Boolean),
+        tags: [form.type === 'sell' ? sellSendText : '', form.region ? `#${form.region}` : '', ...dmTags].filter(Boolean),
       };
 
+      // 팝니다·삽니다 모두 percentage(판매율/매입률) 사용, 금액 필드는 사용 안 함
+      payload.percentage = percentage;
+      payload.face_value = null;
+      payload.price = null;
       if (form.type === 'sell') {
-        // 팝니다는 percentage + 월/일 사용 (face_value/price는 null)
-        payload.percentage = percentage;
-        payload.send_month = sendMonth;
-        payload.send_day = sendDay;
-        payload.face_value = null;
-        payload.price = null;
+        payload.send_month = sendMonth || null;
+        payload.send_day = sendDay || null;
       } else {
-        // 삽니다는 기존 금액 방식
-        payload.face_value = faceValue;
-        payload.price = price;
+        payload.send_month = null;
+        payload.send_day = null;
       }
 
       // 신규 등록 시에만 만료 시각 설정 (수정 시는 기존 만료 유지)
@@ -342,20 +357,20 @@ function WritePostContent() {
                 <p className="text-[11px] text-zinc-400 mt-1">예: 92 (액면가 대비 92%에 판매)</p>
               </div>
               <div>
-                <label className="block text-[12px] font-medium text-zinc-600 mb-1">발송 예정일 *</label>
+                <label className="block text-[12px] font-medium text-zinc-600 mb-1">발송 예정일 <span className="text-[11px] text-zinc-400 font-normal">(선택·변경 가능)</span></label>
                 <div className="flex items-center gap-2">
                   <input
                     type="number" min={1} max={12}
                     value={form.sendMonth}
                     onChange={(e) => handleChange('sendMonth', e.target.value)}
-                    placeholder="5" className="input w-20" required
+                    placeholder="5" className="input w-20"
                   />
                   <span className="text-[13px] text-zinc-600">월</span>
                   <input
                     type="number" min={1} max={31}
                     value={form.sendDay}
                     onChange={(e) => handleChange('sendDay', e.target.value)}
-                    placeholder="15" className="input w-20" required
+                    placeholder="15" className="input w-20"
                   />
                   <span className="text-[13px] text-zinc-600">일 발송</span>
                 </div>
@@ -366,50 +381,42 @@ function WritePostContent() {
             </>
           ) : (
             <>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[12px] font-medium text-zinc-600 mb-1">개당 상품권 금액 (원) *</label>
-                  <input type="text" inputMode="numeric" value={formatNumber(form.faceValue)}
-                    onChange={(e) => handleChange('faceValue', parseNumber(e.target.value))} placeholder="100,000" className="input" required />
-                </div>
-                <div>
-                  <label className="block text-[12px] font-medium text-zinc-600 mb-1">개당 구매금액 (원) *</label>
-                  <input type="text" inputMode="numeric" value={formatNumber(form.price)}
-                    onChange={(e) => handleChange('price', parseNumber(e.target.value))} placeholder="70,000" className="input" required />
-                </div>
-              </div>
-
-              {faceValue > 0 && price > 0 && (
-                <div className="bg-zinc-50 rounded-md px-4 py-3 text-[13px] border border-zinc-200">
-                  할인율: <span className="text-zinc-900 font-semibold">{discount}%</span>
-                </div>
-              )}
-
               <div>
-                <label className="block text-[12px] font-medium text-zinc-600 mb-1">발송 예정</label>
-                <select value={form.delivery} onChange={(e) => handleChange('delivery', e.target.value)} className="input">
-                  <option value="즉시발송">즉시발송</option>
-                  <option value="3일 이내 발송">3일 이내 발송</option>
-                  <option value="5일 이내 발송">5일 이내 발송</option>
-                  <option value="7일 이내 발송">7일 이내 발송</option>
-                  <option value="14일 이내 발송">14일 이내 발송</option>
-                </select>
+                <label className="block text-[12px] font-medium text-zinc-600 mb-1">매입률 (%) *</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number" min={1} max={200} step="0.1"
+                    value={form.percentage}
+                    onChange={(e) => handleChange('percentage', e.target.value)}
+                    placeholder="90" className="input flex-1" required
+                  />
+                  <span className="text-[14px] font-bold text-accent">%</span>
+                </div>
+                <p className="text-[11px] text-zinc-400 mt-1">예: 90 (액면가 대비 90%에 매입)</p>
+              </div>
+              <div>
+                <label className="block text-[12px] font-medium text-zinc-600 mb-1">매입 가능 시간</label>
+                <input type="text" value={form.delivery} onChange={(e) => handleChange('delivery', e.target.value)}
+                  placeholder="예: 24시간 / 평일 09:00~18:00" className="input" />
               </div>
             </>
           )}
 
           <div>
-            <label className="block text-[12px] font-medium text-zinc-600 mb-1">배송 방법</label>
+            <label className="block text-[12px] font-medium text-zinc-600 mb-1">배송 방법 <span className="text-[11px] text-zinc-400 font-normal">(중복 선택 가능)</span></label>
             <div className="flex gap-2">
-              {[{ value: 'mobile', label: '모바일' }, { value: 'parcel', label: '택배' }, { value: 'direct', label: '직접만남' }].map(opt => (
-                <label key={opt.value} className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-[13px] font-medium rounded-md cursor-pointer transition-colors ${
-                  form.deliveryMethod === opt.value ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'
-                }`}>
-                  <input type="radio" name="deliveryMethod" value={opt.value} checked={form.deliveryMethod === opt.value}
-                    onChange={(e) => handleChange('deliveryMethod', e.target.value)} className="sr-only" />
-                  {opt.label}
-                </label>
-              ))}
+              {DELIVERY_METHODS.map(opt => {
+                const selected = deliveryList.includes(opt.value);
+                return (
+                  <label key={opt.value} className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-[13px] font-medium rounded-md cursor-pointer transition-colors ${
+                    selected ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'
+                  }`}>
+                    <input type="checkbox" checked={selected}
+                      onChange={() => toggleDelivery(opt.value)} className="sr-only" />
+                    {opt.label}
+                  </label>
+                );
+              })}
             </div>
           </div>
 
