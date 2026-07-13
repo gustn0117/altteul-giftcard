@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { PenSquare, Tag, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
+import { PenSquare, Tag, ShoppingCart, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import HomeAside from '@/components/layout/HomeAside';
 import NationalAds from '@/components/home/NationalAds';
 import SellPostItem from '@/components/home/SellPostItem';
@@ -55,11 +55,19 @@ function BoardContent() {
   const [page, setPage] = useState(1);
   // 지역 필터 — 첫 진입 시 자동 '전국'
   const [selectedRegion, setSelectedRegion] = useState<string>('전국');
+  const [buyPublic, setBuyPublic] = useState(true); // 삽니다 연락처 공개 (기본 공개)
   // shuffleSeed: 페이지 진입 / 새로고침 시 새로 생성됨 → 박스광고 매번 다른 순서
   const [shuffleSeed, setShuffleSeed] = useState(0);
 
   useEffect(() => {
     setShuffleSeed(Math.random());
+  }, []);
+
+  useEffect(() => {
+    fetch('/api/settings')
+      .then((r) => r.json())
+      .then((d) => setBuyPublic(d.buy_contact_public !== false))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -165,20 +173,22 @@ function BoardContent() {
               </div>
             </div>
 
-            {/* 지역 탭 — 첫 진입 자동 '전국' */}
-            <div className="mb-4 -mx-1 overflow-x-auto scrollbar-hide">
-              <div className="flex items-center gap-1.5 px-1 min-w-max">
+            {/* 지역 탭 — 격자(줄바꿈), 첫 진입 자동 '전국' */}
+            <div className="mb-4 bg-white border border-gray-200 rounded-xl p-3">
+              <p className="flex items-center gap-1 text-[12.5px] font-bold text-gray-700 mb-2.5">
+                <MapPin size={14} className="text-accent" /> 현재 선택지역 : <span className="text-accent">{selectedRegion}</span>
+              </p>
+              <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5">
                 {REGIONS.map((r) => (
                   <button
                     key={r}
                     type="button"
                     onClick={() => { setSelectedRegion(r); setPage(1); }}
-                    className={`shrink-0 px-3 py-1.5 text-[12px] font-bold rounded-full border transition-colors ${
+                    className={`h-9 text-[12.5px] font-bold rounded-md border transition-colors ${
                       selectedRegion === r
-                        ? 'border-accent bg-accent text-white'
+                        ? 'border-accent bg-accent/5 text-accent'
                         : 'border-gray-200 bg-white text-gray-600 hover:border-accent hover:text-accent'
                     }`}
-                    style={selectedRegion === r ? { color: '#FFFFFF' } : undefined}
                   >
                     {r}
                   </button>
@@ -209,7 +219,7 @@ function BoardContent() {
                 {/* 삽니다 — 박스광고 그리드 */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-5">
                   {pagedPosts.map((post) => (
-                    <BuyPostCard key={post.id} post={post} />
+                    <BuyPostCard key={post.id} post={post} publicContact={buyPublic} />
                   ))}
                 </div>
 

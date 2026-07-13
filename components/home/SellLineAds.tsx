@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { ChevronLeft, ChevronRight, HelpCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, HelpCircle, CheckCircle } from 'lucide-react';
 import type { DBPost, DBUser } from '@/lib/types';
 import { getPosts } from '@/lib/api';
 import { getCache, setCache } from '@/lib/cache';
@@ -66,17 +66,18 @@ export default function SellLineAds() {
           <>
             {pagePosts.map((post, i) => {
               const isNew = Date.now() - new Date(post.created_at).getTime() < 3 * 86400000;
+              const isCompleted = !!post.completed_at;
               return (
                 <div key={post.id}>
                   {i > 0 && <div className="mx-4 h-px bg-gray-200" />}
                   <Link
                     href={`/board/${post.id}`}
-                    className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors"
+                    className={`flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors ${isCompleted ? 'opacity-55 bg-gray-50/40' : ''}`}
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
                         <span className="text-[13.5px] text-gray-800 truncate">{post.title}</span>
-                        {isNew && (
+                        {isNew && !isCompleted && (
                           <span className="shrink-0 text-[9px] font-black text-white bg-orange-500 px-1 py-px rounded-sm">N</span>
                         )}
                       </div>
@@ -86,7 +87,14 @@ export default function SellLineAds() {
                         <span>{extractRegion(post)}</span>
                       </p>
                     </div>
-                    <ChevronRight size={14} className="shrink-0 text-gray-300" />
+                    {/* 거래완료 배지 — 맨 오른쪽 */}
+                    {isCompleted ? (
+                      <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold rounded-full bg-zinc-700 text-white">
+                        <CheckCircle size={11} strokeWidth={3} /> 거래완료
+                      </span>
+                    ) : (
+                      <ChevronRight size={14} className="shrink-0 text-gray-300" />
+                    )}
                   </Link>
                 </div>
               );

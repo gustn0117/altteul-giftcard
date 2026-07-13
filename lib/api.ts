@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { DBPost, DBUser, DBChat, DBMessage, DBNotice, DBPremiumBuyer, DBMainBanner, DBNotification, DBPointTransaction } from './types';
+import type { DBPost, DBUser, DBChat, DBMessage, DBNotice, DBPremiumBuyer, DBMainBanner, DBNotification, DBJumpLog, DBPointTransaction } from './types';
 
 // ─── Posts ───
 
@@ -13,11 +13,12 @@ export async function getPosts(type?: 'sell' | 'buy', opts?: { limit?: number; w
     ? `${POST_BASE_COLS}, author:users!author_id(id, name, type)`
     : POST_BASE_COLS;
   // 블라인드/삭제 제외 (운영자 페이지에서는 includeBlinded=true)
-  // 정렬: 최근 등록순 (created_at desc) — 점프 기능 폐지
+  // 정렬: 점프한 글 우선(last_jumped_at desc, nulls last) → 최근 등록순(created_at desc)
   let q = supabase
     .from('posts')
     .select(selectCols)
     .is('deleted_at', null)
+    .order('last_jumped_at', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
     .limit(limit);
   if (type) q = q.eq('type', type);
@@ -315,7 +316,19 @@ export async function markAllNotificationsRead(userId: string) {
   if (error) throw error;
 }
 
-// ─── Points ───
+// ─── Jump / Points ───
+
+export async function getTodayJumpCount(userId: string, postId: string): Promise<number> {
+  const since = new Date(); since.setHours(0, 0, 0, 0);
+  const { count, error } = await supabase
+    .from('jump_logs')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('post_id', postId)
+    .gte('created_at', since.toISOString());
+  if (error) throw error;
+  return count ?? 0;
+}
 
 export async function getPointTransactions(userId: string, limit = 50): Promise<DBPointTransaction[]> {
   const { data, error } = await supabase

@@ -9,6 +9,8 @@ import { useCallModal } from '@/contexts/CallModalContext';
 
 interface BuyPostCardProps {
   post: DBPost & { author?: DBUser };
+  /** 삽니다 연락처 공개 여부 (관리자 설정). false면 통화/문자 버튼 숨김 → 상세에서 열람 */
+  publicContact?: boolean;
 }
 
 const HASH_BG = {
@@ -24,7 +26,7 @@ const HASH_BG = {
  * 그리드(2~5열)로 배치되며 새로고침마다 랜덤 순서.
  * 표시 정보: 카테고리·제목·태그(지역/배송)·매입가/액면가
  */
-export default function BuyPostCard({ post }: BuyPostCardProps) {
+export default function BuyPostCard({ post, publicContact = true }: BuyPostCardProps) {
   const { openCall } = useCallModal();
   const categoryName = getCategoryName(post.category);
   const brandKey = normalizeBrandKey(categoryName);
@@ -83,8 +85,8 @@ export default function BuyPostCard({ post }: BuyPostCardProps) {
         </div>
       </Link>
 
-      {/* 모바일/공통: 전화·문자 버튼 (연락처 권한 회원만 실제 작동, 비회원은 상세로 라우팅) */}
-      {phone && (
+      {/* 모바일/공통: 전화·문자 버튼 (공개 설정 ON일 때만; OFF면 상세에서 열람) */}
+      {phone && publicContact && (
         <div className="grid grid-cols-2 border-t border-gray-100">
           <button
             type="button"

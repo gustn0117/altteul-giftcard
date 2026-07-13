@@ -38,6 +38,8 @@ export default function AdminPage() {
   const [ads, setAds] = useState<Ad[]>(() => getCache<Ad[]>('admin_ads') ?? []);
   const [visitors, setVisitors] = useState<{ total: number; today: number; trades?: number; last30: { date: string; count: number }[] }>({ total: 0, today: 0, trades: 0, last30: [] });
   const [showStatsEdit, setShowStatsEdit] = useState(false);
+  const [buyContactPublic, setBuyContactPublic] = useState(true);
+  const [settingBusy, setSettingBusy] = useState(false);
   const [statsEdit, setStatsEdit] = useState({ today: 0, total: 0, trades: 0 });
   useEffect(() => { if (!showStatsEdit) setStatsEdit({ today: visitors.today || 0, total: visitors.total || 0, trades: visitors.trades || 0 }); }, [visitors, showStatsEdit]);
   const saveStats = async () => {
@@ -163,6 +165,33 @@ export default function AdminPage() {
   };
 
   useEffect(() => { if (authed) fetchData(); }, [authed]);
+
+  useEffect(() => {
+    if (!authed) return;
+    fetch('/api/admin/settings')
+      .then((r) => r.json())
+      .then((d) => { if (typeof d.buy_contact_public === 'boolean') setBuyContactPublic(d.buy_contact_public); })
+      .catch(() => {});
+  }, [authed]);
+
+  const toggleBuyContactPublic = async () => {
+    if (settingBusy) return;
+    const next = !buyContactPublic;
+    setSettingBusy(true);
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'buy_contact_public', value: next }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '설정 변경 실패');
+      setBuyContactPublic(data.value);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '설정 변경 실패');
+    } finally {
+      setSettingBusy(false);
+    }
+  };
 
   // CRUD helpers - api.ts 함수 사용
   const deleteUser = async (id: string) => { if (!confirm('정말 삭제하시겠습니까?')) return; await apiDeleteUser(id); fetchData(); };
@@ -425,6 +454,30 @@ export default function AdminPage() {
       {/* ─── Overview (종합 대시보드) ─── */}
       {!loading && tab === 'overview' && (
         <div className="space-y-4">
+          {/* 사이트 설정 */}
+          <div className="card p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[13px] font-semibold text-zinc-800">삽니다 연락처 공개</p>
+                <p className="text-[11.5px] text-zinc-500 mt-0.5">
+                  {buyContactPublic
+                    ? '현재 전체공개 — 누구나 삽니다 연락처를 바로 볼 수 있습니다.'
+                    : '현재 비공개 — 삽니다도 팝니다처럼 500P 열람이 필요합니다.'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={toggleBuyContactPublic}
+                disabled={settingBusy}
+                className={`shrink-0 relative w-12 h-7 rounded-full transition-colors disabled:opacity-50 ${buyContactPublic ? 'bg-accent' : 'bg-zinc-300'}`}
+                aria-pressed={buyContactPublic}
+                aria-label="삽니다 연락처 공개 토글"
+              >
+                <span className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white transition-transform ${buyContactPublic ? 'translate-x-5' : ''}`} />
+              </button>
+            </div>
+          </div>
+
           {/* 주요 지표 */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="card p-4">

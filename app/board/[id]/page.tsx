@@ -3,25 +3,16 @@
 import { use, useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Eye, Clock, Pencil, Tag, ShoppingCart, Phone, MessageSquare, CheckCircle, Timer, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Eye, Clock, Pencil, Tag, ShoppingCart, CheckCircle, Timer, RotateCcw } from 'lucide-react';
 import { getPost, togglePostComplete, extendPostExpiry } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
-import { useCallModal } from '@/contexts/CallModalContext';
+import ContactReveal from '@/components/board/ContactReveal';
 import type { DBPost, DBUser } from '@/lib/types';
 import { getCategoryName } from '@/data/mock';
 import { BrandLogo } from '@/components/BrandLogo';
 import HomeAside from '@/components/layout/HomeAside';
 
 type PostWithAuthor = DBPost & { author: DBUser };
-
-function maskPhone(phone: string): string {
-  const digits = phone.replace(/[^0-9]/g, '');
-  if (digits.length < 8) return '연락처 비공개';
-  // 010-****-1234 형식
-  if (digits.length === 11) return `${digits.slice(0, 3)}-****-${digits.slice(7)}`;
-  if (digits.length === 10) return `${digits.slice(0, 3)}-***-${digits.slice(6)}`;
-  return digits.slice(0, 3) + '****' + digits.slice(-4);
-}
 
 function formatRemainingTime(expiresAt: string | null): string | null {
   if (!expiresAt) return null;
@@ -38,11 +29,11 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   const { id } = use(params);
   const router = useRouter();
   const { user, isLoggedIn } = useAuth();
-  const { openCall } = useCallModal();
   const [post, setPost] = useState<PostWithAuthor | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [buyPublic, setBuyPublic] = useState(true); // 삽니다 연락처 공개 설정 (기본 공개)
 
   const reload = useCallback(() => {
     return getPost(id)
@@ -54,6 +45,13 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
     setLoading(true);
     reload().finally(() => setLoading(false));
   }, [reload]);
+
+  useEffect(() => {
+    fetch('/api/settings')
+      .then((r) => r.json())
+      .then((d) => setBuyPublic(d.buy_contact_public !== false))
+      .catch(() => {});
+  }, []);
 
   if (loading) {
     return <div className="container-main py-20 text-center text-gray-400 text-[13px]">불러오는 중...</div>;
@@ -78,22 +76,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
 
   const isCompleted = !!post.completed_at;
   const rawPhone = post.guest_phone || post.author?.phone || '';
-
-  /**
-   * 연락처 노출 정책 (팝니다/sell 글 한정)
-   * - 작성자 본인: 항상 보임
-   * - 글 완료 처리됨 (isCompleted): 누구라도 가림 (작성자 제외)
-   * - 삽니다(buy): 모두 공개
-   * - 팝니다(sell): 로그인 + contact_view_until > now 인 회원만
-   */
-  const now = Date.now();
-  const hasViewPermission = !!user?.contact_view_until && new Date(user.contact_view_until).getTime() > now;
-  const showRealPhone = isAuthor
-    || (!isSell)                                  // 삽니다 = 모두 공개
-    || (!isCompleted && hasViewPermission);       // 팝니다 = 권한 회원만, 완료 시 X
-  const contactPhone = showRealPhone ? rawPhone : '';
   const remaining = formatRemainingTime(post.expires_at);
-  const viewRemainingMs = user?.contact_view_until ? new Date(user.contact_view_until).getTime() - now : 0;
 
   const handleToggleComplete = async () => {
     if (!isAuthor) return;
@@ -126,16 +109,6 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
     }
   };
 
-  const handleCall = () => {
-    if (!contactPhone) return;
-    openCall(authorName, contactPhone);
-  };
-
-  const handleSms = () => {
-    if (!contactPhone) return;
-    window.location.href = `sms:${contactPhone.replace(/[^0-9]/g, '')}`;
-  };
-
   return (
     <div className="container-main py-6">
       <div className="flex items-center justify-between mb-4">
@@ -158,12 +131,6 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                   완료 해제
                 </button>
               )}
-            </div>
-          )}
-          {/* 권한 회원에게: 잔여 시간 표시 */}
-          {isSell && !isAuthor && !isCompleted && hasViewPermission && (
-            <div className="mb-3 px-4 py-2 bg-emerald-50 border border-emerald-200 text-[12px] text-emerald-800 flex items-center gap-2">
-              <Eye size={14} /> 연락처 열람 권한 활성 — 만료까지 <strong>{formatRemainingTime(user!.contact_view_until)}</strong>
             </div>
           )}
           {!isCompleted && !isAuthor && remaining && (
@@ -295,60 +262,20 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
               </div>
             </div>
 
-            {/* CTA */}
-            {!isAuthor && (
-              <div className="px-5 py-5 bg-gray-50 space-y-2">
-                {showRealPhone && rawPhone ? (
-                  <>
-                    <div className="flex items-center justify-center gap-2 py-2 text-[14px] font-bold text-gray-900 whitespace-nowrap">
-                      <Phone size={16} className="text-accent shrink-0" />
-                      <span className="tabular-nums">{rawPhone}</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button onClick={handleCall} className="btn-accent w-full h-11 text-[13px]">
-                        <Phone size={14} /> 전화하기
-                      </button>
-                      <button onClick={handleSms} className="btn-secondary w-full h-11 text-[13px]">
-                        <MessageSquare size={14} /> 문자하기
-                      </button>
-                    </div>
-                    <p className="text-[11px] text-gray-500 text-center leading-relaxed">
-                      {isSell ? '판매자' : '구매자'}에게 직접 전화 또는 문자로 협의하세요.
-                    </p>
-                  </>
-                ) : !showRealPhone && rawPhone ? (
-                  <div className="text-center py-4 space-y-3">
-                    <p className="text-[14px] font-bold text-zinc-500 tabular-nums">{maskPhone(rawPhone)}</p>
-                    {isCompleted ? (
-                      <p className="text-[11px] text-zinc-400">판매완료된 글입니다. 연락처가 비공개되었습니다.</p>
-                    ) : !isLoggedIn ? (
-                      <>
-                        <p className="text-[11.5px] text-zinc-500">연락처는 권한 회원만 볼 수 있습니다.</p>
-                        <Link href={`/login?redirect=${encodeURIComponent(`/board/${id}`)}`}
-                          className="inline-flex items-center gap-1 h-9 px-4 bg-accent hover:bg-blue-700 text-white text-[12.5px] font-bold rounded-full transition-colors">
-                          로그인 →
-                        </Link>
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-[11.5px] text-zinc-500">연락처 열람 권한이 없습니다.</p>
-                        <p className="text-[10.5px] text-zinc-400 leading-relaxed">
-                          매입 업체로 활동하시려면 운영자에게 권한 신청을 해주세요.<br/>
-                          (1일 / 7일 / 30일 단위 부여)
-                        </p>
-                        <Link href="/contact" className="inline-flex items-center gap-1 h-9 px-4 border-2 border-accent text-accent hover:bg-accent hover:text-white text-[12.5px] font-bold rounded-full transition-colors">
-                          권한 문의 →
-                        </Link>
-                      </>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-[12px] text-gray-500 text-center py-4">
-                    연락처가 등록되지 않았습니다.
-                  </p>
-                )}
-              </div>
-            )}
+            {/* 연락처 (팝니다=블라인드+500P 열람 / 삽니다=설정에 따라 공개) */}
+            <div className="px-5 py-5 bg-gray-50">
+              <ContactReveal
+                postId={id}
+                postType={isSell ? 'sell' : 'buy'}
+                rawPhone={rawPhone}
+                authorName={authorName}
+                isAuthor={isAuthor}
+                isCompleted={isCompleted}
+                isLoggedIn={isLoggedIn}
+                currentUserId={user?.id}
+                buyPublic={buyPublic}
+              />
+            </div>
 
             {/* Bottom nav */}
             <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50">
