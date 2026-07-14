@@ -16,7 +16,8 @@ export default function CustomersPage() {
           <h3 className="section-title mb-0">고객별 집계</h3>
         </div>
 
-        <table className="w-full text-[13px]">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[560px] text-[13px] [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
           <thead className="table-header">
             <tr>
               <th className="text-left py-3 px-5">고객명</th>
@@ -53,6 +54,7 @@ export default function CustomersPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </DashboardLayout>
   );

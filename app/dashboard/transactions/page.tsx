@@ -30,7 +30,8 @@ export default function TransactionsPage() {
           </div>
         </div>
 
-        <table className="w-full text-[13px]">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[620px] text-[13px] [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
           <thead className="table-header">
             <tr>
               <th className="text-left py-3 px-5">날짜</th>
@@ -64,6 +65,7 @@ export default function TransactionsPage() {
             ))}
           </tbody>
         </table>
+        </div>
 
         {mockTransactions.length === 0 && (
           <div className="py-20 text-center text-zinc-400 text-[13px]">
