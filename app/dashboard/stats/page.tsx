@@ -145,7 +145,7 @@ export default function StatsPage() {
           <p className="text-[12px] font-semibold text-zinc-700 mb-2">거래 리스트 ({filter === 'all' ? '전체' : STATUS_FILTERS.find(f => f.key === filter)?.label}) — {filteredChats.length}건</p>
           <div className="card overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-[12px]">
+              <table className="w-full text-[12px] nowrap-cells">
                 <thead>
                   <tr className="bg-zinc-50 border-b border-zinc-200">
                     <th className="table-header py-2.5 px-3 text-left">거래ID</th>

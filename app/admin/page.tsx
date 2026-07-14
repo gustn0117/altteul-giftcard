@@ -714,7 +714,7 @@ export default function AdminPage() {
         )}
         <div className="card overflow-hidden">
           <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-[13px] [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
+          <table className="w-full min-w-[720px] text-[13px] nowrap-cells">
             <thead><tr className="bg-zinc-50 border-b border-zinc-200">
               <th className="table-header text-left py-2.5 px-4">유형</th>
               <th className="table-header text-left py-2.5 px-4">제목</th>

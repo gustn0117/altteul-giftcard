@@ -31,28 +31,28 @@ export default function TransactionsPage() {
         </div>
 
         <div className="overflow-x-auto">
-        <table className="w-full min-w-[620px] text-[13px] [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
+        <table className="w-full min-w-[620px] text-[13px]">
           <thead className="table-header">
             <tr>
-              <th className="text-left py-3 px-5">날짜</th>
-              <th className="text-left py-3 px-5">상대방</th>
-              <th className="text-left py-3 px-5">상품</th>
-              <th className="text-right py-3 px-5">금액</th>
-              <th className="text-center py-3 px-5">유형</th>
-              <th className="text-center py-3 px-5">상태</th>
+              <th className="text-left py-3 px-4 whitespace-nowrap">날짜</th>
+              <th className="text-left py-3 px-4 whitespace-nowrap">상대방</th>
+              <th className="text-left py-3 px-4 whitespace-nowrap">상품</th>
+              <th className="text-right py-3 px-4 whitespace-nowrap">금액</th>
+              <th className="text-center py-3 px-4 whitespace-nowrap">유형</th>
+              <th className="text-center py-3 px-4 whitespace-nowrap">상태</th>
             </tr>
           </thead>
           <tbody>
             {mockTransactions.map((tx) => (
               <tr key={tx.id} className="border-b border-zinc-100 hover:bg-zinc-50 cursor-pointer transition-colors">
-                <td className="py-3 px-5 text-zinc-600">{tx.date}</td>
-                <td className="py-3 px-5 text-zinc-700 font-medium">{tx.partner}</td>
-                <td className="py-3 px-5 text-zinc-700">{tx.product}</td>
-                <td className="py-3 px-5 text-right font-medium text-zinc-900">{tx.amount.toLocaleString()}원</td>
-                <td className="py-3 px-5 text-center">
+                <td className="py-3 px-4 whitespace-nowrap text-zinc-600">{tx.date}</td>
+                <td className="py-3 px-4 whitespace-nowrap text-zinc-700 font-medium">{tx.partner}</td>
+                <td className="py-3 px-4 whitespace-nowrap text-zinc-700">{tx.product}</td>
+                <td className="py-3 px-4 whitespace-nowrap text-right font-medium text-zinc-900">{tx.amount.toLocaleString()}원</td>
+                <td className="py-3 px-4 whitespace-nowrap text-center">
                   <span className="badge bg-zinc-100 text-zinc-500">{tx.type}</span>
                 </td>
-                <td className="py-3 px-5 text-center">
+                <td className="py-3 px-4 whitespace-nowrap text-center">
                   <span className={`badge ${
                     tx.status === '완료' ? 'bg-zinc-100 text-zinc-900' :
                     tx.status === '진행중' ? 'bg-blue-50 text-blue-600' :

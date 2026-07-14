@@ -74,6 +74,8 @@ a { color: inherit; text-decoration: none; }
 
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+/* 표 셀 줄바꿈 방지 (가로 스크롤 표에서 글자 세로 깨짐 방지) */
+.nowrap-cells th, .nowrap-cells td { white-space: nowrap; }
 
 .card {
   background: var(--card-bg);

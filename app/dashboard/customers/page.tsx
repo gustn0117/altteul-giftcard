@@ -17,7 +17,7 @@ export default function CustomersPage() {
         </div>
 
         <div className="overflow-x-auto">
-        <table className="w-full min-w-[560px] text-[13px] [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
+        <table className="w-full min-w-[560px] text-[13px] nowrap-cells">
           <thead className="table-header">
             <tr>
               <th className="text-left py-3 px-5">고객명</th>
