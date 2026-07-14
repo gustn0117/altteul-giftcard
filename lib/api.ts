@@ -3,9 +3,9 @@ import type { DBPost, DBUser, DBChat, DBMessage, DBNotice, DBPremiumBuyer, DBMai
 
 // ─── Posts ───
 
-const POST_BASE_COLS = 'id, type, title, category, face_value, price, discount, percentage, send_month, send_day, delivery, delivery_method, region, tags, views, is_active, author_id, guest_name, expires_at, blind_locked, completed_at, deleted_at, last_jumped_at, notified_expiry_at, created_at';
+const POST_BASE_COLS = 'id, type, title, category, face_value, price, discount, percentage, send_month, send_day, delivery, delivery_method, region, tags, views, is_active, author_id, guest_name, expires_at, blind_locked, completed_at, deleted_at, approved_at, last_jumped_at, notified_expiry_at, created_at';
 
-export async function getPosts(type?: 'sell' | 'buy', opts?: { limit?: number; withAuthor?: boolean; includeBlinded?: boolean }) {
+export async function getPosts(type?: 'sell' | 'buy', opts?: { limit?: number; withAuthor?: boolean; includeBlinded?: boolean; includePending?: boolean }) {
   const limit = opts?.limit ?? 100;
   const withAuthor = opts?.withAuthor ?? true;
   const includeBlinded = opts?.includeBlinded ?? false;
@@ -23,6 +23,8 @@ export async function getPosts(type?: 'sell' | 'buy', opts?: { limit?: number; w
     .limit(limit);
   if (type) q = q.eq('type', type);
   if (!includeBlinded) q = q.eq('blind_locked', false);
+  // 삽니다(buy)는 관리자 승인(approved_at)된 글만 노출. 팝니다는 승인 불필요.
+  if (type === 'buy' && !opts?.includePending) q = q.not('approved_at', 'is', null);
   const { data, error } = await q;
   if (error) throw error;
   return (data as unknown) as (DBPost & { author: DBUser })[];

@@ -40,6 +40,7 @@ export default function AdminPage() {
   const [showStatsEdit, setShowStatsEdit] = useState(false);
   const [buyContactPublic, setBuyContactPublic] = useState(true);
   const [settingBusy, setSettingBusy] = useState(false);
+  const [approveDaysMap, setApproveDaysMap] = useState<Record<string, string>>({});
   const [statsEdit, setStatsEdit] = useState({ today: 0, total: 0, trades: 0 });
   useEffect(() => { if (!showStatsEdit) setStatsEdit({ today: visitors.today || 0, total: visitors.total || 0, trades: visitors.trades || 0 }); }, [visitors, showStatsEdit]);
   const saveStats = async () => {
@@ -65,7 +66,7 @@ export default function AdminPage() {
   // Premium buyer form
   const [showPremiumForm, setShowPremiumForm] = useState(false);
   const [editingPremium, setEditingPremium] = useState<DBPremiumBuyer | null>(null);
-  const [premiumForm, setPremiumForm] = useState({ name: '', headline: '', description: '', phone: '', region: '', brands: '', image_url: '', user_id: '', priority: 0, is_active: true, tier: 'standard' as 'premium' | 'standard' | 'basic', buy_rate: '' });
+  const [premiumForm, setPremiumForm] = useState({ name: '', headline: '', description: '', phone: '', region: '', brands: '', image_url: '', user_id: '', priority: 0, is_active: true, tier: 'standard' as 'premium' | 'standard' | 'basic', buy_rate: '', is_best: false });
 
   // Ad form
   const [showAdForm, setShowAdForm] = useState(false);
@@ -196,6 +197,14 @@ export default function AdminPage() {
   // CRUD helpers - api.ts 함수 사용
   const deleteUser = async (id: string) => { if (!confirm('정말 삭제하시겠습니까?')) return; await apiDeleteUser(id); fetchData(); };
   const deletePost = async (id: string) => { if (!confirm('게시글을 삭제하시겠습니까?')) return; await apiDeletePost(id); fetchData(); };
+  const approveBuyPost = async (id: string, days: number) => {
+    if (!days || days <= 0) return alert('게시 기간(일)을 입력하세요.');
+    const now = new Date();
+    const expires = new Date(now.getTime() + days * 86400000).toISOString();
+    const { error } = await supabase.from('posts').update({ approved_at: now.toISOString(), expires_at: expires, is_active: true, updated_at: now.toISOString() }).eq('id', id);
+    if (error) return alert('승인 실패: ' + error.message);
+    fetchData();
+  };
   const deleteNotice = async (id: string) => { if (!confirm('공지를 삭제하시겠습니까?')) return; await apiDeleteNotice(id); fetchData(); };
   const addNotice = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -243,11 +252,11 @@ export default function AdminPage() {
   useEffect(() => { msgEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [chatMessages]);
 
   // Premium Buyer CRUD
-  const resetPremiumForm = () => { setPremiumForm({ name: '', headline: '', description: '', phone: '', region: '', brands: '', image_url: '', user_id: '', priority: 0, is_active: true, tier: 'standard', buy_rate: '' }); setEditingPremium(null); setShowPremiumForm(false); };
-  const startEditPremium = (b: DBPremiumBuyer) => { setPremiumForm({ name: b.name, headline: b.headline || '', description: b.description, phone: b.phone, region: b.region, brands: b.brands?.join(', ') || '', image_url: b.image_url, user_id: b.user_id || '', priority: b.priority, is_active: b.is_active, tier: b.tier || 'standard', buy_rate: b.buy_rate != null ? String(b.buy_rate) : '' }); setEditingPremium(b); setShowPremiumForm(true); };
+  const resetPremiumForm = () => { setPremiumForm({ name: '', headline: '', description: '', phone: '', region: '', brands: '', image_url: '', user_id: '', priority: 0, is_active: true, tier: 'standard', buy_rate: '', is_best: false }); setEditingPremium(null); setShowPremiumForm(false); };
+  const startEditPremium = (b: DBPremiumBuyer) => { setPremiumForm({ name: b.name, headline: b.headline || '', description: b.description, phone: b.phone, region: b.region, brands: b.brands?.join(', ') || '', image_url: b.image_url, user_id: b.user_id || '', priority: b.priority, is_active: b.is_active, tier: b.tier || 'standard', buy_rate: b.buy_rate != null ? String(b.buy_rate) : '', is_best: b.is_best ?? false }); setEditingPremium(b); setShowPremiumForm(true); };
   const savePremium = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = { name: premiumForm.name, headline: premiumForm.headline.trim() || null, description: premiumForm.description, phone: premiumForm.phone, region: premiumForm.region, brands: premiumForm.brands.split(',').map(s => s.trim()).filter(Boolean), image_url: premiumForm.image_url, user_id: premiumForm.user_id || null, priority: premiumForm.priority, is_active: premiumForm.is_active, tier: premiumForm.tier, buy_rate: premiumForm.buy_rate === '' ? null : Number(premiumForm.buy_rate) };
+    const payload = { name: premiumForm.name, headline: premiumForm.headline.trim() || null, description: premiumForm.description, phone: premiumForm.phone, region: premiumForm.region, brands: premiumForm.brands.split(',').map(s => s.trim()).filter(Boolean), image_url: premiumForm.image_url, user_id: premiumForm.user_id || null, priority: premiumForm.priority, is_active: premiumForm.is_active, tier: premiumForm.tier, buy_rate: premiumForm.buy_rate === '' ? null : Number(premiumForm.buy_rate), is_best: premiumForm.is_best };
     if (editingPremium) {
       await updatePremiumBuyer(editingPremium.id, payload);
     } else {
@@ -681,8 +690,31 @@ export default function AdminPage() {
 
       {/* ─── Posts ─── */}
       {!loading && tab === 'posts' && (
+        <div className="space-y-4">
+        {posts.some(p => p.type === 'buy' && !p.approved_at && !p.deleted_at) && (
+          <div className="card p-4 border border-amber-200 bg-amber-50/40">
+            <h3 className="text-[13px] font-bold text-amber-800 mb-3">🕒 삽니다 승인 대기 ({posts.filter(p => p.type === 'buy' && !p.approved_at && !p.deleted_at).length})</h3>
+            <div className="space-y-2">
+              {posts.filter(p => p.type === 'buy' && !p.approved_at && !p.deleted_at).map(p => (
+                <div key={p.id} className="flex flex-wrap items-center gap-2 bg-white border border-amber-200 rounded-md px-3 py-2">
+                  <span className="text-[12px] font-medium flex-1 min-w-[140px] truncate">{p.title} <span className="text-zinc-400 font-normal">/ {p.author?.name || '비회원'} / {getCategoryName(p.category)}{p.percentage != null ? ` / 매입 ${p.percentage}%` : ''}</span></span>
+                  {[20, 25, 30].map(d => (
+                    <button key={d} type="button" onClick={() => approveBuyPost(p.id, d)}
+                      className="h-8 px-2.5 text-[12px] font-bold border border-amber-300 rounded hover:bg-amber-100">{d}일</button>
+                  ))}
+                  <input type="number" min={1} placeholder="직접(일)" value={approveDaysMap[p.id] ?? ''}
+                    onChange={e => setApproveDaysMap(m => ({ ...m, [p.id]: e.target.value }))} className="input h-8 w-20" />
+                  <button type="button" onClick={() => approveBuyPost(p.id, Number(approveDaysMap[p.id]))}
+                    className="h-8 px-3 text-[12px] font-bold bg-accent text-white rounded hover:bg-blue-700">승인</button>
+                  <button type="button" onClick={() => deletePost(p.id)} className="h-8 px-1.5 text-red-400 hover:text-red-600"><Trash2 size={14} /></button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="card overflow-hidden">
-          <table className="w-full text-[13px]">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[720px] text-[13px] [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
             <thead><tr className="bg-zinc-50 border-b border-zinc-200">
               <th className="table-header text-left py-2.5 px-4">유형</th>
               <th className="table-header text-left py-2.5 px-4">제목</th>
@@ -696,7 +728,7 @@ export default function AdminPage() {
             <tbody>
               {posts.map(p => (
                 <tr key={p.id} className="border-b border-zinc-100 hover:bg-zinc-50">
-                  <td className="py-2.5 px-4"><span className={`badge ${p.type === 'sell' ? 'bg-blue-50 text-blue-600' : 'bg-zinc-100 text-zinc-500'}`}>{p.type === 'sell' ? '판매' : '구매'}</span></td>
+                  <td className="py-2.5 px-4"><span className={`badge ${p.type === 'sell' ? 'bg-blue-50 text-blue-600' : 'bg-zinc-100 text-zinc-500'}`}>{p.type === 'sell' ? '판매' : '구매'}</span>{p.type === 'buy' && !p.approved_at && <span className="ml-1 badge bg-amber-50 text-amber-600">승인대기</span>}</td>
                   <td className="py-2.5 px-4 font-medium">{p.title}</td>
                   <td className="py-2.5 px-4 text-zinc-500">{getCategoryName(p.category)}</td>
                   <td className="py-2.5 px-4 text-right font-medium">{p.percentage != null ? `${p.percentage}%` : `${(p.price ?? 0).toLocaleString()}원`}</td>
@@ -709,6 +741,8 @@ export default function AdminPage() {
               {posts.length === 0 && <tr><td colSpan={8} className="py-8 text-center text-zinc-400">게시글이 없습니다.</td></tr>}
             </tbody>
           </table>
+          </div>
+        </div>
         </div>
       )}
 
@@ -1030,9 +1064,12 @@ export default function AdminPage() {
                   <label className="block text-[11px] font-medium text-zinc-500 mb-1">우선순위</label>
                   <input type="number" value={premiumForm.priority} onChange={e => setPremiumForm(p => ({ ...p, priority: Number(e.target.value) }))} className="input h-9" />
                 </div>
-                <div className="flex items-end pb-0.5">
+                <div className="flex items-end pb-0.5 gap-3">
                   <label className="flex items-center gap-1.5 text-[12px] text-zinc-600">
                     <input type="checkbox" checked={premiumForm.is_active} onChange={e => setPremiumForm(p => ({ ...p, is_active: e.target.checked }))} className="w-3.5 h-3.5" /> 활성화
+                  </label>
+                  <label className="flex items-center gap-1.5 text-[12px] text-amber-700 font-bold">
+                    <input type="checkbox" checked={premiumForm.is_best} onChange={e => setPremiumForm(p => ({ ...p, is_best: e.target.checked }))} className="w-3.5 h-3.5" /> 이달의 BEST
                   </label>
                 </div>
               </div>

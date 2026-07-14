@@ -31,6 +31,8 @@ export interface DBPost {
   completed_at: string | null;
   /** soft-delete 시각 (30일 자동삭제 등) */
   deleted_at: string | null;
+  /** 삽니다 승인 시각 — null이면 승인 대기(미노출) */
+  approved_at?: string | null;
   /** 마지막 점프 시각 — 정렬 우선순위 */
   last_jumped_at: string | null;
   /** 만료 1시간 전 알림 발송 시각 */
@@ -157,6 +159,8 @@ export interface DBPremiumBuyer {
   tier: 'premium' | 'standard' | 'basic';
   /** 카드에 표시할 매입률(%) — 관리자 설정 */
   buy_rate?: number | null;
+  /** 이달의 Best 업체 여부 — 관리자 지정 */
+  is_best?: boolean;
   created_at: string;
   updated_at: string;
 }

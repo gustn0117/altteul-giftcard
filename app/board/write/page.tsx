@@ -217,7 +217,11 @@ function WritePostContent() {
       }
 
       // 신규 등록 시에만 만료 시각 설정 (수정 시는 기존 만료 유지)
-      if (!isEdit) payload.expires_at = expiresAt;
+      if (!isEdit) {
+        payload.expires_at = expiresAt;
+        // 삽니다는 관리자 승인 전까지 미노출(approved_at null), 팝니다는 자동 승인
+        payload.approved_at = form.type === 'buy' ? null : new Date().toISOString();
+      }
 
       if (isLoggedIn && user) {
         payload.author_id = user.id;
@@ -235,6 +239,9 @@ function WritePostContent() {
         router.push(`/board/${editId}`);
       } else {
         const created = await createPost(payload);
+        if (form.type === 'buy') {
+          alert('구매글이 등록되었습니다. 관리자 승인(게시 기간 설정) 후 노출됩니다.');
+        }
         router.push(`/board/${created.id}`);
       }
     } catch (err: unknown) {
