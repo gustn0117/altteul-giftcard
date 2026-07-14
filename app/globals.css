@@ -63,7 +63,11 @@ html { scroll-behavior: smooth; }
   outline-offset: 2px;
 }
 
-a { color: inherit; text-decoration: none; }
+/* @layer base 안에 둬야 링크의 text-white/text-accent 등 유틸리티가 이 규칙을 덮어씀
+   (Tailwind v4: 레이어 밖 규칙이 유틸리티를 이겨서 dark-on-dark 버튼 발생하던 문제) */
+@layer base {
+  a { color: inherit; text-decoration: none; }
+}
 
 .line-clamp-2 {
   display: -webkit-box;
