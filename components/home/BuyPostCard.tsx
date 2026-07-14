@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Phone, MessageSquare, MapPin } from 'lucide-react';
+import { Phone, Search, MapPin } from 'lucide-react';
 import type { DBPost, DBUser } from '@/lib/types';
 import { getCategoryName } from '@/data/mock';
 import { BRAND_STYLES, normalizeBrandKey } from '@/components/BrandLogo';
@@ -32,7 +32,6 @@ export default function BuyPostCard({ post, publicContact = true }: BuyPostCardP
   const brandKey = normalizeBrandKey(categoryName);
   const bs = BRAND_STYLES[brandKey];
   const phone = post.guest_phone || post.author?.phone || '';
-  const phoneDigits = phone.replace(/[^0-9]/g, '');
   const region = post.tags?.find((t) => /서울|경기|부산|대구|광주|인천|대전|울산|제주|전국/.test(t))?.replace(/^#/, '') || '전국';
 
   return (
@@ -85,25 +84,31 @@ export default function BuyPostCard({ post, publicContact = true }: BuyPostCardP
         </div>
       </Link>
 
-      {/* 모바일/공통: 전화·문자 버튼 (공개 설정 ON일 때만; OFF면 상세에서 열람) */}
-      {phone && publicContact && (
-        <div className="grid grid-cols-2 border-t border-gray-100">
+      {/* 상세보기 / 통화하기 (메인광고 카드와 동일 스타일) */}
+      <div className="grid grid-cols-2 border-t border-gray-100">
+        <Link
+          href={`/board/${post.id}`}
+          className="flex items-center justify-center gap-1 py-2 text-[11.5px] font-bold text-gray-600 bg-white hover:bg-gray-50 transition-colors border-r border-gray-100"
+        >
+          <Search size={12} /> 상세보기
+        </Link>
+        {phone && publicContact ? (
           <button
             type="button"
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); openCall(post.author?.name || post.guest_name || '업체', phone); }}
-            className="flex items-center justify-center gap-1 py-1.5 text-[10.5px] font-bold text-accent bg-white hover:bg-blue-50 transition-colors border-r border-gray-100"
+            className="flex items-center justify-center gap-1 py-2 text-[11.5px] font-bold text-white bg-accent hover:bg-blue-700 transition-colors"
           >
-            <Phone size={11} /> 통화
+            <Phone size={12} /> 통화하기
           </button>
-          <a
-            href={`sms:${phoneDigits}`}
-            onClick={(e) => e.stopPropagation()}
-            className="flex items-center justify-center gap-1 py-1.5 text-[10.5px] font-bold text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+        ) : (
+          <Link
+            href={`/board/${post.id}`}
+            className="flex items-center justify-center gap-1 py-2 text-[11.5px] font-bold text-white bg-accent hover:bg-blue-700 transition-colors"
           >
-            <MessageSquare size={11} /> 문자
-          </a>
-        </div>
-      )}
+            <Phone size={12} /> 통화하기
+          </Link>
+        )}
+      </div>
     </div>
   );
 }
