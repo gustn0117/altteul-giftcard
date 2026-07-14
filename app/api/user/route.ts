@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   const supabase = createServiceClient();
   const { data, error } = await supabase
     .from('users')
-    .select('id, email, name, phone, type, representative, messenger, messenger_id, created_at, updated_at')
+    .select('id, email, name, phone, type, points, representative, messenger, messenger_id, created_at, updated_at')
     .eq('id', id)
     .maybeSingle();
 

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Search, Menu, X, MapPin, Tag as TagIcon, Star,
   LogIn, UserPlus, LayoutDashboard, PenSquare, Megaphone, ShieldAlert, HelpCircle,
@@ -31,6 +31,17 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [fullMenuOpen, setFullMenuOpen] = useState(false);
+  const [points, setPoints] = useState<number | null>(null);
+
+  // 로그인 시 최신 포인트 잔액 조회
+  useEffect(() => {
+    if (!isLoggedIn || !user?.id) { setPoints(null); return; }
+    setPoints(typeof user.points === 'number' ? user.points : null);
+    fetch(`/api/user?id=${user.id}`)
+      .then((r) => r.json())
+      .then((d) => { if (typeof d.user?.points === 'number') setPoints(d.user.points); })
+      .catch(() => {});
+  }, [isLoggedIn, user?.id, user?.points]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,6 +86,12 @@ export default function Header() {
               <span className="w-px h-4 bg-gray-200" aria-hidden />
               {isLoggedIn ? (
                 <>
+                  {points != null && (
+                    <span className="inline-flex items-baseline gap-1 h-9 px-2.5 text-[12.5px] font-bold text-accent">
+                      <span className="text-[10px] text-gray-400 font-medium">포인트</span>
+                      <span className="tabular-nums">{points.toLocaleString()}P</span>
+                    </span>
+                  )}
                   <Link href="/dashboard"
                     className="inline-flex items-center gap-1.5 h-9 px-3.5 text-[13px] font-bold text-gray-800 hover:text-accent transition-colors">
                     <LayoutDashboard size={14} />
@@ -144,12 +161,18 @@ export default function Header() {
       <div className="md:hidden">
         <div className="container-main">
           <div className="grid grid-cols-[1fr_auto_1fr] items-center h-18 gap-1">
-            {/* 좌: 검색 아이콘만 */}
-            <div className="flex items-center justify-start">
+            {/* 좌: 검색 아이콘 + 포인트(로그인 시) */}
+            <div className="flex items-center justify-start gap-1.5 min-w-0">
               <Link href="/search" aria-label="검색"
-                className="inline-flex items-center justify-center w-10 h-10 border border-gray-200 rounded-md text-gray-700 hover:border-accent hover:text-accent transition-colors">
+                className="shrink-0 inline-flex items-center justify-center w-10 h-10 border border-gray-200 rounded-md text-gray-700 hover:border-accent hover:text-accent transition-colors">
                 <Search size={18} strokeWidth={1.8} />
               </Link>
+              {isLoggedIn && points != null && (
+                <Link href="/dashboard" className="flex flex-col leading-none min-w-0" aria-label="내 포인트">
+                  <span className="text-[9px] text-gray-400">포인트</span>
+                  <span className="text-[12.5px] font-extrabold text-accent tabular-nums truncate">{points.toLocaleString()}P</span>
+                </Link>
+              )}
             </div>
             {/* 중앙: 로고 (정중앙) */}
             <Link href="/" className="flex items-center justify-center">
