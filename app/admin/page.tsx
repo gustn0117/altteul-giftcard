@@ -919,8 +919,8 @@ export default function AdminPage() {
                   <div key={c.id} onClick={() => openChatViewer(c)}
                     className={`px-4 py-3 cursor-pointer hover:bg-zinc-50 transition-colors ${isViewing ? 'bg-zinc-100' : ''}`}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[13px] font-medium text-zinc-800 truncate">{postTitle}</span>
-                      <div className="flex items-center gap-1.5">
+                      <span className="text-[13px] font-medium text-zinc-800 truncate min-w-0">{postTitle}</span>
+                      <div className="flex items-center gap-1.5 shrink-0">
                         <span className="badge bg-zinc-100 text-zinc-500">{c.current_step}/{c.trade_type === 'escrow' ? 8 : 6}</span>
                         {c.trade_type === 'escrow' && <span className="badge bg-blue-50 text-blue-500">중개</span>}
                         <button onClick={(e) => { e.stopPropagation(); deleteChat(c.id); }} className="text-red-400 hover:text-red-600"><Trash2 size={12} /></button>

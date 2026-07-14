@@ -37,7 +37,7 @@ export default function NationalAds() {
             return (
               <div
                 key={pos}
-                className="aspect-3/1 border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center text-[12px] text-gray-400 rounded-lg"
+                className="aspect-2/1 md:aspect-3/1 border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center text-[12px] text-gray-400 rounded-lg"
               >
                 전국광고 모집중 ({pos}/4)
               </div>
@@ -45,7 +45,7 @@ export default function NationalAds() {
           }
           const inner = (
             <div
-              className="relative aspect-3/1 flex items-center justify-center px-4 text-white overflow-hidden border-2 border-gray-900 rounded-lg shadow-md hover:shadow-lg transition-shadow"
+              className="relative aspect-2/1 md:aspect-3/1 flex items-center justify-center px-4 text-white overflow-hidden border-2 border-gray-900 rounded-lg shadow-md hover:shadow-lg transition-shadow"
               style={{ background: b.bg_color || '#1E3A8A' }}
             >
               {b.image_url && (

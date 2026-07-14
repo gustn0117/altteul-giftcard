@@ -58,7 +58,7 @@ export default function AdminPointsPage() {
           <h1 className="text-[18px] font-bold text-gray-800 ml-3 flex items-center gap-2"><CircleDollarSign size={18} className="text-accent"/>포인트 관리</h1>
         </div>
         <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="이름/이메일 검색"
-          className="h-9 px-3 border border-gray-300 text-[13px] w-60 focus:border-accent focus:outline-none"/>
+          className="h-9 px-3 border border-gray-300 text-[13px] w-32 sm:w-60 focus:border-accent focus:outline-none"/>
       </div>
 
       <div className="bg-white border border-gray-200">

@@ -393,7 +393,7 @@ export default function AdvertisingPage() {
               type="checkbox"
               checked={form.agree}
               onChange={e => setForm(p => ({ ...p, agree: e.target.checked }))}
-              className="mt-0.5 w-3.5 h-3.5"
+              className="mt-0.5 w-3.5 h-3.5 shrink-0"
             />
             <span>
               개인정보 수집·이용에 동의합니다. (수집 항목: 이름·연락처·이메일. 이용 목적: 광고 문의 응대. 보유 기간: 3년)
