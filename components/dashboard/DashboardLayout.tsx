@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Calendar, FileText, Users, BarChart3, Building2, Globe, PenSquare, TrendingUp, Eye, MessageCircle } from 'lucide-react';
+import { LayoutDashboard, Calendar, FileText, Users, BarChart3, Building2, Globe, PenSquare, TrendingUp, Eye } from 'lucide-react';
 
 const navItems = [
   { href: '/dashboard', label: '현황', icon: LayoutDashboard },
@@ -26,12 +26,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <h1 className="text-lg font-bold text-zinc-900">업체 관리</h1>
           <p className="text-[12px] text-zinc-500">업체 정보와 상품을 관리할 수 있습니다.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Link href="/buyer/me" className="btn-secondary text-[11px] h-[30px] px-3 gap-1">
+        <div className="flex items-center gap-2 shrink-0">
+          <Link href="/buyer/me" className="btn-secondary text-[11px] h-[30px] px-3 gap-1 whitespace-nowrap shrink-0">
             <Eye size={12} />내 페이지 보기
-          </Link>
-          <Link href="/chat" className="btn-secondary text-[11px] h-[30px] px-3 gap-1">
-            <MessageCircle size={12} />내 거래
           </Link>
         </div>
       </div>

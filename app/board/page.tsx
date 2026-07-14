@@ -153,20 +153,20 @@ function BoardContent() {
                 </Link>
               </div>
 
-              <div className="flex items-center justify-between px-4 py-2.5 bg-gray-50">
-                <span className="text-[11.5px] text-gray-600">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-4 py-2.5 bg-gray-50">
+                <span className="text-[11.5px] text-gray-500 min-w-0">
                   {activeTab === 'buy'
-                    ? `박스광고 — 새로고침마다 순서가 바뀝니다. 50개당 한 묶음`
-                    : '최신 등록순 — 최근에 올린 글이 위로'}
+                    ? '박스광고 · 새로고침마다 순서가 바뀝니다'
+                    : '최신 등록순 · 최근 글이 위로'}
                 </span>
                 {writeType === 'buy' && !isLoggedIn ? (
                   <Link href={`/login?redirect=${encodeURIComponent('/board/write?type=buy')}`}
-                    className="inline-flex items-center gap-1 h-8 px-3 bg-accent text-white text-[12px] font-bold rounded-md">
+                    className="shrink-0 self-start sm:self-auto whitespace-nowrap inline-flex items-center gap-1 h-8 px-3 bg-accent text-white text-[12px] font-bold rounded-md hover:bg-blue-700 transition-colors">
                     <PenSquare size={11} /> 로그인 후 {writeLabel}
                   </Link>
                 ) : (
                   <Link href={`/board/write?type=${writeType}`}
-                    className="inline-flex items-center gap-1 h-8 px-3 bg-accent text-white text-[12px] font-bold rounded-md hover:bg-blue-700 transition-colors">
+                    className="shrink-0 self-start sm:self-auto whitespace-nowrap inline-flex items-center gap-1 h-8 px-3 bg-accent text-white text-[12px] font-bold rounded-md hover:bg-blue-700 transition-colors">
                     <PenSquare size={11} /> {writeLabel}
                   </Link>
                 )}
