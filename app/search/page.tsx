@@ -146,7 +146,7 @@ function SearchContent() {
           {/* Tabs */}
           {q && (
             <div className="bg-white border border-gray-200 mb-4">
-              <div className="flex border-b border-gray-200">
+              <div className="flex border-b border-gray-200 overflow-x-auto scrollbar-hide">
                 {TAB_META.map(({ value, label, Icon }) => {
                   const count =
                     value === 'all' ? total
@@ -158,7 +158,7 @@ function SearchContent() {
                     <button
                       key={value}
                       onClick={() => changeTab(value)}
-                      className={`flex-1 py-3 text-center text-[13px] transition-colors flex items-center justify-center gap-1.5 ${
+                      className={`shrink-0 whitespace-nowrap px-4 py-3 text-center text-[13px] transition-colors flex items-center justify-center gap-1 ${
                         active
                           ? 'font-bold text-accent border-b-2 border-accent bg-accent/5'
                           : 'text-gray-500 hover:text-accent'

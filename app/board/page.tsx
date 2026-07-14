@@ -259,21 +259,21 @@ function BoardContent() {
 
             {/* 페이지네이션 */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-1 px-4 py-4 mt-3 border-t border-gray-100">
+              <div className="flex flex-wrap items-center justify-center gap-1 px-4 py-4 mt-3 border-t border-gray-100">
                 <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
-                  className="w-8 h-8 flex items-center justify-center border border-gray-200 rounded text-gray-500 hover:border-accent hover:text-accent disabled:opacity-30">
+                  className="shrink-0 w-8 h-8 flex items-center justify-center border border-gray-200 rounded text-gray-500 hover:border-accent hover:text-accent disabled:opacity-30">
                   <ChevronLeft size={13} />
                 </button>
                 {Array.from({ length: totalPages }, (_, i) => i + 1).slice(0, 10).map((p) => (
                   <button key={p} onClick={() => setPage(p)}
-                    className={`w-8 h-8 text-[12px] border rounded ${
+                    className={`shrink-0 w-8 h-8 text-[12px] border rounded ${
                       p === page ? 'border-accent bg-accent text-white font-bold' : 'border-gray-200 text-gray-600 hover:border-accent hover:text-accent'
                     }`}>
                     {p}
                   </button>
                 ))}
                 <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-                  className="w-8 h-8 flex items-center justify-center border border-gray-200 rounded text-gray-500 hover:border-accent hover:text-accent disabled:opacity-30">
+                  className="shrink-0 w-8 h-8 flex items-center justify-center border border-gray-200 rounded text-gray-500 hover:border-accent hover:text-accent disabled:opacity-30">
                   <ChevronRight size={13} />
                 </button>
               </div>

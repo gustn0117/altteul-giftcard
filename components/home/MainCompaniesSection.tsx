@@ -70,7 +70,7 @@ export default function MainCompaniesSection({ buyers, loading }: Props) {
           </div>
 
           {totalPages > 1 && (
-            <div className="mt-4 flex items-center justify-center gap-1.5">
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-1.5">
               <button
                 type="button"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}

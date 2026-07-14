@@ -109,10 +109,10 @@ export default function VisitorCounter() {
 
 function Stat({ label, value, unit }: { label: string; value: number; unit: string }) {
   return (
-    <div className="flex items-center justify-center gap-2 py-2 px-2">
-      <span className="text-[10.5px] text-gray-500 font-medium">{label}</span>
-      <span className="w-px h-3 bg-gray-300" aria-hidden />
-      <span className="text-[13px] md:text-[14.5px] font-extrabold text-gray-900 tabular-nums">
+    <div className="flex items-center justify-center gap-1.5 py-2 px-2">
+      <span className="text-[10.5px] text-gray-500 font-medium whitespace-nowrap shrink-0">{label}</span>
+      <span className="w-px h-3 bg-gray-300 shrink-0" aria-hidden />
+      <span className="text-[13px] md:text-[14.5px] font-extrabold text-gray-900 tabular-nums whitespace-nowrap">
         {value.toLocaleString()}
         <span className="text-[10px] text-gray-400 font-normal ml-0.5">{unit}</span>
       </span>

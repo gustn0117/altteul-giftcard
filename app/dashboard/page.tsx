@@ -93,18 +93,18 @@ export default function DashboardPage() {
               const statusLabel = chat.current_step >= 6 ? '거래완료' : chat.current_step >= 2 ? '거래중' : '견적대기';
               return (
                 <Link key={chat.id} href={`/chat/${chat.id}`} className="block card card-hover p-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className={`badge ${
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <span className={`shrink-0 badge ${
                         statusLabel === '거래완료' ? 'bg-zinc-100 text-zinc-900' :
                         statusLabel === '거래중' ? 'bg-blue-50 text-blue-600' :
                         'bg-yellow-50 text-yellow-600'
                       }`}>{statusLabel}</span>
-                      <span className="text-[13px] text-zinc-800">{chat.post?.title ?? '삭제된 게시글'}</span>
+                      <span className="text-[13px] text-zinc-800 truncate">{chat.post?.title ?? '삭제된 게시글'}</span>
                     </div>
-                    <div className="flex items-center gap-3 text-[11px] text-zinc-400">
-                      <span>{partner?.name ?? '알 수 없음'}</span>
-                      <span>{new Date(chat.updated_at).toLocaleDateString('ko-KR')}</span>
+                    <div className="flex items-center gap-2 text-[11px] text-zinc-400 shrink-0">
+                      <span className="max-w-20 truncate">{partner?.name ?? '알 수 없음'}</span>
+                      <span className="whitespace-nowrap">{new Date(chat.updated_at).toLocaleDateString('ko-KR')}</span>
                     </div>
                   </div>
                 </Link>
