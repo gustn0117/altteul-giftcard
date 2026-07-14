@@ -75,8 +75,8 @@ export default function SellLineAds() {
                     className={`flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors ${isCompleted ? 'opacity-55 bg-gray-50/40' : ''}`}
                   >
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[13.5px] text-gray-800 truncate">{post.title}</span>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="text-[13.5px] text-gray-800 truncate min-w-0">{post.title}</span>
                         {isNew && !isCompleted && (
                           <span className="shrink-0 text-[9px] font-black text-white bg-orange-500 px-1 py-px rounded-sm">N</span>
                         )}

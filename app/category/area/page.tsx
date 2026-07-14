@@ -128,7 +128,7 @@ function AreaContent() {
               {selectedRegion === '전체' ? '전국' : selectedRegion} <span className="text-accent">업체 등록 현황</span>
               <span className="text-[12px] text-gray-400 ml-2">{filteredBuyers.length}건</span>
             </h2>
-            <Link href="/advertising" className="text-[11px] text-gray-400 hover:text-accent">광고문의</Link>
+            <Link href="/advertising" className="shrink-0 whitespace-nowrap text-[11px] text-gray-400 hover:text-accent">광고문의</Link>
           </div>
 
           {/* Company cards grid */}

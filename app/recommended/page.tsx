@@ -40,7 +40,7 @@ export default function RecommendedPage() {
           {/* Hero stripe */}
           <div className="mb-5 p-5 bg-gradient-to-r from-accent to-accent-light text-white">
             <div className="flex items-center gap-3">
-              <Sparkles size={22} />
+              <Sparkles size={22} className="shrink-0" />
               <div>
                 <p className="text-[16px] font-bold">오늘의 추천업체</p>
                 <p className="text-[12px] opacity-90">우선순위 및 등급 기준으로 엄선된 업체를 소개합니다</p>

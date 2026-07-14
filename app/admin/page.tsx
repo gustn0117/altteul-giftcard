@@ -376,7 +376,7 @@ export default function AdminPage() {
         </a>
       </div>
 
-      <div className="grid grid-cols-4 md:grid-cols-8 gap-2 mb-5">
+      <div className="grid grid-cols-3 md:grid-cols-8 gap-2 mb-5">
         {tabs.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)}
             className={`card card-hover p-3 text-left ${tab === t.key ? 'border-zinc-900' : ''}`}>
@@ -450,7 +450,7 @@ export default function AdminPage() {
               );
             })}
           </div>
-          <div className="flex justify-between mt-1.5 text-[9px] text-zinc-400">
+          <div className="flex justify-between mt-1.5 text-[10px] text-zinc-400">
             <span>{visitors.last30[0]?.date.slice(5)}</span>
             <span>최근 30일</span>
             <span>{visitors.last30[visitors.last30.length - 1]?.date.slice(5)}</span>
@@ -749,8 +749,8 @@ export default function AdminPage() {
       {/* ─── Community ─── */}
       {!loading && tab === 'community' && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex gap-1">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap gap-1">
               {([
                 { k: 'all' as const, label: '전체' },
                 { k: 'news' as const, label: '업계뉴스' },
@@ -1042,7 +1042,7 @@ export default function AdminPage() {
               <div>
                 <ImageUpload label="업체 이미지" folder="buyers" value={premiumForm.image_url} onChange={(url) => setPremiumForm(p => ({ ...p, image_url: url }))} />
               </div>
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div>
                   <label className="block text-[11px] font-medium text-zinc-500 mb-1">연결 회원 (선택)</label>
                   <select value={premiumForm.user_id} onChange={e => setPremiumForm(p => ({ ...p, user_id: e.target.value }))} className="input h-9">
@@ -1175,7 +1175,7 @@ export default function AdminPage() {
                   <input value={adForm.link_url} onChange={e => setAdForm(p => ({ ...p, link_url: e.target.value }))} className="input" placeholder="https://..." />
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-[12px] font-medium text-zinc-600 mb-1">시작일</label>
                   <input type="date" value={adForm.start_date} onChange={e => setAdForm(p => ({ ...p, start_date: e.target.value }))} className="input" />

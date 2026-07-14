@@ -85,7 +85,7 @@ export default function CompanyCard({ company, isNew }: CompanyCardProps) {
 
       {/* ③ 설정한 매입률 */}
       {rate != null && (
-        <p className="px-3 pb-2 text-center text-[13px] font-extrabold text-accent">
+        <p className="px-3 pb-2 text-center text-[13px] font-extrabold text-accent whitespace-nowrap">
           예판상품권 {rate}% 매입
         </p>
       )}
@@ -93,7 +93,7 @@ export default function CompanyCard({ company, isNew }: CompanyCardProps) {
       {/* 구분선 + 업체명·지역 */}
       <div className="mx-3 h-px bg-gray-200" />
       <div className="flex justify-between items-center px-3 py-1.5 text-[11px]">
-        <span className="text-accent font-bold flex items-center gap-1 truncate">
+        <span className="text-accent font-bold flex items-center gap-1 min-w-0 flex-1">
           <User size={10} className="shrink-0" />
           <span className="truncate">{company.name}</span>
         </span>

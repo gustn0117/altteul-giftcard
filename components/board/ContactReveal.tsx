@@ -131,11 +131,11 @@ export default function ContactReveal(props: Props) {
       <div className="space-y-3">
         <ContactButtons />
         <div className="rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-[11.5px] text-gray-600">
-          <div className="flex items-center justify-between">
-            <span>연락처 열람 현황 <strong className="text-accent">{count}/{limit}명</strong></span>
+          <div className="flex items-center justify-between gap-2">
+            <span className="min-w-0">연락처 열람 현황 <strong className="text-accent">{count}/{limit}명</strong></span>
             <button onClick={handleReset} disabled={busy}
-              className="inline-flex items-center gap-1 h-7 px-2.5 rounded-full border border-accent/40 text-accent bg-accent/5 hover:bg-accent hover:text-white transition-colors text-[11px] font-bold disabled:opacity-50">
-              <RotateCcw size={11} /> 블라인드 리셋
+              className="shrink-0 whitespace-nowrap inline-flex items-center gap-1 h-7 px-2.5 rounded-full border border-accent/40 text-accent bg-accent/5 hover:bg-accent hover:text-white transition-colors text-[11px] font-bold disabled:opacity-50">
+              <RotateCcw size={11} className="shrink-0" /> 블라인드 리셋
             </button>
           </div>
           <p className="mt-1 text-[10.5px] text-gray-400">리셋하면 열람 인원이 초기화되어 다시 {limit}명이 볼 수 있습니다.</p>

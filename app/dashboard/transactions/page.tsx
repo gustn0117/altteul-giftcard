@@ -17,7 +17,7 @@ export default function TransactionsPage() {
       <div className="card overflow-hidden animate-fade-in">
         <div className="p-5 border-b border-zinc-100">
           <h3 className="section-title mb-4">거래 내역</h3>
-          <div className="flex border-b border-zinc-200">
+          <div className="flex border-b border-zinc-200 overflow-x-auto scrollbar-hide">
             {['전체', '진행중', '완료', '취소', '지연'].map(tab => (
               <button
                 key={tab}

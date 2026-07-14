@@ -293,8 +293,8 @@ function WritePostContent() {
   return (
     <div className="container-main py-6">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-[18px] font-bold text-gray-800">{isEdit ? '글 수정' : writeLabel + ' 글쓰기'}</h1>
-        <div className="breadcrumb">
+        <h1 className="text-[18px] font-bold text-gray-800 shrink-0">{isEdit ? '글 수정' : writeLabel + ' 글쓰기'}</h1>
+        <div className="breadcrumb hidden sm:block">
           <Link href="/">HOME</Link> &gt; <Link href={`/board?tab=${form.type}`}>{writeLabel}</Link> &gt; {isEdit ? '수정' : '글쓰기'}
         </div>
       </div>
@@ -372,14 +372,14 @@ function WritePostContent() {
                     onChange={(e) => handleChange('sendMonth', e.target.value)}
                     placeholder="5" className="input w-20"
                   />
-                  <span className="text-[13px] text-zinc-600">월</span>
+                  <span className="text-[13px] text-zinc-600 shrink-0 whitespace-nowrap">월</span>
                   <input
                     type="number" min={1} max={31}
                     value={form.sendDay}
                     onChange={(e) => handleChange('sendDay', e.target.value)}
                     placeholder="15" className="input w-20"
                   />
-                  <span className="text-[13px] text-zinc-600">일 발송</span>
+                  <span className="text-[13px] text-zinc-600 shrink-0 whitespace-nowrap">일 발송</span>
                 </div>
                 {sendMonth > 0 && sendDay > 0 && (
                   <p className="text-[11px] text-accent mt-1 font-medium">표시: {sendMonth}월 {sendDay}일 발송</p>

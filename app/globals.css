@@ -69,6 +69,11 @@ html { scroll-behavior: smooth; }
   a { color: inherit; text-decoration: none; }
 }
 
+/* 버튼/배지/탭 라벨은 글자단위로 세로로 깨지지 않게 (모바일 좁은 폭 대비 안전장치) */
+@layer components {
+  .btn-primary, .btn-secondary, .btn-accent, .badge, .tab-underline { white-space: nowrap; }
+}
+
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -106,19 +111,23 @@ html { scroll-behavior: smooth; }
 .divide-gray-200 > :not([hidden]) ~ :not([hidden]) { border-color: #94A3B8; }
 .divide-gray-100 > :not([hidden]) ~ :not([hidden]) { border-color: #CBD5E1; }
 
-.input {
-  width: 100%;
-  height: 40px;
-  padding: 0 12px;
-  border: 1px solid var(--border);
-  border-radius: 0;
-  font-size: 13px;
-  color: var(--foreground);
-  background: var(--card-bg);
-  transition: border-color 0.15s;
+/* @layer components 안에 둬야 h-auto/w-16 등 Tailwind 크기 유틸리티가 이 기본값을 덮어씀
+   (안 그러면 textarea가 40px 한 줄로, 숫자 입력칸이 100%로 터짐) */
+@layer components {
+  .input {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 0;
+    font-size: 13px;
+    color: var(--foreground);
+    background: var(--card-bg);
+    transition: border-color 0.15s;
+  }
+  .input:focus { outline: none; border-color: var(--accent); }
+  .input::placeholder { color: var(--text-muted); }
 }
-.input:focus { outline: none; border-color: var(--accent); }
-.input::placeholder { color: var(--text-muted); }
 
 /* Auth pages: rounded inputs with subtle focus ring */
 .auth-input {

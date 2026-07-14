@@ -98,7 +98,7 @@ export default function HeroPromo() {
             />
             <div className="relative px-5 py-6 md:px-8 md:py-9 text-center">
               {data.eyebrow && (
-                <p className="text-[9.5px] font-bold tracking-[0.22em] uppercase text-gray-400 mb-2.5">
+                <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-400 mb-2.5">
                   {data.eyebrow}
                 </p>
               )}

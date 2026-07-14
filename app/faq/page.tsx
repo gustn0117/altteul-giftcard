@@ -48,7 +48,7 @@ function AccordionItem({ item }: { item: FAQItem }) {
   return (
     <div className="border-b border-zinc-100 last:border-0">
       <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between py-4 px-4 text-left hover:bg-zinc-50 transition-colors">
-        <span className="text-[13px] text-zinc-700">Q. {item.q}</span>
+        <span className="text-[13px] text-zinc-700 flex-1 min-w-0 pr-2">Q. {item.q}</span>
         <ChevronDown size={16} className={`text-zinc-400 shrink-0 ml-2 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (

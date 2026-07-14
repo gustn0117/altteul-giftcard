@@ -130,12 +130,12 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
           {/* 상태 안내 배너 */}
           {post.type === 'buy' && !post.approved_at && (
             <div className="mb-3 px-4 py-3 bg-amber-50 border border-amber-200 text-[13px] text-amber-800 flex items-center gap-2">
-              <Clock size={16} /> <strong>승인 대기 중</strong>인 구매글입니다. 관리자 승인(게시 기간 설정) 후 목록에 노출됩니다.
+              <Clock size={16} className="shrink-0" /> <strong>승인 대기 중</strong>인 구매글입니다. 관리자 승인(게시 기간 설정) 후 목록에 노출됩니다.
             </div>
           )}
           {isCompleted && (
             <div className="mb-3 px-4 py-3 bg-zinc-100 border border-zinc-300 text-[13px] text-zinc-700 flex items-center gap-2">
-              <CheckCircle size={16} /> <strong>판매완료</strong> 처리된 글입니다. 연락처는 비공개됩니다.
+              <CheckCircle size={16} className="shrink-0" /> <strong>판매완료</strong> 처리된 글입니다. 연락처는 비공개됩니다.
               {isAuthor && (
                 <button onClick={handleToggleComplete} disabled={busy} className="ml-auto text-[12px] text-accent hover:underline">
                   완료 해제
@@ -145,12 +145,12 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
           )}
           {!isCompleted && !isAuthor && remaining && (
             <div className="mb-3 px-4 py-2 bg-gray-50 border border-gray-200 text-[12px] text-gray-600 flex items-center gap-2">
-              <Timer size={14} className="text-accent" /> 글 만료까지 {remaining} <span className="text-gray-400">(만료 시 작성자가 7일 연장 가능)</span>
+              <Timer size={14} className="text-accent shrink-0" /> 글 만료까지 {remaining} <span className="text-gray-400">(만료 시 작성자가 7일 연장 가능)</span>
             </div>
           )}
           {!isCompleted && isAuthor && remaining && (
             <div className="mb-3 px-4 py-2 bg-gray-50 border border-gray-200 text-[12px] text-gray-600 flex items-center gap-2">
-              <Timer size={14} className="text-accent" /> 만료까지 {remaining}
+              <Timer size={14} className="text-accent shrink-0" /> 만료까지 {remaining}
               <button onClick={handleExtend} disabled={busy} className="ml-auto text-[12px] text-accent font-bold hover:underline flex items-center gap-1">
                 <RotateCcw size={11} /> 7일 연장
               </button>
