@@ -45,6 +45,9 @@ body {
   font-size: 14px;
   line-height: 1.6;
   letter-spacing: -0.011em;
+  /* 한글이 글자단위로 세로로 쪼개지지 않게: 띄어쓰기에서만 줄바꿈, 너무 긴 단어만 예외적으로 줄바꿈 */
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 * { box-sizing: border-box; }
