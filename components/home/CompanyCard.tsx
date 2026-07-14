@@ -1,12 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { Phone, Bell, MapPin, MessageSquare } from 'lucide-react';
+import { Phone, User, MapPin, Search } from 'lucide-react';
 import type { DBPremiumBuyer } from '@/lib/types';
 import { addRecentBuyer } from '@/lib/recentBuyers';
 import { useCallModal } from '@/contexts/CallModalContext';
 
-const SMS_BODY = '예판상품권 보고 연락드립니다.';
 const stripPhone = (p?: string | null) => (p || '').replace(/[^0-9+]/g, '');
 
 const HASH_BG = {
@@ -26,10 +25,10 @@ interface CompanyCardProps {
 
 export default function CompanyCard({ company, isNew }: CompanyCardProps) {
   const { openCall } = useCallModal();
-  // ① 이미지 및 제목 — 헤드라인 우선, 없으면 업체명
   const displayTitle = company.headline?.trim() || company.name;
   const hasImage = !!company.image_url;
   const phoneDigits = stripPhone(company.phone);
+  const rate = company.buy_rate;
 
   const handleClick = () => {
     addRecentBuyer({
@@ -41,18 +40,10 @@ export default function CompanyCard({ company, isNew }: CompanyCardProps) {
   };
 
   return (
-    <div className="company-card card-hover group flex flex-col rounded-lg">
-      {/* 본문: 좌측 이미지 + 우측 제목·홍보문구·알리미/지역 */}
-      <Link
-        href={`/buyer/${company.id}`}
-        onClick={handleClick}
-        className="flex gap-2.5 md:gap-3 p-2.5 md:p-3"
-      >
-        {/* 좌: 이미지 / 로고 */}
-        <div
-          className="relative shrink-0 w-16 md:w-28 aspect-square rounded-md overflow-hidden"
-          style={!hasImage ? HASH_BG : undefined}
-        >
+    <div className="company-card card-hover group flex flex-col rounded-lg overflow-hidden">
+      {/* ① 이미지 + 제목 */}
+      <Link href={`/buyer/${company.id}`} onClick={handleClick} className="block">
+        <div className="relative h-28 md:h-32 overflow-hidden" style={!hasImage ? HASH_BG : undefined}>
           {hasImage ? (
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -62,67 +53,83 @@ export default function CompanyCard({ company, isNew }: CompanyCardProps) {
                 loading="lazy"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
+              <div className="absolute inset-0 bg-linear-to-b from-black/20 via-black/40 to-black/70" />
+              <div className="absolute inset-0 flex items-center justify-center px-3">
+                <h3 className="text-white text-[15px] md:text-[16px] font-bold text-center leading-tight drop-shadow-md">
+                  {displayTitle}
+                </h3>
+              </div>
             </>
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-[10px] font-bold text-gray-400">로고</span>
+            <div className="absolute inset-0 flex items-center justify-center px-3">
+              <h3 className="text-gray-900 text-[14px] md:text-[15px] font-bold text-center leading-tight bg-white/85 backdrop-blur-sm px-3 py-2 rounded-md">
+                {displayTitle}
+              </h3>
             </div>
           )}
           {company.tier === 'premium' && (
-            <span className="absolute top-1 left-1 text-[9px] text-white bg-accent px-1 py-0.5 rounded-sm font-bold z-10">BEST</span>
+            <span className="absolute top-1.5 left-1.5 text-[9px] text-white bg-accent px-1.5 py-0.5 rounded-sm font-bold z-10">BEST</span>
           )}
           {isNew && (
-            <span className="absolute top-1 right-1 text-[9px] text-white bg-red-500 px-1 py-0.5 rounded-sm font-bold z-10">NEW</span>
+            <span className="absolute top-1.5 right-1.5 text-[9px] text-white bg-red-500 px-1.5 py-0.5 rounded-sm font-bold z-10">NEW</span>
           )}
-        </div>
-
-        {/* 우: 제목 + 홍보문구(2줄) + 알리미·지역 */}
-        <div className="flex-1 min-w-0 flex flex-col">
-          {/* ① 제목 */}
-          <h3 className="text-[12.5px] md:text-[14.5px] font-bold text-gray-900 leading-tight line-clamp-1">
-            {displayTitle}
-          </h3>
-          {/* ② 홍보 문구 — 최대 2줄, 넘으면 말줄임 */}
-          <p className="mt-1 text-[11px] md:text-[12.5px] text-gray-600 leading-snug line-clamp-2 whitespace-pre-line flex-1 min-h-8">
-            {company.description || '상품권 매입 전문 업체입니다.'}
-          </p>
-          {/* ③ 알리미 · 지역 */}
-          <div className="mt-1.5 flex items-center justify-between gap-1 text-[10.5px]">
-            <span className="text-accent font-bold flex items-center gap-1 truncate">
-              <Bell size={10} className="shrink-0" />
-              <span className="truncate">{company.name}</span>
-            </span>
-            <span className="text-gray-500 shrink-0 flex items-center gap-0.5">
-              <MapPin size={9} className="shrink-0" /> {company.region || '전국'}
-            </span>
-          </div>
         </div>
       </Link>
 
-      {/* 모바일 전용: 통화하기 / 문자하기 버튼 */}
-      {phoneDigits && (
-        <>
-          <div className="mx-2.5 h-px bg-gray-200 md:hidden" />
-          <div className="grid grid-cols-2 md:hidden">
-            <button
-              type="button"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); openCall(company.name, company.phone); }}
-              className="flex items-center justify-center gap-1.5 py-2 text-[12.5px] font-bold text-accent bg-white hover:bg-accent-bg transition-colors whitespace-nowrap"
-              aria-label={`${company.name} 통화하기`}
-            >
-              <Phone size={13} /> 통화하기
-            </button>
-            <a
-              href={`sms:${phoneDigits}?&body=${encodeURIComponent(SMS_BODY)}`}
-              onClick={(e) => e.stopPropagation()}
-              className="flex items-center justify-center gap-1.5 py-2 text-[12.5px] font-bold text-gray-700 bg-white hover:bg-gray-50 transition-colors whitespace-nowrap"
-              aria-label={`${company.name} 문자하기`}
-            >
-              <MessageSquare size={13} /> 문자하기
-            </a>
-          </div>
-        </>
+      {/* ② 홍보 문구 (2줄) */}
+      <Link href={`/buyer/${company.id}`} onClick={handleClick} className="block px-3 pt-2.5 pb-1">
+        <p className="text-[12.5px] text-gray-600 leading-snug text-center line-clamp-2 min-h-9 whitespace-pre-line">
+          {company.description || '상품권 매입 전문 업체입니다.'}
+        </p>
+      </Link>
+
+      {/* ③ 설정한 매입률 */}
+      {rate != null && (
+        <p className="px-3 pb-2 text-center text-[13px] font-extrabold text-accent">
+          예판상품권 {rate}% 매입
+        </p>
       )}
+
+      {/* 구분선 + 업체명·지역 */}
+      <div className="mx-3 h-px bg-gray-200" />
+      <div className="flex justify-between items-center px-3 py-1.5 text-[11px]">
+        <span className="text-accent font-bold flex items-center gap-1 truncate">
+          <User size={10} className="shrink-0" />
+          <span className="truncate">{company.name}</span>
+        </span>
+        <span className="text-gray-500 shrink-0 ml-2 flex items-center gap-0.5">
+          <MapPin size={9} className="shrink-0" /> {company.region || '전국'}
+        </span>
+      </div>
+
+      {/* 버튼: 상세보기 / 통화하기 */}
+      <div className="grid grid-cols-2 border-t border-gray-100">
+        <Link
+          href={`/buyer/${company.id}`}
+          onClick={handleClick}
+          className="flex items-center justify-center gap-1.5 py-2.5 text-[12.5px] font-bold text-gray-600 bg-white hover:bg-gray-50 transition-colors border-r border-gray-100"
+        >
+          <Search size={13} /> 상세보기
+        </Link>
+        {phoneDigits ? (
+          <button
+            type="button"
+            onClick={() => openCall(company.name, company.phone)}
+            className="flex items-center justify-center gap-1.5 py-2.5 text-[12.5px] font-bold text-white bg-accent hover:bg-blue-700 transition-colors"
+            aria-label={`${company.name} 통화하기`}
+          >
+            <Phone size={13} /> 통화하기
+          </button>
+        ) : (
+          <Link
+            href={`/buyer/${company.id}`}
+            onClick={handleClick}
+            className="flex items-center justify-center gap-1.5 py-2.5 text-[12.5px] font-bold text-white bg-accent hover:bg-blue-700 transition-colors"
+          >
+            <Phone size={13} /> 통화하기
+          </Link>
+        )}
+      </div>
     </div>
   );
 }

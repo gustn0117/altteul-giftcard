@@ -65,7 +65,7 @@ export default function AdminPage() {
   // Premium buyer form
   const [showPremiumForm, setShowPremiumForm] = useState(false);
   const [editingPremium, setEditingPremium] = useState<DBPremiumBuyer | null>(null);
-  const [premiumForm, setPremiumForm] = useState({ name: '', headline: '', description: '', phone: '', region: '', brands: '', image_url: '', user_id: '', priority: 0, is_active: true, tier: 'standard' as 'premium' | 'standard' | 'basic' });
+  const [premiumForm, setPremiumForm] = useState({ name: '', headline: '', description: '', phone: '', region: '', brands: '', image_url: '', user_id: '', priority: 0, is_active: true, tier: 'standard' as 'premium' | 'standard' | 'basic', buy_rate: '' });
 
   // Ad form
   const [showAdForm, setShowAdForm] = useState(false);
@@ -243,11 +243,11 @@ export default function AdminPage() {
   useEffect(() => { msgEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [chatMessages]);
 
   // Premium Buyer CRUD
-  const resetPremiumForm = () => { setPremiumForm({ name: '', headline: '', description: '', phone: '', region: '', brands: '', image_url: '', user_id: '', priority: 0, is_active: true, tier: 'standard' }); setEditingPremium(null); setShowPremiumForm(false); };
-  const startEditPremium = (b: DBPremiumBuyer) => { setPremiumForm({ name: b.name, headline: b.headline || '', description: b.description, phone: b.phone, region: b.region, brands: b.brands?.join(', ') || '', image_url: b.image_url, user_id: b.user_id || '', priority: b.priority, is_active: b.is_active, tier: b.tier || 'standard' }); setEditingPremium(b); setShowPremiumForm(true); };
+  const resetPremiumForm = () => { setPremiumForm({ name: '', headline: '', description: '', phone: '', region: '', brands: '', image_url: '', user_id: '', priority: 0, is_active: true, tier: 'standard', buy_rate: '' }); setEditingPremium(null); setShowPremiumForm(false); };
+  const startEditPremium = (b: DBPremiumBuyer) => { setPremiumForm({ name: b.name, headline: b.headline || '', description: b.description, phone: b.phone, region: b.region, brands: b.brands?.join(', ') || '', image_url: b.image_url, user_id: b.user_id || '', priority: b.priority, is_active: b.is_active, tier: b.tier || 'standard', buy_rate: b.buy_rate != null ? String(b.buy_rate) : '' }); setEditingPremium(b); setShowPremiumForm(true); };
   const savePremium = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = { name: premiumForm.name, headline: premiumForm.headline.trim() || null, description: premiumForm.description, phone: premiumForm.phone, region: premiumForm.region, brands: premiumForm.brands.split(',').map(s => s.trim()).filter(Boolean), image_url: premiumForm.image_url, user_id: premiumForm.user_id || null, priority: premiumForm.priority, is_active: premiumForm.is_active, tier: premiumForm.tier };
+    const payload = { name: premiumForm.name, headline: premiumForm.headline.trim() || null, description: premiumForm.description, phone: premiumForm.phone, region: premiumForm.region, brands: premiumForm.brands.split(',').map(s => s.trim()).filter(Boolean), image_url: premiumForm.image_url, user_id: premiumForm.user_id || null, priority: premiumForm.priority, is_active: premiumForm.is_active, tier: premiumForm.tier, buy_rate: premiumForm.buy_rate === '' ? null : Number(premiumForm.buy_rate) };
     if (editingPremium) {
       await updatePremiumBuyer(editingPremium.id, payload);
     } else {
@@ -1000,6 +1000,10 @@ export default function AdminPage() {
                   <label className="block text-[11px] font-medium text-zinc-500 mb-1">취급 브랜드 (쉼표 구분)</label>
                   <input value={premiumForm.brands} onChange={e => setPremiumForm(p => ({ ...p, brands: e.target.value }))} className="input h-9" placeholder="신세계, 롯데" />
                 </div>
+              </div>
+              <div>
+                <label className="block text-[11px] font-medium text-zinc-500 mb-1">카드 매입률 (%) — 예: 92 → &quot;예판상품권 92% 매입&quot;</label>
+                <input type="number" step="0.1" min={0} max={200} value={premiumForm.buy_rate} onChange={e => setPremiumForm(p => ({ ...p, buy_rate: e.target.value }))} className="input h-9" placeholder="92 (비우면 카드에 표시 안 함)" />
               </div>
               <div>
                 <ImageUpload label="업체 이미지" folder="buyers" value={premiumForm.image_url} onChange={(url) => setPremiumForm(p => ({ ...p, image_url: url }))} />

@@ -155,6 +155,8 @@ export interface DBPremiumBuyer {
   is_active: boolean;
   priority: number;
   tier: 'premium' | 'standard' | 'basic';
+  /** 카드에 표시할 매입률(%) — 관리자 설정 */
+  buy_rate?: number | null;
   created_at: string;
   updated_at: string;
 }
