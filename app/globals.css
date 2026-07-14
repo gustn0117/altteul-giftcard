@@ -85,6 +85,10 @@ html { scroll-behavior: smooth; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 /* 표 셀 줄바꿈 방지 (가로 스크롤 표에서 글자 세로 깨짐 방지) */
 .nowrap-cells th, .nowrap-cells td { white-space: nowrap; }
+/* 모든 표 셀은 글자단위로 세로로 깨지지 않게 (표는 각자 overflow-x-auto 컨테이너로 감쌈) */
+@layer components {
+  th, td { white-space: nowrap; }
+}
 
 .card {
   background: var(--card-bg);

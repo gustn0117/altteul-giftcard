@@ -65,6 +65,7 @@ export default function AdminPointsPage() {
         {loading ? (
           <div className="py-12 text-center text-gray-400 text-[13px]">불러오는 중...</div>
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
@@ -110,6 +111,7 @@ export default function AdminPointsPage() {
               )}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

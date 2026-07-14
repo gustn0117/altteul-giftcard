@@ -137,6 +137,7 @@ export default function AdminGrantsPage() {
         ) : filtered.length === 0 ? (
           <div className="py-12 text-center text-gray-400 text-[13px]">결과 없음</div>
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
@@ -196,6 +197,7 @@ export default function AdminGrantsPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

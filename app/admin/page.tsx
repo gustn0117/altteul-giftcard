@@ -662,6 +662,7 @@ export default function AdminPage() {
       {/* ─── Users ─── */}
       {!loading && tab === 'users' && (
         <div className="card overflow-hidden">
+          <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
             <thead><tr className="bg-zinc-50 border-b border-zinc-200">
               <th className="table-header text-left py-2.5 px-4">이름</th>
@@ -685,6 +686,7 @@ export default function AdminPage() {
               {users.length === 0 && <tr><td colSpan={6} className="py-8 text-center text-zinc-400">회원이 없습니다.</td></tr>}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
@@ -767,6 +769,7 @@ export default function AdminPage() {
           </div>
 
           <div className="card overflow-hidden">
+            <div className="overflow-x-auto">
             <table className="w-full text-[13px]">
               <thead>
                 <tr className="bg-zinc-50 border-b border-zinc-200">
@@ -816,6 +819,7 @@ export default function AdminPage() {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       )}
@@ -868,6 +872,7 @@ export default function AdminPage() {
             </div>
           </form>
           <div className="card overflow-hidden">
+            <div className="overflow-x-auto">
             <table className="w-full text-[13px]">
               <thead><tr className="bg-zinc-50 border-b border-zinc-200">
                 <th className="table-header text-center py-2.5 px-4 w-16">고정</th>
@@ -891,6 +896,7 @@ export default function AdminPage() {
                 {notices.length === 0 && <tr><td colSpan={5} className="py-8 text-center text-zinc-400">공지가 없습니다.</td></tr>}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       )}
@@ -1088,6 +1094,7 @@ export default function AdminPage() {
           )}
 
           <div className="card overflow-hidden">
+            <div className="overflow-x-auto">
             <table className="w-full text-[13px]">
               <thead><tr className="bg-zinc-50 border-b border-zinc-200">
                 <th className="table-header text-left py-2.5 px-4">업체명</th>
@@ -1130,6 +1137,7 @@ export default function AdminPage() {
                 {premiumBuyers.length === 0 && <tr><td colSpan={9} className="py-8 text-center text-zinc-400">프리미엄 업체가 없습니다.</td></tr>}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       )}

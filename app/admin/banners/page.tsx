@@ -127,6 +127,7 @@ export default function AdminBannersPage() {
         ) : items.length === 0 ? (
           <div className="py-12 text-center text-gray-400 text-[13px]">등록된 배너가 없습니다.</div>
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
@@ -159,6 +160,7 @@ export default function AdminBannersPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>
