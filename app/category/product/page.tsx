@@ -82,7 +82,7 @@ function ProductContent() {
               </div>
             </div>
 
-            <div className="flex-1 bg-white border border-gray-200">
+            <div className="flex-1 bg-white border border-gray-200 overflow-hidden">
               <div className="grid grid-cols-4 md:grid-cols-6 gap-0">
                 {productTypes.map((type) => {
                   const count = typeCounts[type.name] || 0;

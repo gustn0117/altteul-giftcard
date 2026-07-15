@@ -61,7 +61,7 @@ export default function AdminPointsPage() {
           className="h-9 px-3 border border-gray-300 text-[13px] w-32 sm:w-60 focus:border-accent focus:outline-none"/>
       </div>
 
-      <div className="bg-white border border-gray-200">
+      <div className="bg-white border border-gray-200 overflow-hidden">
         {loading ? (
           <div className="py-12 text-center text-gray-400 text-[13px]">불러오는 중...</div>
         ) : (

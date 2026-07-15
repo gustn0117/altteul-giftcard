@@ -35,7 +35,7 @@ export default function BuyPostCard({ post, publicContact = true }: BuyPostCardP
   const region = post.tags?.find((t) => /서울|경기|부산|대구|광주|인천|대전|울산|제주|전국/.test(t))?.replace(/^#/, '') || '전국';
 
   return (
-    <div className="company-card card-hover group flex flex-col">
+    <div className="company-card card-hover group flex flex-col rounded-lg overflow-hidden">
       <Link href={`/board/${post.id}`} className="block">
         {/* Header — 카테고리 컬러 + 제목 */}
         <div

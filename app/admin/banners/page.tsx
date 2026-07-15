@@ -121,7 +121,7 @@ export default function AdminBannersPage() {
         </form>
       )}
 
-      <div className="bg-white border border-gray-200">
+      <div className="bg-white border border-gray-200 overflow-hidden">
         {loading ? (
           <div className="py-12 text-center text-gray-400 text-[13px]">불러오는 중...</div>
         ) : items.length === 0 ? (

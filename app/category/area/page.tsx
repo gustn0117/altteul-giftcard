@@ -91,7 +91,7 @@ function AreaContent() {
             </div>
 
             {/* Region icons grid */}
-            <div className="flex-1 bg-white border border-gray-200">
+            <div className="flex-1 bg-white border border-gray-200 overflow-hidden">
               <div className="grid grid-cols-5 md:grid-cols-9 gap-0">
                 {regions.map((region) => {
                   const IconComp = region.Icon;

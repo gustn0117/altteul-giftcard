@@ -160,7 +160,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
             </div>
           )}
 
-          <article className="bg-white border border-gray-200 mb-4">
+          <article className="bg-white border border-gray-200 mb-4 overflow-hidden">
             {/* Top bar */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
               <Link href={`/board?tab=${backTab}`} className="flex items-center gap-1 text-[12px] text-gray-500 hover:text-accent">
