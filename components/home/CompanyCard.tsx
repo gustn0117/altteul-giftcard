@@ -1,11 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { Phone, User, MapPin, Search } from 'lucide-react';
+import { Phone, MessageSquare, User, MapPin, Search } from 'lucide-react';
 import type { DBPremiumBuyer } from '@/lib/types';
 import { addRecentBuyer } from '@/lib/recentBuyers';
 import { useCallModal } from '@/contexts/CallModalContext';
 
+const SMS_BODY = '예판상품권 보고 연락드립니다.';
 const stripPhone = (p?: string | null) => (p || '').replace(/[^0-9+]/g, '');
 
 const HASH_BG = {
@@ -102,34 +103,34 @@ export default function CompanyCard({ company, isNew }: CompanyCardProps) {
         </span>
       </div>
 
-      {/* 버튼: 상세보기 / 통화하기 */}
-      <div className="grid grid-cols-2 border-t border-gray-100">
-        <Link
-          href={`/buyer/${company.id}`}
-          onClick={handleClick}
-          className="flex items-center justify-center gap-1.5 py-2.5 text-[12.5px] font-bold text-gray-600 bg-white hover:bg-gray-50 transition-colors border-r border-gray-100"
-        >
-          <Search size={13} /> 상세보기
-        </Link>
-        {phoneDigits ? (
+      {/* 버튼: 전화하기(좌) / 문자하기(우) */}
+      {phoneDigits ? (
+        <div className="grid grid-cols-2 border-t border-gray-100">
           <button
             type="button"
             onClick={() => openCall(company.name, company.phone)}
-            className="flex items-center justify-center gap-1.5 py-2.5 text-[12.5px] font-bold text-white bg-accent hover:bg-blue-700 transition-colors"
-            aria-label={`${company.name} 통화하기`}
+            className="flex items-center justify-center gap-1.5 py-2.5 text-[12.5px] font-bold text-white bg-accent hover:bg-blue-700 transition-colors border-r border-gray-100"
+            aria-label={`${company.name} 전화하기`}
           >
-            <Phone size={13} /> 통화하기
+            <Phone size={13} /> 전화하기
           </button>
-        ) : (
-          <Link
-            href={`/buyer/${company.id}`}
-            onClick={handleClick}
-            className="flex items-center justify-center gap-1.5 py-2.5 text-[12.5px] font-bold text-white bg-accent hover:bg-blue-700 transition-colors"
+          <a
+            href={`sms:${phoneDigits}?&body=${encodeURIComponent(SMS_BODY)}`}
+            className="flex items-center justify-center gap-1.5 py-2.5 text-[12.5px] font-bold text-gray-600 bg-white hover:bg-gray-50 transition-colors"
+            aria-label={`${company.name} 문자하기`}
           >
-            <Phone size={13} /> 통화하기
-          </Link>
-        )}
-      </div>
+            <MessageSquare size={13} /> 문자하기
+          </a>
+        </div>
+      ) : (
+        <Link
+          href={`/buyer/${company.id}`}
+          onClick={handleClick}
+          className="flex items-center justify-center gap-1.5 py-2.5 text-[12.5px] font-bold text-gray-600 bg-white hover:bg-gray-50 transition-colors border-t border-gray-100"
+        >
+          <Search size={13} /> 상세보기
+        </Link>
+      )}
     </div>
   );
 }
