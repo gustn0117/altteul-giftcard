@@ -2,14 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Calendar, FileText, Users, BarChart3, Building2, Globe, PenSquare, TrendingUp, Eye } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { LayoutDashboard, Building2, Globe, PenSquare, TrendingUp, Eye } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 
 const navItems = [
   { href: '/dashboard', label: '현황', icon: LayoutDashboard },
-  { href: '/dashboard/stats', label: '통계', icon: BarChart3 },
-  { href: '/dashboard/schedule', label: '스케줄 현황', icon: Calendar },
-  { href: '/dashboard/transactions', label: '거래 내역', icon: FileText },
-  { href: '/dashboard/customers', label: '고객별 집계', icon: Users },
   { href: '/dashboard/access-stats', label: '접속 통계', icon: TrendingUp },
   { href: '/dashboard/company', label: '업체 정보', icon: Building2 },
   { href: '/dashboard/profile', label: '업체 소개 페이지', icon: Globe },
@@ -17,6 +16,17 @@ const navItems = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const [isPremium, setIsPremium] = useState(false);
+
+  // 실제 프리미엄 제휴(활성 premium_buyers) 여부 확인
+  useEffect(() => {
+    let active = true;
+    if (!user?.id) { setIsPremium(false); return; }
+    supabase.from('premium_buyers').select('id').eq('user_id', user.id).eq('is_active', true).limit(1)
+      .then(({ data }) => { if (active) setIsPremium(!!(data && data.length)); }, () => {});
+    return () => { active = false; };
+  }, [user?.id]);
 
   return (
     <div className="max-w-[1140px] mx-auto px-5 py-6">
@@ -33,10 +43,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </div>
 
-      {/* Premium badge */}
-      <div className="card p-3 mb-4 flex items-center gap-3">
-        <span className="badge bg-green-50 text-green-700 text-[11px]">프리미엄 제휴</span>
-        <span className="text-[12px] text-zinc-500">홈 등 프리미엄 노출이 적용 중입니다.</span>
+      {/* 제휴 상태 배지 — 실제 프리미엄 업체일 때만 '제휴 중' 표시 */}
+      <div className="card p-3 mb-4 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+        {isPremium ? (
+          <>
+            <span className="badge bg-green-50 text-green-700 text-[11px] shrink-0">프리미엄 제휴</span>
+            <span className="text-[12px] text-zinc-500">홈 등 프리미엄 노출이 적용 중입니다.</span>
+          </>
+        ) : (
+          <>
+            <span className="badge bg-zinc-100 text-zinc-500 text-[11px] shrink-0">일반 회원</span>
+            <span className="text-[12px] text-zinc-500">제휴 신청 시 홈 등에 프리미엄으로 노출됩니다.</span>
+            <Link href="/advertising" className="ml-auto shrink-0 text-[12px] font-bold text-accent hover:underline">제휴 신청 →</Link>
+          </>
+        )}
       </div>
 
       <div className="flex overflow-x-auto gap-0 mb-5 border-b border-zinc-200 scrollbar-hide">
