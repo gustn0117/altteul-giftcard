@@ -73,10 +73,7 @@ export default function SellPostItem({ post, num, onJumped }: SellPostItemProps)
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '점프에 실패했습니다.');
-      const msg = data.used_free
-        ? `점프 완료! (오늘 무료 ${data.free_remaining}회 남음)`
-        : `점프 완료! (포인트 ${data.points_used}p 차감, 잔액 ${data.balance}p)`;
-      alert(msg);
+      alert(`점프 완료! (오늘 무료 점프 ${data.free_remaining}회 남음)`);
       onJumped?.();
     } catch (err) {
       alert(err instanceof Error ? err.message : '점프 실패');
@@ -165,7 +162,7 @@ export default function SellPostItem({ post, num, onJumped }: SellPostItemProps)
             onClick={handleJump}
             disabled={jumping}
             className="shrink-0 inline-flex items-center gap-1 h-7 px-2.5 text-[10.5px] font-bold rounded-full border border-accent/40 text-accent bg-accent/5 hover:bg-accent hover:text-white hover:border-accent transition-colors disabled:opacity-50"
-            title="이 글을 맨 위로 점프 (무료 일 3회, 이후 100p)"
+            title="이 글을 맨 위로 점프 (하루 10회 무료, 밤 12시 초기화)"
           >
             <Rocket size={11} /> 점프
           </button>
