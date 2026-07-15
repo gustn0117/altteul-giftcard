@@ -12,7 +12,8 @@ import { useAuth } from '@/contexts/AuthContext';
 // 만료 정책 (일 단위)
 const SELL_EXPIRE_DAYS = 7;   // 팝니다: 7일 후 잠금 (30일 후 자동삭제)
 const BUY_EXPIRE_DAYS = 7;    // 삽니다: 7일 후 잠금 (운영자 해제)
-const REGION_OPTIONS = ['전국', '서울', '경기', '인천', '대전', '대구', '부산', '광주', '울산', '세종', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'];
+// 글 작성 시엔 실제 지역만 선택(전국 제외 — 전국은 목록에서 '전체 보기' 필터로만 사용)
+const REGION_OPTIONS = ['서울', '경기', '인천', '대전', '대구', '부산', '광주', '울산', '세종', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'];
 const DELIVERY_METHODS = [{ value: 'mobile', label: '모바일', tag: '#모바일' }, { value: 'parcel', label: '택배', tag: '#택배' }, { value: 'direct', label: '직접만남', tag: '#직접만남' }];
 
 export default function WritePostPage() {

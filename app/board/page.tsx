@@ -16,7 +16,6 @@ import { PostRowSkeleton } from '@/components/Skeleton';
 
 const SELL_PER_PAGE = 15;     // 팝니다 줄광고 페이지당
 const BUY_BOX_PER_PAGE = 50;  // 삽니다 박스광고 페이지당
-const SELL_INTERLEAVE = 10;   // 박스광고 아래 끼워넣을 판매글 개수
 
 // 지역 탭 — 첫 진입 기본값은 '전국'(전체 표시)
 const REGIONS = ['전국', '서울', '경기', '인천', '대전', '대구', '부산', '광주', '울산', '세종', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'] as const;
@@ -49,7 +48,6 @@ function BoardContent() {
   const activeTab: 'buy' | 'sell' = tabParam === 'buy' ? 'buy' : 'sell';
 
   const [posts, setPosts] = useState<PostWithAuthor[]>(() => getCache<PostWithAuthor[]>(`board_${activeTab}`) ?? []);
-  const [otherPosts, setOtherPosts] = useState<PostWithAuthor[]>([]); // 다른 탭(끼워넣기용)
   const [loading, setLoading] = useState(() => !getCache(`board_${activeTab}`));
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
@@ -79,14 +77,9 @@ function BoardContent() {
     setSelectedRegion('전국'); // 탭 변경 시 지역도 전국으로 초기화
     setShuffleSeed(Math.random()); // 탭 변경 시도 다시 셔플
 
-    Promise.all([
-      getPosts(activeTab, { limit: 500 }),
-      // 삽니다 탭일 때만 끼워넣을 판매글도 가져옴
-      activeTab === 'buy' ? getPosts('sell', { limit: 100 }) : Promise.resolve([]),
-    ])
-      .then(([data, others]) => {
+    getPosts(activeTab, { limit: 500 })
+      .then((data) => {
         setPosts(data); setCache(`board_${activeTab}`, data, 60000);
-        setOtherPosts(others);
       })
       .catch((err) => setError(err.message || '데이터를 불러오지 못했습니다.'))
       .finally(() => setLoading(false));
@@ -98,11 +91,6 @@ function BoardContent() {
     void shuffleSeed; // 셔플 트리거
     return shuffle(posts);
   }, [posts, activeTab, shuffleSeed]);
-
-  const sellInterleave = useMemo(
-    () => otherPosts.filter((p) => matchRegion(p, selectedRegion)).slice(0, SELL_INTERLEAVE),
-    [otherPosts, selectedRegion],
-  );
 
   // 지역 필터 적용 (전국이면 전체)
   const baseList = activeTab === 'buy' ? shuffledBuy : posts;
@@ -222,26 +210,6 @@ function BoardContent() {
                     <BuyPostCard key={post.id} post={post} publicContact={buyPublic} />
                   ))}
                 </div>
-
-                {/* 박스광고 바로 아래 — 판매글(팝니다) 10개 줄광고 */}
-                {sellInterleave.length > 0 && (
-                  <section className="mb-5">
-                    <div className="flex items-end justify-between mb-2 gap-3">
-                      <h3 className="text-[14px] font-extrabold text-gray-900 flex items-center gap-1.5">
-                        <Tag size={13} className="text-accent" /> 최신 판매글
-                        <span className="text-[11px] text-gray-400 font-normal">{sellInterleave.length}건</span>
-                      </h3>
-                      <Link href="/board?tab=sell" className="text-[11.5px] text-gray-500 hover:text-accent">
-                        전체보기 →
-                      </Link>
-                    </div>
-                    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
-                      {sellInterleave.map((post, idx) => (
-                        <SellPostItem key={post.id} post={post} num={idx + 1} />
-                      ))}
-                    </div>
-                  </section>
-                )}
               </>
             ) : (
               /* 팝니다 — 줄광고 */
