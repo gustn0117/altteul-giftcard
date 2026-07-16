@@ -66,7 +66,7 @@ export default function RecommendedPage() {
                     <h2 className="text-[15px] font-bold">프리미엄 추천업체</h2>
                     <span className="text-[12px] text-gray-400">{premiumTier.length}건</span>
                   </div>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5">
+                  <div className="grid grid-cols-2 min-[520px]:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-2.5">
                     {premiumTier.map(b => <CompanyCard key={b.id} company={b} isNew={false} />)}
                   </div>
                 </section>
@@ -79,7 +79,7 @@ export default function RecommendedPage() {
                     <h2 className="text-[15px] font-bold">스탠다드 업체</h2>
                     <span className="text-[12px] text-gray-400">{standardTier.length}건</span>
                   </div>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5">
+                  <div className="grid grid-cols-2 min-[520px]:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-2.5">
                     {standardTier.map(b => <CompanyCard key={b.id} company={b} isNew={false} />)}
                   </div>
                 </section>
@@ -91,7 +91,7 @@ export default function RecommendedPage() {
                     <h2 className="text-[15px] font-bold">베이직 업체</h2>
                     <span className="text-[12px] text-gray-400">{basicTier.length}건</span>
                   </div>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5">
+                  <div className="grid grid-cols-2 min-[520px]:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-2.5">
                     {basicTier.map(b => <CompanyCard key={b.id} company={b} isNew={false} />)}
                   </div>
                 </section>

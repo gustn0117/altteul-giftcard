@@ -204,7 +204,7 @@ function SearchContent() {
                     <h2 className="text-[13px] font-bold text-gray-800 flex items-center gap-1.5 mb-3">
                       <Building2 size={12} className="text-accent" /> 매입업체 <span className="text-accent">{buyers.length}</span>
                     </h2>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5">
+                    <div className="grid grid-cols-2 min-[520px]:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-2.5">
                       {buyers.map((b) => (
                         <CompanyCard key={b.id} company={b} />
                       ))}

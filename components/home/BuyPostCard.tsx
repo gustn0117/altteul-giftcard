@@ -35,7 +35,7 @@ export default function BuyPostCard({ post, publicContact = true }: BuyPostCardP
   const isNew = Date.now() - new Date(post.created_at).getTime() < 3 * 86400000;
 
   return (
-    <div className="company-card card-hover group flex flex-col rounded-none overflow-hidden w-full max-w-42 md:max-w-none mx-auto">
+    <div className="company-card card-hover group flex flex-col rounded-none overflow-hidden w-full max-w-42 min-[520px]:max-w-none mx-auto">
       {/* ① 이미지영역(어두운 배경 + 카테고리 + 제목) */}
       <Link href={`/board/${post.id}`} className="block">
         <div className="relative h-24 md:h-28 overflow-hidden" style={DARK_BG}>
@@ -88,17 +88,17 @@ export default function BuyPostCard({ post, publicContact = true }: BuyPostCardP
           <button
             type="button"
             onClick={() => openCall(name, phone)}
-            className="flex-1 min-w-0 h-9 appearance-none rounded-none border border-transparent flex items-center justify-center gap-1 text-[11.5px] font-bold text-white bg-accent hover:bg-blue-700 transition-colors whitespace-nowrap"
+            className="flex-1 min-w-0 overflow-hidden h-9 appearance-none rounded-none border border-transparent flex items-center justify-center gap-1 text-[11.5px] font-bold text-white bg-accent hover:bg-blue-700 transition-colors whitespace-nowrap"
             aria-label={`${name} 전화하기`}
           >
-            <Phone size={12} className="shrink-0" /> 전화하기
+            <Phone size={12} className="shrink-0 hidden min-[360px]:block" /> 전화하기
           </button>
           <a
             href={`sms:${phoneDigits}?&body=${encodeURIComponent(SMS_BODY)}`}
-            className="flex-1 min-w-0 h-9 rounded-none border border-gray-300 flex items-center justify-center gap-1 text-[11.5px] font-bold text-gray-700 bg-white hover:bg-gray-50 transition-colors whitespace-nowrap"
+            className="flex-1 min-w-0 overflow-hidden h-9 rounded-none border border-gray-300 flex items-center justify-center gap-1 text-[11.5px] font-bold text-gray-700 bg-white hover:bg-gray-50 transition-colors whitespace-nowrap"
             aria-label={`${name} 문자하기`}
           >
-            <MessageSquare size={12} className="shrink-0" /> 문자하기
+            <MessageSquare size={12} className="shrink-0 hidden min-[360px]:block" /> 문자하기
           </a>
         </div>
       ) : (

@@ -87,7 +87,7 @@ export default function RecommendedCompanies({ buyers, loading }: Props) {
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 min-[520px]:grid-cols-3 md:grid-cols-3 gap-3">
         {recommended.map((b) => (
           <CompanyCard key={b.id} company={b} />
         ))}

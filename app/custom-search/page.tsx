@@ -172,7 +172,7 @@ export default function CustomSearchPage() {
           {loading ? (
             <div className="py-16 text-center text-gray-400 text-[13px]">불러오는 중...</div>
           ) : filtered.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 mb-6">
+            <div className="grid grid-cols-2 min-[520px]:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-2.5 mb-6">
               {filtered.map(b => <CompanyCard key={b.id} company={b} isNew={false} />)}
             </div>
           ) : (

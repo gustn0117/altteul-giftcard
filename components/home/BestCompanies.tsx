@@ -25,7 +25,7 @@ export default function BestCompanies({ buyers, loading }: Props) {
           <Crown size={14} className="text-amber-500 fill-amber-400" /> 이달의 Best 업체
         </h2>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 min-[520px]:grid-cols-3 md:grid-cols-3 gap-3">
         {best.map((b) => (
           <CompanyCard key={b.id} company={b} />
         ))}

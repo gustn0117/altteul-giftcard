@@ -27,7 +27,7 @@ export function PostRowSkeleton({ count = 10 }: { count?: number }) {
 // 업체 카드 그리드 스켈레톤
 export function CompanyCardGridSkeleton({ count = 10 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-1.5">
+    <div className="grid grid-cols-2 min-[520px]:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-1.5">
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} className="bg-white border border-gray-200">
           <div className="h-[120px] bg-gray-100 animate-pulse" />

@@ -63,7 +63,7 @@ export default function MainCompaniesSection({ buyers, loading }: Props) {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 min-[520px]:grid-cols-3 md:grid-cols-3 gap-3">
             {pageBuyers.map((b) => (
               <CompanyCard key={b.id} company={b} />
             ))}

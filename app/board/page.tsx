@@ -205,7 +205,7 @@ function BoardContent() {
             ) : activeTab === 'buy' ? (
               <>
                 {/* 삽니다 — 박스광고 그리드 */}
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-5">
+                <div className="grid grid-cols-2 min-[520px]:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-5">
                   {pagedPosts.map((post) => (
                     <BuyPostCard key={post.id} post={post} publicContact={buyPublic} />
                   ))}

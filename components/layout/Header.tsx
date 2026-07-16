@@ -140,9 +140,10 @@ export default function Header() {
                 ))}
               </div>
               <div className="flex items-center gap-0.5">
+                {/* 768~1023px에선 nav 전체 폭(약 848px)이 컨테이너를 넘겨 가로 스크롤이 생김 → 보조메뉴는 lg부터 노출 (전체메뉴 버튼으로 접근 가능) */}
                 {SECONDARY_NAV.map(({ href, label, Icon }) => (
                   <Link key={href} href={href}
-                    className="inline-flex items-center gap-1 h-8 px-2.5 text-[12px] text-gray-500 hover:text-accent transition-colors">
+                    className="hidden lg:inline-flex items-center gap-1 h-8 px-2.5 text-[12px] text-gray-500 hover:text-accent transition-colors">
                     {Icon && <Icon size={11} />}
                     {label}
                   </Link>
