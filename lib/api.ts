@@ -9,9 +9,13 @@ export async function getPosts(type?: 'sell' | 'buy', opts?: { limit?: number; w
   const limit = opts?.limit ?? 100;
   const withAuthor = opts?.withAuthor ?? true;
   const includeBlinded = opts?.includeBlinded ?? false;
-  const selectCols = withAuthor
-    ? `${POST_BASE_COLS}, author:users!author_id(id, name, type)`
-    : POST_BASE_COLS;
+  // 삽니다(buy)는 연락처 공개 정책 → 목록 카드에서 전화/문자를 걸 수 있게
+  //   guest_phone·description·작성자 phone 을 포함한다.
+  // 팝니다(sell)는 연락처 블라인드(상세페이지 500P 열람)라 목록 응답에 phone 을 넣지 않는다.
+  const isBuy = type === 'buy';
+  const baseCols = isBuy ? `${POST_BASE_COLS}, guest_phone, description` : POST_BASE_COLS;
+  const authorCols = isBuy ? 'id, name, type, phone' : 'id, name, type';
+  const selectCols = withAuthor ? `${baseCols}, author:users!author_id(${authorCols})` : baseCols;
   // 블라인드/삭제 제외 (운영자 페이지에서는 includeBlinded=true)
   // 정렬: 점프한 글 우선(last_jumped_at desc, nulls last) → 최근 등록순(created_at desc)
   let q = supabase
