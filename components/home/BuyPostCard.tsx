@@ -65,7 +65,7 @@ export default function BuyPostCard({ post, publicContact = true }: BuyPostCardP
 
       {/* ③ 작성한 매입률 — 예판상품권 N% 매입 */}
       {post.percentage != null && (
-        <p className="px-3 pb-1.5 text-center text-[13px] font-extrabold text-accent whitespace-nowrap">
+        <p className="px-3 pb-1.5 text-center text-[11px] min-[360px]:text-[13px] font-extrabold text-accent whitespace-nowrap">
           예판상품권 {post.percentage}% 매입
         </p>
       )}

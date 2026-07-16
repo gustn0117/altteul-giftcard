@@ -134,7 +134,7 @@ export default function CustomSearchPage() {
               {/* 등급 */}
               <div>
                 <label className="block text-[11px] font-medium text-gray-600 mb-1.5">광고 등급</label>
-                <div className="flex gap-1">
+                <div className="flex flex-wrap gap-1">
                   {tiers.map(t => (
                     <button
                       key={t.value}

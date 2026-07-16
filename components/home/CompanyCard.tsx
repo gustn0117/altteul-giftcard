@@ -73,7 +73,7 @@ export default function CompanyCard({ company, isNew }: CompanyCardProps) {
 
       {/* ③ 설정한 매입률 */}
       {rate != null && (
-        <p className="px-3 pb-1.5 text-center text-[13px] font-extrabold text-accent whitespace-nowrap">
+        <p className="px-3 pb-1.5 text-center text-[11px] min-[360px]:text-[13px] font-extrabold text-accent whitespace-nowrap">
           예판상품권 {rate}% 매입
         </p>
       )}
