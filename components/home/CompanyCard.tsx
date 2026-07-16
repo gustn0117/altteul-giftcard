@@ -34,7 +34,7 @@ export default function CompanyCard({ company, isNew }: CompanyCardProps) {
   };
 
   return (
-    <div className="company-card card-hover group flex flex-col rounded-lg overflow-hidden">
+    <div className="company-card card-hover group flex flex-col rounded-none overflow-hidden">
       {/* ① 이미지 + 제목 */}
       <Link href={`/buyer/${company.id}`} onClick={handleClick} className="block">
         <div className="relative h-24 md:h-28 overflow-hidden" style={!hasImage ? DARK_BG : undefined}>
@@ -56,10 +56,10 @@ export default function CompanyCard({ company, isNew }: CompanyCardProps) {
             </h3>
           </div>
           {company.tier === 'premium' && (
-            <span className="absolute top-1.5 left-1.5 text-[9px] text-white bg-accent px-1.5 py-0.5 rounded-sm font-bold z-10">BEST</span>
+            <span className="absolute top-1.5 left-1.5 text-[9px] text-white bg-accent px-1.5 py-0.5 rounded-none font-bold z-10">BEST</span>
           )}
           {isNew && (
-            <span className="absolute top-1.5 right-1.5 text-[9px] text-white bg-red-500 px-1.5 py-0.5 rounded-sm font-bold z-10">NEW</span>
+            <span className="absolute top-1.5 right-1.5 text-[9px] text-white bg-red-500 px-1.5 py-0.5 rounded-none font-bold z-10">NEW</span>
           )}
         </div>
       </Link>
@@ -96,14 +96,14 @@ export default function CompanyCard({ company, isNew }: CompanyCardProps) {
           <button
             type="button"
             onClick={() => openCall(company.name, company.phone)}
-            className="flex-1 h-9 rounded-md flex items-center justify-center gap-1.5 text-[12.5px] font-bold text-white bg-accent hover:bg-blue-700 transition-colors"
+            className="flex-1 h-9 rounded-none flex items-center justify-center gap-1.5 text-[12.5px] font-bold text-white bg-accent hover:bg-blue-700 transition-colors"
             aria-label={`${company.name} 전화하기`}
           >
             <Phone size={13} /> 전화하기
           </button>
           <a
             href={`sms:${phoneDigits}?&body=${encodeURIComponent(SMS_BODY)}`}
-            className="flex-1 h-9 rounded-md flex items-center justify-center gap-1.5 text-[12.5px] font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors"
+            className="flex-1 h-9 rounded-none flex items-center justify-center gap-1.5 text-[12.5px] font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors"
             aria-label={`${company.name} 문자하기`}
           >
             <MessageSquare size={13} /> 문자하기
@@ -114,7 +114,7 @@ export default function CompanyCard({ company, isNew }: CompanyCardProps) {
           <Link
             href={`/buyer/${company.id}`}
             onClick={handleClick}
-            className="h-9 rounded-md flex items-center justify-center gap-1.5 text-[12.5px] font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors"
+            className="h-9 rounded-none flex items-center justify-center gap-1.5 text-[12.5px] font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors"
           >
             <Search size={13} /> 상세보기
           </Link>

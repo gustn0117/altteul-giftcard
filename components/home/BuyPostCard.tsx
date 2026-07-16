@@ -35,18 +35,18 @@ export default function BuyPostCard({ post, publicContact = true }: BuyPostCardP
   const isNew = Date.now() - new Date(post.created_at).getTime() < 3 * 86400000;
 
   return (
-    <div className="company-card card-hover group flex flex-col rounded-lg overflow-hidden">
+    <div className="company-card card-hover group flex flex-col rounded-none overflow-hidden">
       {/* ① 이미지영역(어두운 배경 + 카테고리 + 제목) */}
       <Link href={`/board/${post.id}`} className="block">
         <div className="relative h-24 md:h-28 overflow-hidden" style={DARK_BG}>
           <span
-            className="absolute top-1.5 left-1.5 z-10 text-[9px] font-bold px-1.5 py-0.5 rounded-sm"
+            className="absolute top-1.5 left-1.5 z-10 text-[9px] font-bold px-1.5 py-0.5 rounded-none"
             style={{ background: bs.bg, color: bs.fg }}
           >
             {categoryName}
           </span>
           {isNew && (
-            <span className="absolute top-1.5 right-1.5 z-10 text-[9px] text-white bg-red-500 px-1.5 py-0.5 rounded-sm font-bold">NEW</span>
+            <span className="absolute top-1.5 right-1.5 z-10 text-[9px] text-white bg-red-500 px-1.5 py-0.5 rounded-none font-bold">NEW</span>
           )}
           <div className="absolute inset-0 flex items-center justify-center px-3">
             <h3 className="text-white text-[14px] md:text-[15px] font-bold text-center leading-tight drop-shadow-md line-clamp-2">
@@ -88,14 +88,14 @@ export default function BuyPostCard({ post, publicContact = true }: BuyPostCardP
           <button
             type="button"
             onClick={() => openCall(name, phone)}
-            className="flex-1 h-9 rounded-md flex items-center justify-center gap-1.5 text-[12.5px] font-bold text-white bg-accent hover:bg-blue-700 transition-colors"
+            className="flex-1 h-9 rounded-none flex items-center justify-center gap-1.5 text-[12.5px] font-bold text-white bg-accent hover:bg-blue-700 transition-colors"
             aria-label={`${name} 전화하기`}
           >
             <Phone size={13} /> 전화하기
           </button>
           <a
             href={`sms:${phoneDigits}?&body=${encodeURIComponent(SMS_BODY)}`}
-            className="flex-1 h-9 rounded-md flex items-center justify-center gap-1.5 text-[12.5px] font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors"
+            className="flex-1 h-9 rounded-none flex items-center justify-center gap-1.5 text-[12.5px] font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors"
             aria-label={`${name} 문자하기`}
           >
             <MessageSquare size={13} /> 문자하기
@@ -105,7 +105,7 @@ export default function BuyPostCard({ post, publicContact = true }: BuyPostCardP
         <div className="px-3 pt-1 pb-2.5">
           <Link
             href={`/board/${post.id}`}
-            className="h-9 rounded-md flex items-center justify-center gap-1.5 text-[12.5px] font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors"
+            className="h-9 rounded-none flex items-center justify-center gap-1.5 text-[12.5px] font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors"
           >
             <Search size={13} /> 상세보기
           </Link>
