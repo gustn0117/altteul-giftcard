@@ -37,15 +37,13 @@ function LoginContent() {
     setError(null);
     setSubmitting(true);
     try {
-      const loginEmail =
-        loginType === 'business'
-          ? `${businessPhone.replace(/[^0-9]/g, '')}@biz.altteul-giftcard`
-          : email.trim();
+      // 일반/업체 모두 휴대폰 번호가 아이디 (예전엔 업체를 가짜 이메일로 변환해 조회했음)
+      const identifier = loginType === 'business' ? businessPhone.trim() : email.trim();
 
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: loginEmail, password, loginType }),
+        body: JSON.stringify({ phone: identifier, password, loginType }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -91,15 +89,15 @@ function LoginContent() {
 
       <form onSubmit={handleLogin} className="space-y-3 mt-5">
         {loginType === 'normal' ? (
-          <Field icon={Mail} label="이메일 또는 휴대폰 번호">
+          <Field icon={Phone} label="휴대폰 번호" hint="가입 시 입력한 휴대폰 번호">
             <input
-              type="text"
+              type="tel"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="이메일 또는 010-0000-0000"
+              placeholder="010-0000-0000"
               className="auth-input"
               required
-              autoComplete="username"
+              autoComplete="tel"
             />
           </Field>
         ) : (

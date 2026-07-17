@@ -43,23 +43,30 @@ async function runCron() {
     banners_notified: 0,
   };
 
-  // ── (폐기) 글 단위 만료/잠금 시스템은 회원별 연락처 권한으로 대체됨 ──
-  // ── 1. 연락처 열람 권한 만료 회원 → 만료 임박 알림 (1시간 전) ──
-  const { data: grantsExpiring } = await supabase
-    .from('users')
-    .select('id, name, contact_view_until')
-    .gt('contact_view_until', nowIso)
-    .lte('contact_view_until', inOneHour);
-  if (grantsExpiring && grantsExpiring.length > 0) {
-    const noties = grantsExpiring.map((u) => ({
-      user_id: u.id,
-      type: 'post_expiry_soon',
-      title: '연락처 열람 권한이 1시간 후 만료됩니다',
-      body: '연장이 필요하시면 운영자에게 문의해주세요.',
-      link: '/contact',
-    }));
-    await supabase.from('notifications').insert(noties);
-    result.posts_notified = grantsExpiring.length;
+  // ── 1. 게시 기간이 끝난 삽니다 광고 → 승인 해제(홈 광고칸에서 내림) ──
+  // 관리자가 20/25/30일을 넣어 승인하지만 예전엔 만료를 집행하는 코드가 없어
+  // 한 번 승인된 광고가 기간이 지나도 영원히 노출됐다.
+  const { data: expiredAds } = await supabase
+    .from('posts')
+    .select('id, author_id, title')
+    .eq('type', 'buy')
+    .is('deleted_at', null)
+    .not('approved_at', 'is', null)
+    .lt('expires_at', nowIso);
+  if (expiredAds && expiredAds.length > 0) {
+    const ids = expiredAds.map((p) => p.id);
+    await supabase.from('posts').update({ approved_at: null, updated_at: nowIso }).in('id', ids);
+    const noties = expiredAds
+      .filter((p) => p.author_id)
+      .map((p) => ({
+        user_id: p.author_id,
+        type: 'post_expiry_soon',
+        title: '광고 게시 기간이 만료되었습니다',
+        body: `"${p.title}" 광고가 만료되어 노출이 중단되었습니다. 연장은 운영자에게 문의해주세요.`,
+        link: '/dashboard',
+      }));
+    if (noties.length > 0) await supabase.from('notifications').insert(noties);
+    result.posts_notified = expiredAds.length;
   }
 
   // ── 2. 30일 지난 팝니다 글 soft-delete ──

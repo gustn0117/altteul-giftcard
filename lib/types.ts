@@ -1,3 +1,14 @@
+/** 삽니다(buy) 글의 광고 종류 — 홈의 어느 칸에 노출될지 결정 */
+export type AdType = 'national' | 'main' | 'recommend';
+
+export const AD_TYPES: { value: AdType; label: string; desc: string }[] = [
+  { value: 'main', label: '메인광고', desc: '홈 메인광고칸에 노출 (50개씩)' },
+  { value: 'national', label: '전국광고', desc: '홈 전국광고칸 + 추천업체칸에 함께 노출' },
+  { value: 'recommend', label: '추천업체', desc: '홈 추천업체칸에 노출' },
+];
+
+export const adTypeLabel = (t?: string | null) => AD_TYPES.find((a) => a.value === (t ?? 'main'))?.label ?? '메인광고';
+
 export interface DBPost {
   id: string;
   author_id: string | null;
@@ -33,6 +44,8 @@ export interface DBPost {
   deleted_at: string | null;
   /** 삽니다 승인 시각 — null이면 승인 대기(미노출) */
   approved_at?: string | null;
+  /** 삽니다 광고 종류 — 승인 시 홈의 해당 칸에 노출. null이면 'main' 취급 */
+  ad_type?: AdType | null;
   /** 마지막 점프 시각 — 정렬 우선순위 */
   last_jumped_at: string | null;
   /** 만료 1시간 전 알림 발송 시각 */

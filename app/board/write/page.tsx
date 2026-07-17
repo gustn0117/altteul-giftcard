@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { categories } from '@/data/mock';
 import { createPost, getPost, updatePost } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { AD_TYPES } from '@/lib/types';
 
 // 만료 정책 (일 단위)
 const SELL_EXPIRE_DAYS = 7;   // 팝니다: 7일 후 잠금 (30일 후 자동삭제)
@@ -64,6 +65,8 @@ function WritePostContent() {
     deliveryMethod: 'mobile',
     description: '',
     region: '',
+    // 삽니다 광고 종류 (기본: 메인광고)
+    adType: 'main' as string,
     guestName: '',
     guestPassword: '',
     guestPhone: '',
@@ -215,6 +218,8 @@ function WritePostContent() {
       } else {
         payload.send_month = null;
         payload.send_day = null;
+        // 삽니다 광고 종류 — 승인되면 홈의 해당 칸(전국/메인/추천)에 노출
+        payload.ad_type = form.adType || 'main';
       }
 
       // 신규 등록 시에만 만료 시각 설정 (수정 시는 기존 만료 유지)
@@ -389,6 +394,29 @@ function WritePostContent() {
             </>
           ) : (
             <>
+              {/* 광고 종류 — 승인되면 홈의 해당 칸에 노출됨 */}
+              <div>
+                <label className="block text-[12px] font-medium text-zinc-600 mb-1">광고 종류 *</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {AD_TYPES.map((a) => (
+                    <button
+                      key={a.value}
+                      type="button"
+                      onClick={() => handleChange('adType', a.value)}
+                      className={`h-10 text-[12.5px] font-bold border transition-colors ${
+                        form.adType === a.value
+                          ? 'border-accent bg-accent text-white'
+                          : 'border-gray-200 bg-white text-gray-600 hover:border-accent hover:text-accent'
+                      }`}
+                    >
+                      {a.label}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[11px] text-zinc-400 mt-1">
+                  {AD_TYPES.find((a) => a.value === form.adType)?.desc}
+                </p>
+              </div>
               <div>
                 <label className="block text-[12px] font-medium text-zinc-600 mb-1">매입률 (%) *</label>
                 <div className="flex items-center gap-2">

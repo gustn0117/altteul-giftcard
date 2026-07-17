@@ -6,7 +6,7 @@ function hashPassword(password: string): string {
   return crypto.createHash('sha256').update(password).digest('hex');
 }
 
-// 휴대폰 번호를 여러 저장 형식(숫자만/하이픈)으로 후보 생성
+// 휴대폰 번호를 여러 저장 형식(숫자만/하이픈)으로 후보 생성 — 기존 데이터가 형식이 섞여 있음
 function phoneCandidates(input: string): string[] {
   const d = input.replace(/[^0-9]/g, '');
   const set = new Set<string>([input.trim(), d]);
@@ -15,40 +15,46 @@ function phoneCandidates(input: string): string[] {
   return [...set].filter(Boolean);
 }
 
+/**
+ * 로그인 — 일반/업체 모두 **휴대폰 번호 + 비밀번호**.
+ * 예전엔 업체가 `번호@biz.altteul-giftcard` 라는 가짜 이메일을 조회 키로 썼는데,
+ * 이메일을 없애기로 하여 (type, 휴대폰)을 키로 사용한다.
+ * 같은 번호로 일반+업체 계정을 함께 가질 수 있으므로 반드시 type과 함께 조회한다.
+ * (기존 이메일 가입자 호환: identifier에 @가 있으면 이메일로도 조회)
+ */
 export async function POST(req: NextRequest) {
-  const { email, password, loginType } = await req.json();
+  const body = await req.json();
+  // 구버전 클라이언트 호환: email 키로 올 수도 있음
+  const identifier = String(body.phone ?? body.email ?? '').trim();
+  const { password, loginType } = body;
 
-  const identifier = (email || '').trim();
   if (!identifier) {
-    return NextResponse.json({ error: '아이디(이메일 또는 휴대폰)를 입력해주세요.' }, { status: 400 });
+    return NextResponse.json({ error: '휴대폰 번호를 입력해주세요.' }, { status: 400 });
   }
 
+  const userType = loginType === 'business' ? 'business' : 'normal';
   const supabase = createServiceClient();
 
-  // 개인 회원은 이메일 또는 휴대폰 번호로 로그인 가능 (@ 없으면 휴대폰으로 조회)
   let user: Record<string, unknown> | null = null;
-  if (loginType === 'normal' && !identifier.includes('@')) {
-    const { data } = await supabase
-      .from('users')
-      .select('*')
-      .eq('type', 'normal')
-      .in('phone', phoneCandidates(identifier))
-      .limit(1);
-    user = data?.[0] ?? null;
+
+  if (identifier.includes('@')) {
+    // 이메일로 가입했던 기존 회원 호환
+    const { data } = await supabase.from('users').select('*').eq('email', identifier).maybeSingle();
+    user = data ?? null;
   } else {
     const { data } = await supabase
       .from('users')
       .select('*')
-      .eq('email', identifier)
-      .maybeSingle();
-    user = data ?? null;
+      .eq('type', userType)
+      .in('phone', phoneCandidates(identifier))
+      .limit(1);
+    user = data?.[0] ?? null;
   }
 
   if (!user) {
     return NextResponse.json({ error: '등록되지 않은 계정입니다.' }, { status: 401 });
   }
 
-  // 비밀번호 검증 (해싱된 비밀번호와 비교)
   if (password && user.password_hash) {
     const hashed = hashPassword(password);
     // 기존 평문 비밀번호 호환 + 해싱 비밀번호 둘 다 지원
@@ -57,7 +63,6 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // 유형 검증
   if (loginType === 'business' && user.type !== 'business') {
     return NextResponse.json({ error: '업체 회원이 아닙니다. 일반 회원 로그인을 이용해주세요.' }, { status: 403 });
   }
@@ -65,7 +70,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '일반 회원이 아닙니다. 업체 로그인을 이용해주세요.' }, { status: 403 });
   }
 
-  // password_hash 제외하고 반환
   const { password_hash, ...safeUser } = user;
   return NextResponse.json({ user: safeUser });
 }

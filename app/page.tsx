@@ -1,30 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import NationalAds from '@/components/home/NationalAds';
+import { Globe, Megaphone, Crown } from 'lucide-react';
 import HeroPromo from '@/components/home/HeroPromo';
 import QuickLinks from '@/components/home/QuickLinks';
 import VisitorCounter from '@/components/home/VisitorCounter';
 import HomeAside from '@/components/layout/HomeAside';
-import BestCompanies from '@/components/home/BestCompanies';
-import RecommendedCompanies from '@/components/home/RecommendedCompanies';
-import MainCompaniesSection from '@/components/home/MainCompaniesSection';
+import AdSection from '@/components/home/AdSection';
 import SellLineAds from '@/components/home/SellLineAds';
-import { getPremiumBuyers } from '@/lib/api';
-import type { DBPremiumBuyer } from '@/lib/types';
-import { getCache, setCache } from '@/lib/cache';
 
+/**
+ * 홈 광고칸 3종 — 전부 '관리자 승인된 삽니다(buy) 글'로 통일.
+ * 카드/크기/간격/내용이 같아야 하므로 세 칸 모두 같은 AdSection + BuyPostCard 를 쓴다.
+ */
 export default function Home() {
-  const [buyers, setBuyers] = useState<DBPremiumBuyer[]>(() => getCache<DBPremiumBuyer[]>('home_buyers') ?? []);
-  const [loading, setLoading] = useState(() => !getCache('home_buyers'));
-
-  useEffect(() => {
-    getPremiumBuyers()
-      .then((data) => { setBuyers(data); setCache('home_buyers', data, 120000); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-
   return (
     <div className="bg-linear-to-b from-gray-50/50 to-white min-h-[calc(100vh-200px)] pb-3 md:pb-8">
       <div className="container-main pt-1 md:pt-3">
@@ -35,21 +23,40 @@ export default function Home() {
           </div>
 
           <div className="space-y-2 md:space-y-3">
-            {/* 1. 우리 업체 홍보 (작게) */}
             <HeroPromo />
-            {/* 2. 이용안내 / 주의사항 */}
             <QuickLinks />
-            {/* 3. 오늘 방문자 / 누적 상담 */}
             <VisitorCounter />
-            {/* 4. 전국 광고 (2x2) */}
-            <NationalAds />
-            {/* 4-1. 이달의 Best 업체 — 관리자 지정 */}
-            <BestCompanies buyers={buyers} loading={loading} />
-            {/* 5. 오늘의 추천 업체 — 우선순위 상위 20 (승인된 업체만) */}
-            <RecommendedCompanies buyers={buyers} loading={loading} />
-            {/* 6. 메인 광고 — 등록업체 카드 그리드 (접속/새로고침마다 랜덤) */}
-            <MainCompaniesSection buyers={buyers} loading={loading} />
-            {/* 7. 팝니다 줄광고 — 10개씩 페이지 */}
+
+            {/* 전국광고 */}
+            <AdSection
+              adType="national"
+              title="전국 광고"
+              icon={<Globe size={15} className="text-accent" />}
+              perPage={50}
+              emptyText="전국 광고 모집중입니다."
+            />
+
+            {/* 추천업체 — 전국광고도 함께 노출 */}
+            <AdSection
+              adType={['recommend', 'national']}
+              title="추천 업체"
+              icon={<Crown size={15} className="text-accent" />}
+              perPage={50}
+              shuffle
+              emptyText="추천 업체 모집중입니다."
+            />
+
+            {/* 메인광고 — 50개가 한 칸 */}
+            <AdSection
+              adType="main"
+              title="메인 광고"
+              icon={<Megaphone size={15} className="text-accent" />}
+              perPage={50}
+              shuffle
+              emptyText="메인 광고 모집중입니다."
+            />
+
+            {/* 팝니다 줄광고 */}
             <SellLineAds />
           </div>
         </div>

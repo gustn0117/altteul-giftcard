@@ -59,14 +59,13 @@ function RegisterContent() {
     if (form.password !== form.passwordConfirm) return setError('비밀번호가 일치하지 않습니다.');
     if (!form.agree) return setError('이용약관 및 개인정보 처리방침에 동의해야 가입할 수 있습니다.');
 
+    // 이메일 없이 휴대폰 번호가 아이디
     let payload: Record<string, unknown>;
     if (type === 'normal') {
       if (!form.name.trim()) return setError('이름(닉네임)을 입력해주세요.');
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return setError('유효한 이메일 주소를 입력해주세요.');
       if (form.phone.replace(/[^0-9]/g, '').length < 10) return setError('휴대폰 번호를 정확히 입력해주세요. (로그인 시 사용됩니다)');
       payload = {
         name: form.name.trim(),
-        email: form.email.trim(),
         phone: form.phone.trim(),
         password: form.password,
         type: 'normal',
@@ -79,9 +78,8 @@ function RegisterContent() {
       if (!form.messenger || !form.messengerId.trim()) return setError('메신저 종류와 아이디를 모두 입력해주세요.');
       payload = {
         name: form.businessName.trim(),
-        email: `${phoneDigits}@biz.altteul-giftcard`,
         password: form.password,
-        phone: form.phone || null,
+        phone: form.phone,
         type: 'business',
         representative: form.representative.trim(),
         messenger: form.messenger,
@@ -179,13 +177,9 @@ function RegisterContent() {
               <input type="text" value={form.name} onChange={(e) => change('name', e.target.value)}
                 placeholder="게시글에 표시될 이름" maxLength={30} className="auth-input" required />
             </Field>
-            <Field icon={Mail} label="이메일" hint="로그인 시 사용됩니다.">
-              <input type="email" value={form.email} onChange={(e) => change('email', e.target.value)}
-                placeholder="example@email.com" className="auth-input" required autoComplete="email" />
-            </Field>
-            <Field icon={Phone} label="휴대폰 번호" hint="이메일과 함께 로그인에 사용됩니다.">
+            <Field icon={Phone} label="휴대폰 번호" hint="로그인 아이디로 사용됩니다.">
               <input type="tel" value={form.phone} onChange={(e) => change('phone', e.target.value)}
-                placeholder="010-0000-0000" className="auth-input" required />
+                placeholder="010-0000-0000" className="auth-input" required autoComplete="tel" />
             </Field>
           </>
         ) : (

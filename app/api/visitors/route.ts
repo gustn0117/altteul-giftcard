@@ -1,117 +1,119 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
-import fs from 'fs';
-import path from 'path';
 
-const DATA_FILE = path.join(process.cwd(), 'data', 'visitors.json');
+/**
+ * 방문자 통계 — DB(altteul_giftcard.visitors) 영구 저장.
+ *
+ * 과거 구조의 문제로 수치가 안 늘어났음:
+ *  1) data/visitors.json 로컬 파일에 저장 → Docker 볼륨이 없어 재배포마다 초기화됨
+ *  2) 관리자 '수치 수정'이 _override 로 저장돼 GET을 영구히 가로챔(해제 수단 없음)
+ *     → 실제 방문이 아무리 쌓여도 화면은 고정값만 표시
+ *
+ * 현재 구조:
+ *  - 실제 방문은 visitors(date, ip) 로 하루 1IP 1회 집계 (DB 영구 저장)
+ *  - '수치 수정'은 고정값이 아니라 **시작값(오프셋)** 으로 저장 → 표시값 = 실제 + 오프셋
+ *    이므로 관리자가 숫자를 맞춰놔도 이후 실제 방문만큼 계속 증가한다.
+ *  - 날짜는 KST 기준 (UTC로 하면 한국시간 오전 9시에 '오늘'이 바뀜)
+ */
 
-// ─── JSON 파일 폴백 ───
-interface VisitorData { daily: Record<string, number>; total: number; }
-
-function readData(): VisitorData {
-  try {
-    if (!fs.existsSync(DATA_FILE)) return { daily: {}, total: 0 };
-    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
-  } catch { return { daily: {}, total: 0 }; }
+// KST(UTC+9) 기준 YYYY-MM-DD
+function kstDate(offsetDays = 0): string {
+  const t = Date.now() + 9 * 3600 * 1000 - offsetDays * 86400000;
+  return new Date(t).toISOString().slice(0, 10);
 }
-function writeData(data: VisitorData) {
-  const dir = path.dirname(DATA_FILE);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+
+type Settings = Record<string, string | null>;
+
+async function getSettings(supabase: ReturnType<typeof createServiceClient>): Promise<Settings> {
+  const { data } = await supabase.from('site_settings').select('key, value');
+  return Object.fromEntries((data ?? []).map((r: { key: string; value: string | null }) => [r.key, r.value]));
 }
 
-// POST: 방문 기록
+const num = (v: string | null | undefined) => {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+};
+
+// POST: 방문 기록 (하루 1IP 1회)
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
-  const today = new Date().toISOString().slice(0, 10);
-
-  // Supabase 시도
+  const ip = (req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown').split(',')[0].trim();
+  const date = kstDate();
   try {
     const supabase = createServiceClient();
-    // visitors 테이블에 upsert 시도
-    const { error } = await supabase.from('visitors').upsert(
-      { date: today, ip, visited_at: new Date().toISOString() },
-      { onConflict: 'date,ip' }
-    );
-    if (!error) return NextResponse.json({ ok: true });
-  } catch {
-    // 테이블 없으면 폴백
+    const { error } = await supabase
+      .from('visitors')
+      .upsert({ date, ip, visited_at: new Date().toISOString() }, { onConflict: 'date,ip' });
+    if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    return NextResponse.json({ ok: false, error: err instanceof Error ? err.message : 'fail' }, { status: 500 });
   }
-
-  // JSON 파일 폴백
-  const data = readData();
-  const ipKey = `_ips_${today}`;
-  const ips: string[] = (data as unknown as Record<string, unknown>)[ipKey] as string[] || [];
-  if (!ips.includes(ip)) {
-    ips.push(ip);
-    (data as unknown as Record<string, unknown>)[ipKey] = ips;
-    data.daily[today] = (data.daily[today] || 0) + 1;
-    data.total = (data.total || 0) + 1;
-    writeData(data);
-  }
-  return NextResponse.json({ ok: true });
 }
 
-// GET: 방문자 통계 조회
+// GET: 통계 조회 (표시값 = 실제 집계 + 관리자 오프셋)
 export async function GET() {
-  const today = new Date().toISOString().slice(0, 10);
-
-  // Supabase 시도
   try {
     const supabase = createServiceClient();
-    // 오늘 카운트
-    const { count: todayCount } = await supabase
-      .from('visitors')
-      .select('*', { count: 'exact', head: true })
-      .eq('date', today);
+    const today = kstDate();
 
-    // 전체 카운트
-    const { count: totalCount } = await supabase
-      .from('visitors')
-      .select('*', { count: 'exact', head: true });
+    const [{ count: realToday }, { count: realTotal }, settings] = await Promise.all([
+      supabase.from('visitors').select('id', { count: 'exact', head: true }).eq('date', today),
+      supabase.from('visitors').select('id', { count: 'exact', head: true }),
+      getSettings(supabase),
+    ]);
 
-    // 최근 30일 데이터
-    const last30: { date: string; count: number }[] = [];
-    for (let i = 29; i >= 0; i--) {
-      const d = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
-      const { count } = await supabase
-        .from('visitors')
-        .select('*', { count: 'exact', head: true })
-        .eq('date', d);
-      last30.push({ date: d, count: count || 0 });
-    }
+    // 최근 30일 (한 번의 쿼리로 가져와 집계 — 과거엔 30번 반복 조회했음)
+    const from = kstDate(29);
+    const { data: rows } = await supabase.from('visitors').select('date').gte('date', from).lte('date', today);
+    const byDate: Record<string, number> = {};
+    (rows ?? []).forEach((r: { date: string }) => {
+      byDate[r.date] = (byDate[r.date] || 0) + 1;
+    });
 
-    if (totalCount !== null) {
-      return NextResponse.json({ total: totalCount, today: todayCount || 0, last30 });
-    }
-  } catch {
-    // 폴백
+    // 오늘 오프셋은 저장 당시 날짜에만 적용 (날짜 바뀌면 자동으로 실제값부터 시작)
+    const todayOffset = settings.visitor_offset_today_date === today ? num(settings.visitor_offset_today) : 0;
+    const totalOffset = num(settings.visitor_offset_total);
+
+    const last30 = Array.from({ length: 30 }, (_, i) => {
+      const d = kstDate(29 - i);
+      return { date: d, count: (byDate[d] || 0) + (d === today ? todayOffset : 0) };
+    });
+
+    return NextResponse.json({
+      today: (realToday ?? 0) + todayOffset,
+      total: (realTotal ?? 0) + totalOffset,
+      trades: num(settings.trades_total),
+      last30,
+    });
+  } catch (err) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'fail' }, { status: 500 });
   }
-
-  // JSON 파일 폴백
-  const data = readData();
-  const todayCount = data.daily[today] || 0;
-  const last30: { date: string; count: number }[] = [];
-  for (let i = 29; i >= 0; i--) {
-    const d = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
-    last30.push({ date: d, count: data.daily[d] || 0 });
-  }
-  // 오버라이드 값이 있으면 적용
-  const override = (data as unknown as Record<string, unknown>)._override as { today?: number; total?: number; trades?: number } | undefined;
-  return NextResponse.json({
-    total: override?.total ?? data.total,
-    today: override?.today ?? todayCount,
-    trades: override?.trades ?? 0,
-    last30
-  });
 }
 
-// PUT: 수치 수동 설정 (관리자용)
+// PUT: 관리자 '수치 수정' — 고정이 아니라 시작값(오프셋)으로 저장
 export async function PUT(req: NextRequest) {
-  const { today, total, trades } = await req.json();
-  const data = readData();
-  const override = { today, total, trades };
-  (data as unknown as Record<string, unknown>)._override = override;
-  writeData(data);
-  return NextResponse.json({ ok: true, override });
+  try {
+    const { today: wantToday, total: wantTotal, trades } = await req.json();
+    const supabase = createServiceClient();
+    const today = kstDate();
+
+    const [{ count: realToday }, { count: realTotal }] = await Promise.all([
+      supabase.from('visitors').select('id', { count: 'exact', head: true }).eq('date', today),
+      supabase.from('visitors').select('id', { count: 'exact', head: true }),
+    ]);
+
+    // 원하는 표시값 - 실제 집계 = 오프셋 (이후 실제 방문이 이 위에 계속 누적됨)
+    const rows = [
+      { key: 'visitor_offset_today', value: String(Number(wantToday ?? 0) - (realToday ?? 0)) },
+      { key: 'visitor_offset_today_date', value: today },
+      { key: 'visitor_offset_total', value: String(Number(wantTotal ?? 0) - (realTotal ?? 0)) },
+      { key: 'trades_total', value: String(Number(trades ?? 0)) },
+    ];
+    const { error } = await supabase.from('site_settings').upsert(rows, { onConflict: 'key' });
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    return NextResponse.json({ ok: true, today: Number(wantToday ?? 0), total: Number(wantTotal ?? 0) });
+  } catch (err) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'fail' }, { status: 500 });
+  }
 }

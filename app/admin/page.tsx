@@ -5,11 +5,12 @@ import { supabase } from '@/lib/supabase';
 import { getMessages, getPremiumBuyers, createNotice as apiCreateNotice, deleteNotice as apiDeleteNotice, deleteUser as apiDeleteUser, updateUser, deletePost as apiDeletePost, deleteChat as apiDeleteChat, createPremiumBuyer, updatePremiumBuyer, deletePremiumBuyer as apiDeletePremiumBuyer } from '@/lib/api';
 import ImageUpload from '@/components/ImageUpload';
 import type { DBUser, DBPost, DBNotice, DBChat, DBMessage, DBPremiumBuyer, DBCommunityPost, CommunityCategory } from '@/lib/types';
+import { AD_TYPES, adTypeLabel } from '@/lib/types';
 import ImageUploader from '@/components/ImageUploader';
 import type { Ad, AdSlot } from '@/lib/ads';
 import { AD_SLOT_LABELS, AD_SLOT_SIZES } from '@/lib/ads';
 import Link from 'next/link';
-import { Users, FileText, Bell, MessageCircle, Trash2, Shield, Megaphone, Pencil, Plus, Eye, EyeOff, ArrowLeft, Radio, Crown, LayoutDashboard, TrendingUp, ExternalLink, Activity } from 'lucide-react';
+import { Users, FileText, Bell, MessageCircle, Trash2, Shield, Megaphone, Pencil, Plus, Eye, EyeOff, ArrowLeft, Radio, Crown, LayoutDashboard, TrendingUp, ExternalLink, Activity, Globe } from 'lucide-react';
 import { getCategoryName } from '@/data/mock';
 import { getCache, setCache } from '@/lib/cache';
 
@@ -20,7 +21,9 @@ const ALL_SLOTS = Object.keys(AD_SLOT_LABELS) as AdSlot[];
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [pw, setPw] = useState('');
-  const [tab, setTab] = useState<'overview' | 'users' | 'posts' | 'notices' | 'chats' | 'premium' | 'ads' | 'community'>('overview');
+  const [tab, setTab] = useState<'overview' | 'users' | 'posts' | 'notices' | 'chats' | 'premium' | 'ads' | 'community' | 'national' | 'main' | 'recommend'>('overview');
+  // 회원 목록 일반/업체 구분 필터
+  const [userFilter, setUserFilter] = useState<'all' | 'normal' | 'business'>('all');
   const [communityPosts, setCommunityPosts] = useState<DBCommunityPost[]>([]);
   const [communityCat, setCommunityCat] = useState<CommunityCategory | 'all'>('all');
   const [stats, setStats] = useState<{
@@ -205,6 +208,19 @@ export default function AdminPage() {
     if (error) return alert('승인 실패: ' + error.message);
     fetchData();
   };
+  // 광고 종류 변경 (전국/메인/추천 간 이동)
+  const changeAdType = async (id: string, adType: string) => {
+    const { error } = await supabase.from('posts').update({ ad_type: adType, updated_at: new Date().toISOString() }).eq('id', id);
+    if (error) return alert('변경 실패: ' + error.message);
+    fetchData();
+  };
+  // 승인 취소 → 다시 대기 상태로
+  const unapproveAd = async (id: string) => {
+    if (!confirm('노출을 중단하고 승인 대기로 되돌립니다.')) return;
+    const { error } = await supabase.from('posts').update({ approved_at: null, updated_at: new Date().toISOString() }).eq('id', id);
+    if (error) return alert('실패: ' + error.message);
+    fetchData();
+  };
   const deleteNotice = async (id: string) => { if (!confirm('공지를 삭제하시겠습니까?')) return; await apiDeleteNotice(id); fetchData(); };
   const addNotice = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -328,13 +344,20 @@ export default function AdminPage() {
     );
   }
 
+  // 삽니다 글 = 광고. 승인되어 실제 노출 중인 것만 종류별로 센다.
+  const liveAds = posts.filter((p) => p.type === 'buy' && p.approved_at && !p.deleted_at);
+  const adCount = (t: string) => liveAds.filter((p) => (p.ad_type ?? 'main') === t).length;
+
+  const filteredUsers = userFilter === 'all' ? users : users.filter((u) => (userFilter === 'business' ? u.type === 'business' : u.type !== 'business'));
+
   const tabs = [
     { key: 'overview' as const, label: '대시보드', icon: LayoutDashboard, count: null as number | null },
     { key: 'users' as const, label: '회원', icon: Users, count: users.length },
-    { key: 'posts' as const, label: '게시글', icon: FileText, count: posts.length },
+    { key: 'posts' as const, label: '총 게시글', icon: FileText, count: posts.filter((p) => !p.deleted_at).length },
     { key: 'notices' as const, label: '공지', icon: Bell, count: notices.length },
-    { key: 'premium' as const, label: '프리미엄', icon: Crown, count: premiumBuyers.length },
-    { key: 'ads' as const, label: '광고', icon: Megaphone, count: ads.length },
+    { key: 'national' as const, label: '전국광고', icon: Globe, count: adCount('national') },
+    { key: 'main' as const, label: '메인광고', icon: Megaphone, count: adCount('main') },
+    { key: 'recommend' as const, label: '추천업체', icon: Crown, count: adCount('recommend') },
   ];
 
   return (
@@ -353,10 +376,6 @@ export default function AdminPage() {
         <a href="/admin/hero-promo" className="card card-hover p-3 text-left">
           <span className="text-[10.5px] text-violet-600 font-bold">메인 홍보</span>
           <p className="text-[12.5px] font-bold text-gray-900 mt-0.5">홍보 박스 편집</p>
-        </a>
-        <a href="/admin/grants" className="card card-hover p-3 text-left">
-          <span className="text-[10.5px] text-amber-600 font-bold">연락처 권한</span>
-          <p className="text-[12.5px] font-bold text-gray-900 mt-0.5">회원별 시간/일 부여</p>
         </a>
         <a href="/admin/inquiries" className="card card-hover p-3 text-left">
           <span className="text-[10.5px] text-rose-600 font-bold">문의</span>
@@ -578,7 +597,7 @@ export default function AdminPage() {
                   <div key={u.id} className="flex items-center justify-between py-2">
                     <div className="min-w-0">
                       <p className="text-[12px] font-medium truncate">{u.name}</p>
-                      <p className="text-[11px] text-zinc-400 truncate">{u.email}</p>
+                      <p className="text-[11px] text-zinc-400 truncate tabular-nums">{u.phone || '-'}</p>
                     </div>
                     <span className={`badge shrink-0 ${u.type === 'business' ? 'bg-blue-50 text-blue-600' : 'bg-zinc-100 text-zinc-500'}`}>
                       {u.type === 'business' ? '업체' : '일반'}
@@ -662,33 +681,141 @@ export default function AdminPage() {
       {/* ─── Users ─── */}
       {!loading && tab === 'users' && (
         <div className="card overflow-hidden">
+          {/* 일반회원 / 업체회원 구분 */}
+          <div className="flex items-center gap-1 px-4 py-3 border-b border-zinc-200 bg-zinc-50">
+            {([
+              { k: 'all' as const, label: '전체', n: users.length },
+              { k: 'normal' as const, label: '일반회원', n: users.filter(u => u.type !== 'business').length },
+              { k: 'business' as const, label: '업체회원', n: users.filter(u => u.type === 'business').length },
+            ]).map(f => (
+              <button key={f.k} onClick={() => setUserFilter(f.k)}
+                className={`h-8 px-3 text-[12px] font-bold border transition-colors ${
+                  userFilter === f.k ? 'border-accent bg-accent text-white' : 'border-zinc-200 bg-white text-zinc-600 hover:border-accent hover:text-accent'
+                }`}>
+                {f.label} {f.n}
+              </button>
+            ))}
+            <span className="ml-auto text-[11px] text-zinc-400">유형 배지를 누르면 일반↔업체 전환</span>
+          </div>
           <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
             <thead><tr className="bg-zinc-50 border-b border-zinc-200">
               <th className="table-header text-left py-2.5 px-4">이름</th>
-              <th className="table-header text-left py-2.5 px-4">이메일</th>
-              <th className="table-header text-left py-2.5 px-4">연락처</th>
+              <th className="table-header text-left py-2.5 px-4">연락처 (로그인 아이디)</th>
               <th className="table-header text-center py-2.5 px-4">유형</th>
+              <th className="table-header text-right py-2.5 px-4">포인트</th>
               <th className="table-header text-left py-2.5 px-4">가입일</th>
               <th className="table-header text-center py-2.5 px-4">관리</th>
             </tr></thead>
             <tbody>
-              {users.map(u => (
+              {filteredUsers.map(u => (
                 <tr key={u.id} className="border-b border-zinc-100 hover:bg-zinc-50">
                   <td className="py-2.5 px-4 font-medium">{u.name}</td>
-                  <td className="py-2.5 px-4 text-zinc-500">{u.email}</td>
                   <td className="py-2.5 px-4 text-zinc-500 whitespace-nowrap tabular-nums">{u.phone || '-'}</td>
                   <td className="py-2.5 px-4 text-center"><button onClick={() => toggleUserType(u.id, u.type)} className={`badge cursor-pointer ${u.type === 'business' ? 'bg-blue-50 text-blue-600' : 'bg-zinc-100 text-zinc-500'}`}>{u.type === 'business' ? '업체' : '일반'}</button></td>
+                  <td className="py-2.5 px-4 text-right tabular-nums text-accent font-bold">{(u.points ?? 0).toLocaleString()}p</td>
                   <td className="py-2.5 px-4 text-zinc-400 text-[11px]">{new Date(u.created_at).toLocaleDateString('ko-KR')}</td>
                   <td className="py-2.5 px-4 text-center"><button onClick={() => deleteUser(u.id)} className="text-red-400 hover:text-red-600"><Trash2 size={14} /></button></td>
                 </tr>
               ))}
-              {users.length === 0 && <tr><td colSpan={6} className="py-8 text-center text-zinc-400">회원이 없습니다.</td></tr>}
+              {filteredUsers.length === 0 && <tr><td colSpan={6} className="py-8 text-center text-zinc-400">회원이 없습니다.</td></tr>}
             </tbody>
           </table>
           </div>
         </div>
       )}
+
+      {/* ─── 광고 관리 (전국광고 / 메인광고 / 추천업체) ─── */}
+      {!loading && (tab === 'national' || tab === 'main' || tab === 'recommend') && (() => {
+        const cur = tab as 'national' | 'main' | 'recommend';
+        const label = adTypeLabel(cur);
+        const buyPosts = posts.filter(p => p.type === 'buy' && !p.deleted_at);
+        const pending = buyPosts.filter(p => !p.approved_at && (p.ad_type ?? 'main') === cur);
+        const live = buyPosts.filter(p => p.approved_at && (p.ad_type ?? 'main') === cur);
+        return (
+          <div className="space-y-4">
+            <div className="card p-3 text-[12px] text-gray-600">
+              <b className="text-gray-900">{label}</b> — 회원이 삽니다 글 작성 시 종류를 고르고, 여기서 게시 기간을 넣어 승인하면 홈 {label}칸에 노출됩니다.
+              {cur === 'national' && <span className="text-accent font-bold"> 전국광고는 추천업체칸에도 함께 노출됩니다.</span>}
+            </div>
+
+            {/* 승인 대기 */}
+            <div className="card p-4 border border-amber-200 bg-amber-50/40">
+              <h3 className="text-[13px] font-bold text-amber-800 mb-3">🕒 {label} 승인 대기 ({pending.length})</h3>
+              {pending.length === 0 ? (
+                <p className="text-[12px] text-amber-700/70">대기 중인 신청이 없습니다.</p>
+              ) : (
+                <div className="space-y-2">
+                  {pending.map(p => (
+                    <div key={p.id} className="flex flex-wrap items-center gap-2 bg-white border border-amber-200 px-3 py-2">
+                      <span className="text-[12px] font-medium flex-1 min-w-[140px] truncate">
+                        {p.title} <span className="text-zinc-400 font-normal">/ {p.author?.name || '비회원'} / {getCategoryName(p.category)}{p.percentage != null ? ` / 매입 ${p.percentage}%` : ''}</span>
+                      </span>
+                      {[20, 25, 30].map(d => (
+                        <button key={d} type="button" onClick={() => approveBuyPost(p.id, d)}
+                          className="h-8 px-2.5 text-[12px] font-bold border border-amber-300 hover:bg-amber-100">{d}일</button>
+                      ))}
+                      <input type="number" min={1} placeholder="직접(일)" value={approveDaysMap[p.id] ?? ''}
+                        onChange={e => setApproveDaysMap(m => ({ ...m, [p.id]: e.target.value }))} className="input h-8 w-20" />
+                      <button type="button" onClick={() => approveBuyPost(p.id, Number(approveDaysMap[p.id]))}
+                        className="h-8 px-3 text-[12px] font-bold bg-accent text-white hover:bg-blue-700">승인</button>
+                      <button type="button" onClick={() => deletePost(p.id)} className="h-8 px-1.5 text-red-400 hover:text-red-600"><Trash2 size={14} /></button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 노출 중 */}
+            <div className="card overflow-hidden">
+              <div className="px-4 py-2.5 border-b border-zinc-200 bg-zinc-50 text-[13px] font-bold text-gray-800">
+                ✅ {label} 노출 중 ({live.length})
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[720px] text-[13px] nowrap-cells">
+                  <thead><tr className="bg-zinc-50 border-b border-zinc-200">
+                    <th className="table-header text-left py-2.5 px-4">제목</th>
+                    <th className="table-header text-left py-2.5 px-4">업체</th>
+                    <th className="table-header text-center py-2.5 px-4">매입률</th>
+                    <th className="table-header text-left py-2.5 px-4">지역</th>
+                    <th className="table-header text-center py-2.5 px-4">게시 만료</th>
+                    <th className="table-header text-center py-2.5 px-4">종류 변경</th>
+                    <th className="table-header text-center py-2.5 px-4">관리</th>
+                  </tr></thead>
+                  <tbody>
+                    {live.map(p => {
+                      const exp = p.expires_at ? new Date(p.expires_at) : null;
+                      const expired = exp ? exp.getTime() < Date.now() : false;
+                      return (
+                        <tr key={p.id} className="border-b border-zinc-100 hover:bg-zinc-50">
+                          <td className="py-2.5 px-4 font-medium truncate max-w-[220px]">{p.title}</td>
+                          <td className="py-2.5 px-4 text-zinc-500">{p.author?.name || '비회원'}</td>
+                          <td className="py-2.5 px-4 text-center text-accent font-bold">{p.percentage != null ? `${p.percentage}%` : '-'}</td>
+                          <td className="py-2.5 px-4 text-zinc-500">{p.region || '전국'}</td>
+                          <td className={`py-2.5 px-4 text-center text-[11px] ${expired ? 'text-red-500 font-bold' : 'text-zinc-400'}`}>
+                            {exp ? `${exp.toLocaleDateString('ko-KR')}${expired ? ' (만료)' : ''}` : '-'}
+                          </td>
+                          <td className="py-2.5 px-4 text-center">
+                            <select value={p.ad_type ?? 'main'} onChange={(e) => changeAdType(p.id, e.target.value)}
+                              className="h-8 px-2 border border-gray-300 text-[12px] focus:border-accent focus:outline-none">
+                              {AD_TYPES.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
+                            </select>
+                          </td>
+                          <td className="py-2.5 px-4 text-center whitespace-nowrap">
+                            <button onClick={() => unapproveAd(p.id)} className="h-7 px-2 text-[11px] border border-zinc-300 text-zinc-600 hover:bg-zinc-100 mr-1">노출중단</button>
+                            <button onClick={() => deletePost(p.id)} className="text-red-400 hover:text-red-600 align-middle"><Trash2 size={14} /></button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {live.length === 0 && <tr><td colSpan={7} className="py-8 text-center text-zinc-400">노출 중인 {label}가 없습니다.</td></tr>}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ─── Posts ─── */}
       {!loading && tab === 'posts' && (
@@ -1054,7 +1181,7 @@ export default function AdminPage() {
                   <select value={premiumForm.user_id} onChange={e => setPremiumForm(p => ({ ...p, user_id: e.target.value }))} className="input h-9">
                     <option value="">미연결</option>
                     {users.filter(u => u.type === 'business').map(u => (
-                      <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
+                      <option key={u.id} value={u.id}>{u.name} ({u.phone || '번호없음'})</option>
                     ))}
                   </select>
                 </div>

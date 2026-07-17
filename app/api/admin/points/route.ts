@@ -17,11 +17,17 @@ export async function POST(req: NextRequest) {
   const { data: user, error } = await supabase.from('users').select('id, points, name').eq('id', user_id).single();
   if (error || !user) return NextResponse.json({ error: '사용자를 찾을 수 없습니다.' }, { status: 404 });
 
-  const newBalance = (user.points ?? 0) + delta;
-  if (newBalance < 0) return NextResponse.json({ error: `잔액 부족 (현재 ${user.points}p, 차감 ${-delta}p)` }, { status: 400 });
+  if ((user.points ?? 0) + delta < 0) {
+    return NextResponse.json({ error: `잔액 부족 (현재 ${user.points}p, 차감 ${-delta}p)` }, { status: 400 });
+  }
 
-  const { error: updErr } = await supabase.from('users').update({ points: newBalance }).eq('id', user_id);
-  if (updErr) return NextResponse.json({ error: updErr.message }, { status: 500 });
+  // 원자적 증감 — 예전엔 select→계산→update 라, 충전과 사용자의 포인트 사용이 겹치면
+  // 한쪽이 낡은 잔액으로 덮어써서 충전이 통째로 사라졌음(= "포인트가 제대로 안 올라감")
+  const { data: newBalance, error: rpcErr } = await supabase.rpc('adjust_points', {
+    p_user_id: user_id,
+    p_delta: delta,
+  });
+  if (rpcErr) return NextResponse.json({ error: rpcErr.message }, { status: 500 });
 
   await supabase.from('point_transactions').insert({
     user_id,
@@ -51,10 +57,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: '관리자 인증이 필요합니다.' }, { status: 401 });
   }
   const supabase = createServiceClient();
+  // 가입 최신순 — 예전엔 포인트 내림차순 limit 200 이라 회원이 늘면 0p 신규회원이 목록에 안 떠 충전 자체가 불가능했음
   const { data: users } = await supabase
     .from('users')
-    .select('id, name, email, type, points, created_at')
-    .order('points', { ascending: false })
-    .limit(200);
+    .select('id, name, phone, type, points, created_at')
+    .order('created_at', { ascending: false })
+    .limit(1000);
   return NextResponse.json({ users: users ?? [] });
 }

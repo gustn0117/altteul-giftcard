@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { PenSquare, Tag, ShoppingCart, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import HomeAside from '@/components/layout/HomeAside';
-import NationalAds from '@/components/home/NationalAds';
+import AdSection from '@/components/home/AdSection';
 import SellPostItem from '@/components/home/SellPostItem';
 import BuyPostCard from '@/components/home/BuyPostCard';
 import { getPosts } from '@/lib/api';
@@ -110,7 +110,9 @@ function BoardContent() {
 
   return (
     <>
-      <NationalAds />
+      <div className="container-main pt-4">
+        <AdSection adType="national" title="전국 광고" icon={<MapPin size={15} className="text-accent" />} perPage={50} />
+      </div>
 
       <div className="container-main py-6">
         <div className="flex items-center justify-between mb-4">

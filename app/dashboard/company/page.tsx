@@ -79,13 +79,13 @@ export default function CompanyPage() {
   }
 
   const isBusiness = user?.type === 'business';
-  // 업체는 이메일이 `{휴대폰숫자}@biz.altteul-giftcard` 형식 (로그인 아이디)
-  const loginPhoneMatch = isBusiness ? form.email.match(/^(\d+)@biz\.altteul-giftcard$/) : null;
-  const loginPhone = loginPhoneMatch
-    ? loginPhoneMatch[1]
-        .replace(/^(\d{3})(\d{4})(\d{4})$/, '$1-$2-$3')
-        .replace(/^(\d{3})(\d{3})(\d{4})$/, '$1-$2-$3')
-    : null;
+  // 로그인 아이디 = 휴대폰 번호. (구버전 업체 계정은 `{번호}@biz.altteul-giftcard` 가짜 이메일을
+  //  아이디로 썼으므로, 그런 계정은 이메일에서 번호를 되살려 보여준다)
+  const legacyBizPhone = isBusiness ? (form.email || '').match(/^(\d+)@biz\.altteul-giftcard$/)?.[1] : null;
+  const loginPhone = (form.phone || legacyBizPhone || '')
+    .replace(/[^0-9]/g, '')
+    .replace(/^(\d{3})(\d{4})(\d{4})$/, '$1-$2-$3')
+    .replace(/^(\d{3})(\d{3})(\d{4})$/, '$1-$2-$3') || null;
 
   return (
     <DashboardLayout>
@@ -117,16 +117,6 @@ export default function CompanyPage() {
               <p className="text-[11px] text-zinc-400 mt-1">로그인에 사용하는 휴대폰 번호는 변경할 수 없습니다.</p>
             </div>
           )}
-          <div>
-            <label className="block text-[12px] font-medium text-zinc-600 mb-1">이메일</label>
-            <input
-              type="email"
-              value={form.email}
-              className="input bg-zinc-50 text-zinc-500 cursor-not-allowed"
-              readOnly
-            />
-            <p className="text-[11px] text-zinc-400 mt-1">이메일은 변경할 수 없습니다.</p>
-          </div>
           <div>
             <label className="block text-[12px] font-medium text-zinc-600 mb-1">연락처</label>
             <input

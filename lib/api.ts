@@ -3,7 +3,7 @@ import type { DBPost, DBUser, DBChat, DBMessage, DBNotice, DBPremiumBuyer, DBMai
 
 // ─── Posts ───
 
-const POST_BASE_COLS = 'id, type, title, category, face_value, price, discount, percentage, send_month, send_day, delivery, delivery_method, region, tags, views, is_active, author_id, guest_name, expires_at, blind_locked, completed_at, deleted_at, approved_at, last_jumped_at, notified_expiry_at, created_at';
+const POST_BASE_COLS = 'id, type, title, category, face_value, price, discount, percentage, send_month, send_day, delivery, delivery_method, region, tags, views, is_active, author_id, guest_name, expires_at, blind_locked, completed_at, deleted_at, approved_at, ad_type, last_jumped_at, notified_expiry_at, created_at';
 
 export async function getPosts(type?: 'sell' | 'buy', opts?: { limit?: number; withAuthor?: boolean; includeBlinded?: boolean; includePending?: boolean }) {
   const limit = opts?.limit ?? 100;
@@ -32,6 +32,28 @@ export async function getPosts(type?: 'sell' | 'buy', opts?: { limit?: number; w
   const { data, error } = await q;
   if (error) throw error;
   return (data as unknown) as (DBPost & { author: DBUser })[];
+}
+
+/**
+ * 홈 광고칸용 — 관리자 승인된 삽니다(buy) 글을 광고 종류별로 조회.
+ * 전국광고/메인광고/추천업체 3개 칸이 모두 이 함수를 쓴다(카드·크기·내용 동일).
+ * 연락처(전화/문자)를 걸 수 있어야 하므로 buy 전용 컬럼(guest_phone/description/author.phone)을 포함한다.
+ */
+export async function getAdPosts(adType: 'national' | 'main' | 'recommend' | ('national' | 'main' | 'recommend')[], limit = 200) {
+  const types = Array.isArray(adType) ? adType : [adType];
+  const { data, error } = await supabase
+    .from('posts')
+    .select(`${POST_BASE_COLS}, guest_phone, description, author:users!author_id(id, name, type, phone)`)
+    .eq('type', 'buy')
+    .is('deleted_at', null)
+    .eq('blind_locked', false)
+    .not('approved_at', 'is', null)
+    .in('ad_type', types)
+    .order('last_jumped_at', { ascending: false, nullsFirst: false })
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return (data as unknown) as (DBPost & { author?: DBUser })[];
 }
 
 export async function getPost(id: string) {
