@@ -416,6 +416,10 @@ function WritePostContent() {
                 <p className="text-[11px] text-zinc-400 mt-1">
                   {AD_TYPES.find((a) => a.value === form.adType)?.desc}
                 </p>
+                <p className="mt-2 px-3 py-2 bg-amber-50 border border-amber-200 text-[11.5px] text-amber-800">
+                  🕒 광고는 <b>관리자 승인 후</b> 노출됩니다. 관리자가 게시 기간(20/25/30일 등)을 설정해 승인하면
+                  홈 {AD_TYPES.find((a) => a.value === form.adType)?.label}칸에 표시되고, 기간이 끝나면 자동으로 내려갑니다.
+                </p>
               </div>
               <div>
                 <label className="block text-[12px] font-medium text-zinc-600 mb-1">매입률 (%) *</label>
