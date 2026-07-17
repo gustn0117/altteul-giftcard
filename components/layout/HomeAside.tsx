@@ -4,9 +4,11 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Crown, Clock, Phone, X } from 'lucide-react';
 import { getRecentBuyers, clearRecentBuyers, RECENT_BUYERS_EVENT, addRecentBuyer, type RecentBuyer } from '@/lib/recentBuyers';
-import { getPremiumBuyers } from '@/lib/api';
+import { getAdPosts } from '@/lib/api';
 import { getCache, setCache } from '@/lib/cache';
-import type { DBPremiumBuyer } from '@/lib/types';
+import type { DBPost, DBUser } from '@/lib/types';
+
+type AdPost = DBPost & { author?: DBUser };
 
 /**
  * 메인 페이지 통합 사이드바 (우측, 280px)
@@ -14,7 +16,9 @@ import type { DBPremiumBuyer } from '@/lib/types';
  */
 export default function HomeAside() {
   const [recent, setRecent] = useState<RecentBuyer[]>([]);
-  const [premium, setPremium] = useState<DBPremiumBuyer[]>(() => getCache<DBPremiumBuyer[]>('home_buyers') ?? []);
+  // 추천/전국 광고(삽니다 글) 상위 4개. 예전엔 premium_buyers 를 봤는데 광고를 삽니다 글로
+  // 통일하면서 그 테이블이 비어 사이드바가 영영 안 뜨는 상태였다.
+  const [featured, setFeatured] = useState<AdPost[]>(() => getCache<AdPost[]>('aside_ads') ?? []);
 
   useEffect(() => {
     const refresh = () => setRecent(getRecentBuyers());
@@ -28,14 +32,13 @@ export default function HomeAside() {
   }, []);
 
   useEffect(() => {
-    if (premium.length > 0) return;
-    getPremiumBuyers().then((data) => {
-      setPremium(data);
-      setCache('home_buyers', data, 120000);
-    }).catch(() => {});
-  }, [premium.length]);
-
-  const featured = premium.slice(0, 4);
+    getAdPosts(['recommend', 'national'], 4)
+      .then((data) => {
+        setFeatured(data as AdPost[]);
+        setCache('aside_ads', data, 120000);
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <aside className="space-y-3.5">
@@ -45,36 +48,38 @@ export default function HomeAside() {
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
             <div className="flex items-center gap-1.5">
               <Crown size={13} className="text-amber-500" />
-              <span className="text-[12px] font-bold text-gray-800">프리미엄 업체</span>
+              <span className="text-[12px] font-bold text-gray-800">추천 업체</span>
             </div>
             <Link href="/recommended" className="text-[10.5px] text-gray-400 hover:text-accent">전체 →</Link>
           </div>
           <ul>
-            {featured.map((b) => (
-              <li key={b.id} className="border-b border-gray-50 last:border-b-0">
-                <Link
-                  href={`/buyer/${b.id}`}
-                  onClick={() => addRecentBuyer({ id: b.id, name: b.name, region: b.region, image_url: b.image_url })}
-                  className="block px-4 py-3 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center gap-2 mb-1.5">
-                    {b.image_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={b.image_url} alt="" className="w-8 h-8 rounded-lg object-cover border border-gray-100 shrink-0" />
-                    ) : (
+            {featured.map((b) => {
+              const name = b.author?.name ?? b.guest_name ?? '업체';
+              const phone = b.guest_phone || b.author?.phone || '';
+              return (
+                <li key={b.id} className="border-b border-gray-50 last:border-b-0">
+                  <Link
+                    href={`/board/${b.id}`}
+                    onClick={() => addRecentBuyer({ id: b.id, name, region: b.region, image_url: null })}
+                    className="block px-4 py-3 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-2 mb-1.5">
                       <span className="w-8 h-8 rounded-lg bg-linear-to-br from-blue-100 to-blue-50 border border-gray-100 shrink-0" />
+                      <span className="text-[12.5px] font-bold text-gray-900 truncate flex-1">{name}</span>
+                      {b.percentage != null && (
+                        <span className="text-[11px] font-extrabold text-accent shrink-0">{b.percentage}%</span>
+                      )}
+                    </div>
+                    {phone && (
+                      <p className="flex items-center gap-1 text-[11.5px] font-bold text-gray-700">
+                        <Phone size={10} className="text-accent shrink-0" />
+                        <span className="tabular-nums truncate">{phone}</span>
+                      </p>
                     )}
-                    <span className="text-[12.5px] font-bold text-gray-900 truncate flex-1">{b.name}</span>
-                  </div>
-                  {b.phone && (
-                    <p className="flex items-center gap-1 text-[11.5px] font-bold text-gray-700">
-                      <Phone size={10} className="text-accent shrink-0" />
-                      <span className="tabular-nums">{b.phone}</span>
-                    </p>
-                  )}
-                </Link>
-              </li>
-            ))}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}

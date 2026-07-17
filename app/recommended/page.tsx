@@ -1,29 +1,17 @@
 'use client';
 import HomeAside from '@/components/layout/HomeAside';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Crown, Sparkles, TrendingUp } from 'lucide-react';
-import CompanyCard from '@/components/home/CompanyCard';
-import { getPremiumBuyers } from '@/lib/api';
-import type { DBPremiumBuyer } from '@/lib/types';
+import { Sparkles, Crown } from 'lucide-react';
+import AdSection from '@/components/home/AdSection';
 
+/**
+ * 오늘의 추천업체 — 홈 추천업체칸과 동일한 데이터/카드.
+ * 예전엔 관리자가 따로 등록하는 premium_buyers(등급별 3단 그룹)를 썼는데,
+ * 광고를 삽니다 글로 통일하면서 그 테이블이 비어 이 페이지가 항상 텅 비어 있었다.
+ * 추천업체칸에는 전국광고도 함께 노출된다.
+ */
 export default function RecommendedPage() {
-  const [buyers, setBuyers] = useState<DBPremiumBuyer[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setLoading(true);
-    getPremiumBuyers()
-      .then(data => setBuyers(data))
-      .catch(() => setBuyers([]))
-      .finally(() => setLoading(false));
-  }, []);
-
-  const premiumTier = buyers.filter(b => b.tier === 'premium');
-  const standardTier = buyers.filter(b => b.tier === 'standard');
-  const basicTier = buyers.filter(b => b.tier === 'basic' || !b.tier);
-
   return (
     <div className="container-main py-6">
       <div className="flex items-center justify-between mb-4">
@@ -37,69 +25,25 @@ export default function RecommendedPage() {
         <HomeAside />
 
         <div className="flex-1 min-w-0">
-          {/* Hero stripe */}
           <div className="mb-5 p-5 bg-gradient-to-r from-accent to-accent-light text-white">
             <div className="flex items-center gap-3">
               <Sparkles size={22} className="shrink-0" />
               <div>
                 <p className="text-[16px] font-bold">오늘의 추천업체</p>
-                <p className="text-[12px] opacity-90">우선순위 및 등급 기준으로 엄선된 업체를 소개합니다</p>
+                <p className="text-[12px] opacity-90">추천업체 광고와 전국광고를 함께 소개합니다</p>
               </div>
             </div>
           </div>
 
-          {loading ? (
-            <div className="py-16 text-center text-gray-400 text-[13px]">불러오는 중...</div>
-          ) : buyers.length === 0 ? (
-            <div className="py-16 text-center border border-dashed border-gray-200 bg-white">
-              <p className="text-[13px] text-gray-500">아직 등록된 추천업체가 없습니다.</p>
-              <Link href="/register-business" className="inline-block mt-3 text-[12px] text-accent font-bold hover:underline">
-                업체 등록하기 →
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-6 mb-6">
-              {premiumTier.length > 0 && (
-                <section>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Crown size={16} className="text-yellow-600" />
-                    <h2 className="text-[15px] font-bold">프리미엄 추천업체</h2>
-                    <span className="text-[12px] text-gray-400">{premiumTier.length}건</span>
-                  </div>
-                  <div className="grid grid-cols-2 min-[520px]:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-2.5">
-                    {premiumTier.map(b => <CompanyCard key={b.id} company={b} isNew={false} />)}
-                  </div>
-                </section>
-              )}
-
-              {standardTier.length > 0 && (
-                <section>
-                  <div className="flex items-center gap-2 mb-3">
-                    <TrendingUp size={16} className="text-blue-600" />
-                    <h2 className="text-[15px] font-bold">스탠다드 업체</h2>
-                    <span className="text-[12px] text-gray-400">{standardTier.length}건</span>
-                  </div>
-                  <div className="grid grid-cols-2 min-[520px]:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-2.5">
-                    {standardTier.map(b => <CompanyCard key={b.id} company={b} isNew={false} />)}
-                  </div>
-                </section>
-              )}
-
-              {basicTier.length > 0 && (
-                <section>
-                  <div className="flex items-center gap-2 mb-3">
-                    <h2 className="text-[15px] font-bold">베이직 업체</h2>
-                    <span className="text-[12px] text-gray-400">{basicTier.length}건</span>
-                  </div>
-                  <div className="grid grid-cols-2 min-[520px]:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-2.5">
-                    {basicTier.map(b => <CompanyCard key={b.id} company={b} isNew={false} />)}
-                  </div>
-                </section>
-              )}
-            </div>
-          )}
+          <AdSection
+            adType={['recommend', 'national']}
+            title="추천 업체"
+            icon={<Crown size={15} className="text-accent" />}
+            perPage={50}
+            shuffle
+            emptyText="추천 업체 모집중입니다."
+          />
         </div>
-
       </div>
     </div>
   );
