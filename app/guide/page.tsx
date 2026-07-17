@@ -86,7 +86,7 @@ function GuideContent() {
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {['전체', '서울', '경기', '인천', '대전', '대구', '부산', '광주'].map(r => (
-                      <Link key={r} href={`/category/area?region=${r}`} className="px-3 py-1.5 text-[11px] border border-gray-200 text-gray-600 hover:text-accent hover:border-accent transition-colors">
+                      <Link key={r} href="/board?tab=buy" className="px-3 py-1.5 text-[11px] border border-gray-200 text-gray-600 hover:text-accent hover:border-accent transition-colors">
                         {r}
                       </Link>
                     ))}
@@ -98,7 +98,7 @@ function GuideContent() {
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {['전체', '신세계', '롯데', '문화상품권', '컬쳐랜드', '스타벅스', '해피머니', '온캐시'].map(t => (
-                      <Link key={t} href={`/category/product?type=${t}`} className="px-3 py-1.5 text-[11px] border border-gray-200 text-gray-600 hover:text-accent hover:border-accent transition-colors">
+                      <Link key={t} href={`/search?q=${encodeURIComponent(t === '전체' ? '상품권' : t)}&tab=buy`} className="px-3 py-1.5 text-[11px] border border-gray-200 text-gray-600 hover:text-accent hover:border-accent transition-colors">
                         {t}
                       </Link>
                     ))}

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { getMessages, getPremiumBuyers, createNotice as apiCreateNotice, deleteNotice as apiDeleteNotice, deleteUser as apiDeleteUser, updateUser, deletePost as apiDeletePost, deleteChat as apiDeleteChat, createPremiumBuyer, updatePremiumBuyer, deletePremiumBuyer as apiDeletePremiumBuyer } from '@/lib/api';
 import ImageUpload from '@/components/ImageUpload';
-import type { DBUser, DBPost, DBNotice, DBChat, DBMessage, DBPremiumBuyer, DBCommunityPost, CommunityCategory } from '@/lib/types';
+import type { DBUser, DBPost, DBNotice, DBChat, DBMessage, DBPremiumBuyer } from '@/lib/types';
 import { AD_TYPES, adTypeLabel } from '@/lib/types';
 import ImageUploader from '@/components/ImageUploader';
 import type { Ad, AdSlot } from '@/lib/ads';
@@ -24,8 +24,6 @@ export default function AdminPage() {
   const [tab, setTab] = useState<'overview' | 'users' | 'posts' | 'notices' | 'chats' | 'premium' | 'ads' | 'community' | 'national' | 'main' | 'recommend'>('overview');
   // 회원 목록 일반/업체 구분 필터
   const [userFilter, setUserFilter] = useState<'all' | 'normal' | 'business'>('all');
-  const [communityPosts, setCommunityPosts] = useState<DBCommunityPost[]>([]);
-  const [communityCat, setCommunityCat] = useState<CommunityCategory | 'all'>('all');
   const [stats, setStats] = useState<{
     users: { total: number; business: number; normal: number; todayNew: number };
     posts: { total: number; sell: number; buy: number; active: number; todayNew: number };
@@ -152,20 +150,6 @@ export default function AdminPage() {
     setLoading(false);
   };
 
-  // 커뮤니티 CRUD
-  const deleteCommunityPost = async (id: string) => {
-    if (!confirm('정말 삭제하시겠습니까? 댓글도 함께 삭제됩니다.')) return;
-    await fetch(`/api/community/posts/${id}`, { method: 'DELETE' });
-    fetchData();
-  };
-  const toggleCommunityPinned = async (post: DBCommunityPost) => {
-    await fetch(`/api/community/posts/${post.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ is_pinned: !post.is_pinned }),
-    });
-    fetchData();
-  };
 
   useEffect(() => { if (authed) fetchData(); }, [authed]);
 
@@ -556,14 +540,11 @@ export default function AdminPage() {
               <Link href="/" target="_blank" className="btn-secondary h-9 text-[12px] justify-between">
                 메인 페이지 <ExternalLink size={12} />
               </Link>
-              <Link href="/category/area" target="_blank" className="btn-secondary h-9 text-[12px] justify-between">
-                지역별 업체찾기 <ExternalLink size={12} />
+              <Link href="/board?tab=buy" target="_blank" className="btn-secondary h-9 text-[12px] justify-between">
+                지역별 매입찾기 <ExternalLink size={12} />
               </Link>
-              <Link href="/category/product" target="_blank" className="btn-secondary h-9 text-[12px] justify-between">
-                상품별 업체찾기 <ExternalLink size={12} />
-              </Link>
-              <Link href="/community" target="_blank" className="btn-secondary h-9 text-[12px] justify-between">
-                커뮤니티 <ExternalLink size={12} />
+              <Link href="/recommended" target="_blank" className="btn-secondary h-9 text-[12px] justify-between">
+                추천업체 <ExternalLink size={12} />
               </Link>
               <Link href="/notice" target="_blank" className="btn-secondary h-9 text-[12px] justify-between">
                 공지사항 <ExternalLink size={12} />
@@ -871,80 +852,6 @@ export default function AdminPage() {
       )}
 
       {/* ─── Community ─── */}
-      {!loading && tab === 'community' && (
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex flex-wrap gap-1">
-              {([
-                { k: 'all' as const, label: '전체' },
-                { k: 'news' as const, label: '업계뉴스' },
-                { k: 'tip' as const, label: '거래TIP' },
-                { k: 'qna' as const, label: '질문과답변' },
-              ]).map(t => (
-                <button key={t.k} onClick={() => setCommunityCat(t.k)}
-                  className={`px-3 py-1.5 text-[12px] border ${communityCat === t.k ? 'border-zinc-900 bg-zinc-900 text-white font-bold' : 'border-zinc-200 text-zinc-600 hover:border-zinc-400'}`}>
-                  {t.label}
-                </button>
-              ))}
-            </div>
-            <Link href="/community/write" target="_blank" className="btn-primary h-9"><Plus size={14} /> 새 글 작성</Link>
-          </div>
-
-          <div className="card overflow-hidden">
-            <div className="overflow-x-auto">
-            <table className="w-full text-[13px]">
-              <thead>
-                <tr className="bg-zinc-50 border-b border-zinc-200">
-                  <th className="table-header text-center py-2.5 px-4 w-16">카테고리</th>
-                  <th className="table-header text-center py-2.5 px-4 w-14">고정</th>
-                  <th className="table-header text-left py-2.5 px-4">제목</th>
-                  <th className="table-header text-left py-2.5 px-4 w-24">작성자</th>
-                  <th className="table-header text-center py-2.5 px-4 w-16">조회</th>
-                  <th className="table-header text-center py-2.5 px-4 w-16">댓글</th>
-                  <th className="table-header text-left py-2.5 px-4 w-28">작성일</th>
-                  <th className="table-header text-center py-2.5 px-4 w-20">관리</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(communityCat === 'all' ? communityPosts : communityPosts.filter(p => p.category === communityCat)).map(p => (
-                  <tr key={p.id} className="border-b border-zinc-100 hover:bg-zinc-50">
-                    <td className="py-2.5 px-4 text-center">
-                      <span className={`badge ${p.category === 'news' ? 'bg-blue-50 text-blue-600' : p.category === 'tip' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
-                        {p.category === 'news' ? '뉴스' : p.category === 'tip' ? 'TIP' : 'Q&A'}
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-4 text-center">
-                      <button onClick={() => toggleCommunityPinned(p)} className={`badge cursor-pointer ${p.is_pinned ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-400'}`}>
-                        {p.is_pinned ? '고정' : '일반'}
-                      </button>
-                    </td>
-                    <td className="py-2.5 px-4">
-                      <Link href={`/community/${p.id}`} target="_blank" className="text-zinc-800 hover:text-accent">
-                        {p.title}
-                      </Link>
-                    </td>
-                    <td className="py-2.5 px-4 text-zinc-500 text-[12px]">{p.author_name || '익명'}</td>
-                    <td className="py-2.5 px-4 text-center text-zinc-400">{p.views}</td>
-                    <td className="py-2.5 px-4 text-center text-zinc-400">{p.comment_count || 0}</td>
-                    <td className="py-2.5 px-4 text-zinc-400 text-[11px]">{new Date(p.created_at).toLocaleDateString('ko-KR')}</td>
-                    <td className="py-2.5 px-4 text-center">
-                      <button onClick={() => deleteCommunityPost(p.id)} className="text-red-400 hover:text-red-600"><Trash2 size={14} /></button>
-                    </td>
-                  </tr>
-                ))}
-                {communityPosts.length === 0 && (
-                  <tr><td colSpan={8} className="py-12 text-center text-zinc-400">
-                    <p className="mb-2">커뮤니티 게시글이 없습니다.</p>
-                    <p className="text-[11px]">Supabase에 community_posts 테이블이 생성되어 있는지 확인하세요.</p>
-                    <p className="text-[11px]">(/supabase/migrations/20260418_community.sql 실행)</p>
-                  </td></tr>
-                )}
-              </tbody>
-            </table>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ─── Notices ─── */}
       {!loading && tab === 'notices' && (
