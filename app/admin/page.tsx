@@ -128,7 +128,7 @@ export default function AdminPage() {
     if (!getCache('admin_users')) setLoading(true);
 
     // 모든 데이터를 동시에 병렬 요청
-    const [u, p, n, c, v, pb, ad, st, cm] = await Promise.allSettled([
+    const [u, p, n, c, v, pb, ad, st] = await Promise.allSettled([
       supabase.from('users').select('*').order('created_at', { ascending: false }).limit(200),
       supabase.from('posts').select('*, author:users!author_id(id, name, type)').order('created_at', { ascending: false }).limit(200),
       supabase.from('notices').select('*').order('created_at', { ascending: false }).limit(50),
@@ -137,7 +137,6 @@ export default function AdminPage() {
       getPremiumBuyers(false),
       fetch('/api/ads').then(r => r.json()),
       fetch('/api/admin/stats', { credentials: 'include' }).then(r => r.json()),
-      fetch('/api/community/posts?limit=200').then(r => r.json()),
     ]);
 
     if (u.status === 'fulfilled' && u.value.data) { setUsers(u.value.data); setCache('admin_users', u.value.data, ADMIN_CACHE_TTL); }
@@ -148,7 +147,7 @@ export default function AdminPage() {
     if (pb.status === 'fulfilled') { setPremiumBuyers(pb.value); setCache('admin_premium', pb.value, ADMIN_CACHE_TTL); }
     if (ad.status === 'fulfilled') { setAds(ad.value); setCache('admin_ads', ad.value, ADMIN_CACHE_TTL); }
     if (st.status === 'fulfilled' && st.value?.users) setStats(st.value);
-    if (cm.status === 'fulfilled' && cm.value?.posts) setCommunityPosts(cm.value.posts);
+    // 커뮤니티 기능은 이전에 제거됨 — /api/community/posts 를 부르면 매 로드마다 404 가 났음
 
     setLoading(false);
   };

@@ -36,7 +36,7 @@ async function runCron() {
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 86400 * 1000).toISOString();
 
   const result: Record<string, number> = {
-    posts_locked: 0,
+    ads_expired: 0,
     posts_notified: 0,
     posts_soft_deleted: 0,
     banners_locked: 0,
@@ -60,13 +60,14 @@ async function runCron() {
       .filter((p) => p.author_id)
       .map((p) => ({
         user_id: p.author_id,
-        type: 'post_expiry_soon',
+        type: 'post_expired',
         title: '광고 게시 기간이 만료되었습니다',
         body: `"${p.title}" 광고가 만료되어 노출이 중단되었습니다. 연장은 운영자에게 문의해주세요.`,
         link: '/dashboard',
       }));
     if (noties.length > 0) await supabase.from('notifications').insert(noties);
-    result.posts_notified = expiredAds.length;
+    result.ads_expired = expiredAds.length;      // 실제 만료 집행 건수
+    result.posts_notified = noties.length;       // 실제 알림 발송 건수 (비회원 글은 제외되므로 다를 수 있음)
   }
 
   // ── 2. 30일 지난 팝니다 글 soft-delete ──

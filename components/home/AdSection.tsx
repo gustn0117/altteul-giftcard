@@ -45,6 +45,15 @@ export default function AdSection({ adType, title, icon, perPage = 50, shuffle =
   const [loading, setLoading] = useState(() => !getCache(cacheKey));
   const [page, setPage] = useState(1);
   const [seed, setSeed] = useState(0);
+  // 관리자의 '삽니다 연락처 공개' 설정 — 게시판만 지키고 홈은 무시하면 설정이 무력화된다
+  const [publicContact, setPublicContact] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/settings')
+      .then((r) => r.json())
+      .then((d) => setPublicContact(d.buy_contact_public !== false))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     setSeed(Math.random());
@@ -102,7 +111,7 @@ export default function AdSection({ adType, title, icon, perPage = 50, shuffle =
         <>
           <div className="grid grid-cols-2 min-[520px]:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {paged.map((p) => (
-              <BuyPostCard key={p.id} post={p} />
+              <BuyPostCard key={p.id} post={p} publicContact={publicContact} />
             ))}
           </div>
 

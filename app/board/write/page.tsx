@@ -97,6 +97,9 @@ function WritePostContent() {
             deliveryMethod: post.delivery_method || 'mobile',
             description: post.description || '',
             region: post.region || '',
+            // 광고 종류를 로드하지 않으면 수정 시 항상 'main' 으로 덮어써져
+            // 전국광고/추천업체가 조용히 메인광고로 강등된다
+            adType: post.ad_type ?? 'main',
             guestName: post.guest_name || '',
             guestPhone: post.guest_phone || '',
           }));

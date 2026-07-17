@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import { verifyAdminSession } from '../admin/route';
 
 /**
  * 방문자 통계 — DB(altteul_giftcard.visitors) 영구 저장.
@@ -92,6 +93,10 @@ export async function GET() {
 
 // PUT: 관리자 '수치 수정' — 고정이 아니라 시작값(오프셋)으로 저장
 export async function PUT(req: NextRequest) {
+  // 관리자 전용 — 게이트가 없으면 누구나 사이트 방문자 수치를 바꿀 수 있다
+  if (!verifyAdminSession(req.cookies.get('altteul-giftcard_admin')?.value)) {
+    return NextResponse.json({ error: '관리자 인증이 필요합니다.' }, { status: 401 });
+  }
   try {
     const { today: wantToday, total: wantTotal, trades } = await req.json();
     const supabase = createServiceClient();

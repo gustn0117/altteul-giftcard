@@ -23,7 +23,6 @@ function RegisterContent() {
   const [form, setForm] = useState({
     // 개인
     name: '',
-    email: '',
     phone: '',
     // 업체
     businessName: '',
@@ -97,13 +96,9 @@ function RegisterContent() {
       if (!res.ok) throw new Error(data.error || '회원가입에 실패했습니다.');
 
       if (type === 'normal') {
-        // 자동 로그인
-        const loginRes = await fetch('/api/auth/login', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: form.email.trim(), password: form.password, loginType: 'normal' }),
-        });
-        const loginData = await loginRes.json();
-        if (loginRes.ok && loginData.user) { login(loginData.user); router.push('/'); }
+        // 가입 응답이 이미 user 를 주므로 그대로 로그인 (예전엔 이메일로 재로그인 요청을 보냈는데
+        // 이메일을 없앤 뒤 그 값이 항상 빈 문자열이라 자동 로그인이 100% 실패해 /login 으로 튕겼음)
+        if (data.user) { login(data.user); router.push('/'); }
         else router.push('/login');
       } else {
         setDone(true);

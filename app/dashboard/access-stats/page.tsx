@@ -26,9 +26,11 @@ export default function AccessStatsPage() {
     fetch('/api/visitors')
       .then((r) => r.json())
       .then((res) => {
-        const days = res.last30Days ?? [];
+        // API가 주는 키는 last30 (예전엔 last30Days 를 읽어 항상 빈 배열 → 모든 수치가 0이었음)
+        const days: { date: string; count: number }[] = res.last30 ?? [];
         const periodDays = period === '1' ? 1 : period === '7' ? 7 : 30;
-        const filtered = days.slice(0, periodDays);
+        // last30 은 오래된 날짜 → 최신 순이므로 최근 N일은 뒤에서 잘라야 한다
+        const filtered = days.slice(-periodDays);
         const totalVisitors = filtered.reduce((s: number, d: { count: number }) => s + d.count, 0);
         setData({
           views: totalVisitors * 3, // estimate: 3 pageviews per visitor

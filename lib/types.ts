@@ -57,7 +57,8 @@ export interface DBPost {
 
 export interface DBUser {
   id: string;
-  email: string;
+  /** 구버전 회원만 보유. 신규 가입은 휴대폰 번호가 아이디라 email 이 없다(NULL) */
+  email?: string | null;
   name: string;
   phone: string | null;
   type: 'normal' | 'business';
