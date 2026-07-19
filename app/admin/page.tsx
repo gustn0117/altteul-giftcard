@@ -12,7 +12,7 @@ import type { Ad, AdSlot } from '@/lib/ads';
 import { AD_SLOT_LABELS, AD_SLOT_SIZES } from '@/lib/ads';
 import Link from 'next/link';
 import { Users, FileText, Bell, MessageCircle, Trash2, Shield, Megaphone, Pencil, Plus, Eye, EyeOff, ArrowLeft, Radio, Crown, LayoutDashboard, TrendingUp, ExternalLink, Activity, Globe } from 'lucide-react';
-import { getCategoryName } from '@/data/mock';
+import { getCategoryName, categories } from '@/data/mock';
 import { getCache, setCache } from '@/lib/cache';
 
 const ADMIN_CACHE_TTL = 30 * 1000; // 30초 (관리자라 너무 길면 변경사항 반영이 늦음)
@@ -25,6 +25,9 @@ export default function AdminPage() {
   const [tab, setTab] = useState<'overview' | 'users' | 'posts' | 'notices' | 'chats' | 'premium' | 'ads' | 'community' | 'national' | 'main' | 'recommend'>('overview');
   // 회원 목록 일반/업체 구분 필터
   const [userFilter, setUserFilter] = useState<'all' | 'normal' | 'business'>('all');
+  // 업체 소개 편집 모달
+  const [introEdit, setIntroEdit] = useState<{ id: string; name: string; intro: string; hours: string; imageUrl: string; categories: string[] } | null>(null);
+  const [introSaving, setIntroSaving] = useState(false);
   const [stats, setStats] = useState<{
     users: { total: number; business: number; normal: number; todayNew: number };
     posts: { total: number; sell: number; buy: number; active: number; todayNew: number };
@@ -222,6 +225,35 @@ export default function AdminPage() {
     fetchData();
   };
   const toggleUserType = async (id: string, t: string) => { await updateUser(id, { type: t === 'normal' ? 'business' : 'normal' } as any); fetchData(); };
+
+  // 업체 소개 편집 (관리자가 각 업체 소개를 직접 관리)
+  const openIntroEdit = (u: DBUser) => setIntroEdit({
+    id: u.id, name: u.name,
+    intro: u.intro || '', hours: u.business_hours || '',
+    imageUrl: u.intro_image_url || '',
+    categories: u.main_categories ? String(u.main_categories).split(',').filter(Boolean) : [],
+  });
+  const saveIntroEdit = async () => {
+    if (!introEdit) return;
+    setIntroSaving(true);
+    try {
+      const res = await fetch('/api/user', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: introEdit.id, intro: introEdit.intro, businessHours: introEdit.hours,
+          introImageUrl: introEdit.imageUrl, mainCategories: introEdit.categories.join(','),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '저장 실패');
+      setIntroEdit(null);
+      fetchData();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '저장 실패');
+    } finally {
+      setIntroSaving(false);
+    }
+  };
   const deleteChat = async (id: string) => { if (!confirm('채팅을 삭제하시겠습니까?')) return; await apiDeleteChat(id); if (viewingChat?.id === id) setViewingChat(null); fetchData(); };
 
   // 채팅 실시간 뷰어
@@ -692,7 +724,12 @@ export default function AdminPage() {
                   <td className="py-2.5 px-4 text-center"><button onClick={() => toggleUserType(u.id, u.type)} className={`badge cursor-pointer ${u.type === 'business' ? 'bg-blue-50 text-blue-600' : 'bg-zinc-100 text-zinc-500'}`}>{u.type === 'business' ? '업체' : '일반'}</button></td>
                   <td className="py-2.5 px-4 text-right tabular-nums text-accent font-bold">{(u.points ?? 0).toLocaleString()}p</td>
                   <td className="py-2.5 px-4 text-zinc-400 text-[11px]">{new Date(u.created_at).toLocaleDateString('ko-KR')}</td>
-                  <td className="py-2.5 px-4 text-center"><button onClick={() => deleteUser(u.id)} className="text-red-400 hover:text-red-600"><Trash2 size={14} /></button></td>
+                  <td className="py-2.5 px-4 text-center whitespace-nowrap">
+                    {u.type === 'business' && (
+                      <button onClick={() => openIntroEdit(u)} className="mr-2 h-7 px-2 text-[11px] border border-zinc-300 text-zinc-600 hover:border-accent hover:text-accent align-middle">소개편집</button>
+                    )}
+                    <button onClick={() => deleteUser(u.id)} className="text-red-400 hover:text-red-600 align-middle"><Trash2 size={14} /></button>
+                  </td>
                 </tr>
               ))}
               {filteredUsers.length === 0 && <tr><td colSpan={6} className="py-8 text-center text-zinc-400">회원이 없습니다.</td></tr>}
@@ -1300,6 +1337,60 @@ export default function AdminPage() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* 업체 소개 편집 모달 */}
+      {introEdit && (
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/40 p-4" onClick={() => setIntroEdit(null)}>
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white rounded-lg p-5" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-[15px] font-bold text-gray-900">{introEdit.name} — 업체 소개 편집</h3>
+              <button onClick={() => setIntroEdit(null)} className="text-[13px] text-gray-400 hover:text-gray-700">닫기</button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[12px] font-medium text-gray-600 mb-1">업체 소개 이미지</label>
+                <ImageUploader value={introEdit.imageUrl} onChange={(url) => setIntroEdit((p) => p && { ...p, imageUrl: url })} folder="intro" />
+              </div>
+              <div>
+                <label className="block text-[12px] font-medium text-gray-600 mb-1">주력 카테고리 (최대 2개)</label>
+                <div className="flex flex-wrap gap-2">
+                  {categories.filter((c) => c.id !== 'all').map((cat) => {
+                    const on = introEdit.categories.includes(cat.id);
+                    return (
+                      <button key={cat.id} type="button"
+                        onClick={() => setIntroEdit((p) => {
+                          if (!p) return p;
+                          if (on) return { ...p, categories: p.categories.filter((c) => c !== cat.id) };
+                          if (p.categories.length >= 2) return p;
+                          return { ...p, categories: [...p.categories, cat.id] };
+                        })}
+                        className={`badge cursor-pointer ${on ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'}`}>
+                        {cat.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <label className="block text-[12px] font-medium text-gray-600 mb-1">업체 소개</label>
+                <textarea value={introEdit.intro} onChange={(e) => setIntroEdit((p) => p && { ...p, intro: e.target.value })}
+                  rows={4} placeholder="업체 소개 (상세페이지에 노출)" className="input h-auto py-3 resize-none" />
+              </div>
+              <div>
+                <label className="block text-[12px] font-medium text-gray-600 mb-1">운영 시간</label>
+                <input type="text" value={introEdit.hours} onChange={(e) => setIntroEdit((p) => p && { ...p, hours: e.target.value })}
+                  placeholder="예: 연중무휴 24시간" className="input" />
+              </div>
+              <div className="flex gap-2 pt-1">
+                <button onClick={saveIntroEdit} disabled={introSaving} className="btn-primary h-10 px-5 text-[13px] disabled:opacity-60">
+                  {introSaving ? '저장 중...' : '저장'}
+                </button>
+                <button onClick={() => setIntroEdit(null)} className="btn-secondary h-10 px-5 text-[13px]">취소</button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
