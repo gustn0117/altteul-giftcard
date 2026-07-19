@@ -2,14 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-
-interface AccessData {
-  views: number;
-  visitors: number;
-  phoneClicks: number;
-  chatClicks: number;
-  productClicks: number;
-}
+import { useAuth } from '@/contexts/AuthContext';
 
 const PERIOD_OPTIONS = [
   { key: '30', label: '30일' },
@@ -17,39 +10,41 @@ const PERIOD_OPTIONS = [
   { key: '1', label: '1일' },
 ];
 
-export default function AccessStatsPage() {
-  const [period, setPeriod] = useState('30');
-  const [data, setData] = useState<AccessData>({ views: 0, visitors: 0, phoneClicks: 0, chatClicks: 0, productClicks: 0 });
-  const [dailyData, setDailyData] = useState<{ date: string; count: number }[]>([]);
+interface Totals { view: number; phone: number; sms: number; }
 
+export default function AccessStatsPage() {
+  const { user } = useAuth();
+  const [period, setPeriod] = useState('30');
+  const [totals, setTotals] = useState<Totals>({ view: 0, phone: 0, sms: 0 });
+  const [dailyData, setDailyData] = useState<{ date: string; count: number }[]>([]);
+  const [allDays, setAllDays] = useState<{ date: string; count: number }[]>([]);
+
+  // 로그인한 업체 본인의 광고 이벤트만 집계 (예전엔 전역 방문자를 모든 업체가 동일하게 봤음)
   useEffect(() => {
-    fetch('/api/visitors')
+    if (!user?.id) return;
+    fetch(`/api/ad-events?user_id=${user.id}`)
       .then((r) => r.json())
       .then((res) => {
-        // API가 주는 키는 last30 (예전엔 last30Days 를 읽어 항상 빈 배열 → 모든 수치가 0이었음)
-        const days: { date: string; count: number }[] = res.last30 ?? [];
-        const periodDays = period === '1' ? 1 : period === '7' ? 7 : 30;
-        // last30 은 오래된 날짜 → 최신 순이므로 최근 N일은 뒤에서 잘라야 한다
-        const filtered = days.slice(-periodDays);
-        const totalVisitors = filtered.reduce((s: number, d: { count: number }) => s + d.count, 0);
-        setData({
-          views: totalVisitors * 3, // estimate: 3 pageviews per visitor
-          visitors: totalVisitors,
-          phoneClicks: Math.floor(totalVisitors * 0.05),
-          chatClicks: Math.floor(totalVisitors * 0.15),
-          productClicks: Math.floor(totalVisitors * 0.4),
-        });
-        setDailyData(filtered);
+        setTotals(res.totals ?? { view: 0, phone: 0, sms: 0 });
+        setAllDays(res.last30 ?? []);
       })
       .catch(() => {});
-  }, [period]);
+  }, [user?.id]);
+
+  // 기간(1/7/30일)에 맞춰 일별 데이터 자름 — last30은 오래된→최신 순이라 뒤에서 자른다
+  useEffect(() => {
+    const n = period === '1' ? 1 : period === '7' ? 7 : 30;
+    setDailyData(allDays.slice(-n));
+  }, [allDays, period]);
+
+  const sumIn = (n: number) => allDays.slice(-n).reduce((s, d) => s + d.count, 0);
+  const periodDays = period === '1' ? 1 : period === '7' ? 7 : 30;
+  const periodViews = sumIn(periodDays);
 
   const stats = [
-    { label: '샵 조회수', value: data.views, color: 'text-zinc-900' },
-    { label: '고유 방문자', value: data.visitors, color: 'text-blue-600' },
-    { label: '전화 클릭', value: data.phoneClicks, color: 'text-green-600' },
-    { label: '채팅 클릭', value: data.chatClicks, color: 'text-amber-600' },
-    { label: '상품 클릭', value: data.productClicks, color: 'text-purple-600' },
+    { label: '전화 클릭', value: totals.phone, color: 'text-green-600' },
+    { label: '문자 클릭', value: totals.sms, color: 'text-blue-600' },
+    { label: '상품 클릭', value: totals.view, color: 'text-purple-600' },
   ];
 
   const maxCount = Math.max(...dailyData.map((d) => d.count), 1);
@@ -63,8 +58,19 @@ export default function AccessStatsPage() {
           </svg>
           접속 통계
         </h2>
+        <p className="text-[12px] text-zinc-500 -mt-2">내 광고에 대한 조회·연락 클릭 통계입니다. (누적 기준)</p>
 
-        {/* Period Filter */}
+        {/* 클릭 통계 카드 — 전화/문자/상품 (누적) */}
+        <div className="grid grid-cols-3 gap-3">
+          {stats.map((stat) => (
+            <div key={stat.label} className="card p-4 card-hover">
+              <p className="text-[11px] text-zinc-500 mb-1">{stat.label}</p>
+              <p className={`text-xl font-semibold ${stat.color}`}>{stat.value.toLocaleString()}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* 기간 필터 */}
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 bg-zinc-100 rounded-lg p-0.5">
             {PERIOD_OPTIONS.map((opt) => (
@@ -79,31 +85,21 @@ export default function AccessStatsPage() {
               </button>
             ))}
           </div>
-          <button onClick={() => setPeriod('30')} className="text-[11px] text-zinc-400 hover:text-zinc-600 ml-1">초기화</button>
+          <span className="text-[11px] text-zinc-400 ml-1">최근 {periodDays}일 조회 {periodViews.toLocaleString()}건</span>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-          {stats.map((stat) => (
-            <div key={stat.label} className="card p-4 card-hover">
-              <p className="text-[11px] text-zinc-500 mb-1">{stat.label}</p>
-              <p className={`text-xl font-semibold ${stat.color}`}>{stat.value.toLocaleString()}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Chart */}
+        {/* 일별 조회 추이 */}
         <div className="card p-5">
-          <h3 className="text-[13px] font-semibold text-zinc-800 mb-4">일별 방문자 추이</h3>
-          {dailyData.length === 0 ? (
+          <h3 className="text-[13px] font-semibold text-zinc-800 mb-4">일별 조회 추이 (최근 {periodDays}일)</h3>
+          {dailyData.length === 0 || periodViews === 0 ? (
             <div className="h-40 flex items-center justify-center text-zinc-400 text-[13px]">
-              아직 접속 데이터가 없습니다.
+              아직 조회 데이터가 없습니다.
             </div>
           ) : (
-            <div className="space-y-1">
-              {dailyData.slice(0, 14).map((day) => (
+            <div className="space-y-1 max-h-130 overflow-y-auto">
+              {dailyData.map((day) => (
                 <div key={day.date} className="flex items-center gap-3">
-                  <span className="text-[11px] text-zinc-500 w-20 shrink-0">{day.date}</span>
+                  <span className="text-[11px] text-zinc-500 w-20 shrink-0">{day.date.slice(5)}</span>
                   <div className="flex-1 h-5 bg-zinc-50 rounded overflow-hidden">
                     <div
                       className="h-full bg-green-400 rounded transition-all"

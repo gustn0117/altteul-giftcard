@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, CircleDollarSign } from 'lucide-react';
+import { formatPhone } from '@/lib/format';
 
 interface UserRow {
   id: string;
@@ -100,7 +101,7 @@ export default function AdminPointsPage() {
               {filtered.map((u) => (
                 <tr key={u.id} className="border-b border-gray-100 hover:bg-gray-50">
                   <td className="py-2.5 px-3 font-bold text-gray-800">{u.name}</td>
-                  <td className="py-2.5 px-3 text-[12px] text-gray-500">{u.phone || '-'}</td>
+                  <td className="py-2.5 px-3 text-[12px] text-gray-500">{u.phone ? formatPhone(u.phone) : '-'}</td>
                   <td className="py-2.5 px-3 text-center text-[11px]">
                     <span className={`px-2 py-0.5 rounded ${u.type === 'business' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>
                       {u.type === 'business' ? '업체' : '개인'}

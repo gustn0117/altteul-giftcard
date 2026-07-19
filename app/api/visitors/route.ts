@@ -71,18 +71,20 @@ export async function GET() {
       byDate[r.date] = (byDate[r.date] || 0) + 1;
     });
 
-    // 오늘 오프셋은 저장 당시 날짜에만 적용 (날짜 바뀌면 자동으로 실제값부터 시작)
-    const todayOffset = settings.visitor_offset_today_date === today ? num(settings.visitor_offset_today) : 0;
+    // 관리자가 설정한 오늘 방문자는 '매일 기준값'으로 유지한다.
+    // (예전엔 저장 날짜가 지나면 무시돼서 다음날 오늘 방문자가 리셋됐음 → "반영 안됨"의 원인)
+    // 오늘 = 오늘 실제 방문 + 기준값 → 매일 기준값에서 시작해 실제 방문만큼 올라간다.
+    const todayOffset = num(settings.visitor_offset_today);
     const totalOffset = num(settings.visitor_offset_total);
 
     const last30 = Array.from({ length: 30 }, (_, i) => {
       const d = kstDate(29 - i);
-      return { date: d, count: (byDate[d] || 0) + (d === today ? todayOffset : 0) };
+      return { date: d, count: Math.max(0, (byDate[d] || 0) + (d === today ? todayOffset : 0)) };
     });
 
     return NextResponse.json({
-      today: (realToday ?? 0) + todayOffset,
-      total: (realTotal ?? 0) + totalOffset,
+      today: Math.max(0, (realToday ?? 0) + todayOffset),
+      total: Math.max(0, (realTotal ?? 0) + totalOffset),
       trades: num(settings.trades_total),
       last30,
     });

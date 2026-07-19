@@ -144,7 +144,7 @@ function LoginContent() {
           >
             {loginType === 'business' ? '업체 회원가입' : '개인 회원가입'}
           </Link>
-          <button type="button" className="hover:text-accent transition-colors">비밀번호 찾기</button>
+          <Link href="/forgot" className="hover:text-accent transition-colors">비밀번호 찾기</Link>
         </div>
       </form>
 

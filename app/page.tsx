@@ -1,6 +1,6 @@
 'use client';
 
-import { Globe, Megaphone, Crown } from 'lucide-react';
+import { Globe, Megaphone } from 'lucide-react';
 import HeroPromo from '@/components/home/HeroPromo';
 import QuickLinks from '@/components/home/QuickLinks';
 import VisitorCounter from '@/components/home/VisitorCounter';
@@ -36,17 +36,7 @@ export default function Home() {
               emptyText="전국 광고 모집중입니다."
             />
 
-            {/* 추천업체 — 전국광고도 함께 노출 */}
-            <AdSection
-              adType={['recommend', 'national']}
-              title="추천 업체"
-              icon={<Crown size={15} className="text-accent" />}
-              perPage={50}
-              shuffle
-              emptyText="추천 업체 모집중입니다."
-            />
-
-            {/* 메인광고 — 50개가 한 칸 */}
+            {/* 메인광고 — 전국광고 바로 아래, 50개가 한 칸 */}
             <AdSection
               adType="main"
               title="메인 광고"

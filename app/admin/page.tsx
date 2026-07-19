@@ -6,6 +6,7 @@ import { getMessages, getPremiumBuyers, createNotice as apiCreateNotice, deleteN
 import ImageUpload from '@/components/ImageUpload';
 import type { DBUser, DBPost, DBNotice, DBChat, DBMessage, DBPremiumBuyer } from '@/lib/types';
 import { AD_TYPES, adTypeLabel } from '@/lib/types';
+import { formatPhone } from '@/lib/format';
 import ImageUploader from '@/components/ImageUploader';
 import type { Ad, AdSlot } from '@/lib/ads';
 import { AD_SLOT_LABELS, AD_SLOT_SIZES } from '@/lib/ads';
@@ -573,7 +574,7 @@ export default function AdminPage() {
                   <div key={u.id} className="flex items-center justify-between py-2">
                     <div className="min-w-0">
                       <p className="text-[12px] font-medium truncate">{u.name}</p>
-                      <p className="text-[11px] text-zinc-400 truncate tabular-nums">{u.phone || '-'}</p>
+                      <p className="text-[11px] text-zinc-400 truncate tabular-nums">{u.phone ? formatPhone(u.phone) : '-'}</p>
                     </div>
                     <span className={`badge shrink-0 ${u.type === 'business' ? 'bg-blue-50 text-blue-600' : 'bg-zinc-100 text-zinc-500'}`}>
                       {u.type === 'business' ? '업체' : '일반'}
@@ -687,7 +688,7 @@ export default function AdminPage() {
               {filteredUsers.map(u => (
                 <tr key={u.id} className="border-b border-zinc-100 hover:bg-zinc-50">
                   <td className="py-2.5 px-4 font-medium">{u.name}</td>
-                  <td className="py-2.5 px-4 text-zinc-500 whitespace-nowrap tabular-nums">{u.phone || '-'}</td>
+                  <td className="py-2.5 px-4 text-zinc-500 whitespace-nowrap tabular-nums">{u.phone ? formatPhone(u.phone) : '-'}</td>
                   <td className="py-2.5 px-4 text-center"><button onClick={() => toggleUserType(u.id, u.type)} className={`badge cursor-pointer ${u.type === 'business' ? 'bg-blue-50 text-blue-600' : 'bg-zinc-100 text-zinc-500'}`}>{u.type === 'business' ? '업체' : '일반'}</button></td>
                   <td className="py-2.5 px-4 text-right tabular-nums text-accent font-bold">{(u.points ?? 0).toLocaleString()}p</td>
                   <td className="py-2.5 px-4 text-zinc-400 text-[11px]">{new Date(u.created_at).toLocaleDateString('ko-KR')}</td>
@@ -1083,7 +1084,7 @@ export default function AdminPage() {
                   <select value={premiumForm.user_id} onChange={e => setPremiumForm(p => ({ ...p, user_id: e.target.value }))} className="input h-9">
                     <option value="">미연결</option>
                     {users.filter(u => u.type === 'business').map(u => (
-                      <option key={u.id} value={u.id}>{u.name} ({u.phone || '번호없음'})</option>
+                      <option key={u.id} value={u.id}>{u.name} ({u.phone ? formatPhone(u.phone) : '번호없음'})</option>
                     ))}
                   </select>
                 </div>

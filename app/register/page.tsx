@@ -3,11 +3,20 @@
 import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { User, Building2, Mail, Lock, Phone, MessageCircle, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { User, Building2, Lock, Phone, MessageCircle, ArrowRight, CheckCircle2, HelpCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthShell from '@/components/auth/AuthShell';
 
 type RegisterType = 'normal' | 'business';
+
+// 비밀번호 찾기용 보안질문 (가입 시 답변 저장 → 찾기 시 대조)
+export const SECURITY_QUESTIONS = [
+  '좋아하는 음식은?',
+  '출신 초등학교 이름은?',
+  '어머니 성함은?',
+  '기억에 남는 별명은?',
+  '첫 반려동물 이름은?',
+];
 
 function RegisterContent() {
   const router = useRouter();
@@ -32,6 +41,9 @@ function RegisterContent() {
     // 공통
     password: '',
     passwordConfirm: '',
+    // 비밀번호 찾기용 보안질문
+    securityQuestion: SECURITY_QUESTIONS[0],
+    securityAnswer: '',
     agree: false,
   });
 
@@ -56,6 +68,7 @@ function RegisterContent() {
     // 공통 검증
     if (form.password.length < 6) return setError('비밀번호는 6자 이상이어야 합니다.');
     if (form.password !== form.passwordConfirm) return setError('비밀번호가 일치하지 않습니다.');
+    if (!form.securityAnswer.trim()) return setError('비밀번호 찾기용 답변을 입력해주세요.');
     if (!form.agree) return setError('이용약관 및 개인정보 처리방침에 동의해야 가입할 수 있습니다.');
 
     // 이메일 없이 휴대폰 번호가 아이디
@@ -68,6 +81,8 @@ function RegisterContent() {
         phone: form.phone.trim(),
         password: form.password,
         type: 'normal',
+        securityQuestion: form.securityQuestion,
+        securityAnswer: form.securityAnswer.trim(),
       };
     } else {
       const phoneDigits = form.phone.replace(/[^0-9]/g, '');
@@ -83,6 +98,8 @@ function RegisterContent() {
         representative: form.representative.trim(),
         messenger: form.messenger,
         messengerId: form.messengerId.trim(),
+        securityQuestion: form.securityQuestion,
+        securityAnswer: form.securityAnswer.trim(),
       };
     }
 
@@ -222,6 +239,18 @@ function RegisterContent() {
               placeholder="다시 입력" className="auth-input" required autoComplete="new-password" />
           </Field>
         </div>
+
+        {/* 비밀번호 찾기용 보안질문 */}
+        <Field icon={HelpCircle} label="비밀번호 찾기 질문" hint="비밀번호를 잊었을 때 이 답변으로 재설정합니다.">
+          <select value={form.securityQuestion} onChange={(e) => change('securityQuestion', e.target.value)}
+            className="auth-input">
+            {SECURITY_QUESTIONS.map((qq) => <option key={qq} value={qq}>{qq}</option>)}
+          </select>
+        </Field>
+        <Field icon={HelpCircle} label="답변">
+          <input type="text" value={form.securityAnswer} onChange={(e) => change('securityAnswer', e.target.value)}
+            placeholder="답변을 입력하세요" className="auth-input" required />
+        </Field>
 
         <label className="flex items-start gap-2 text-[12px] text-gray-600 py-1">
           <input type="checkbox" checked={form.agree} onChange={(e) => change('agree', e.target.checked)}

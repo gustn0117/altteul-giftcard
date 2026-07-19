@@ -20,7 +20,7 @@ function phoneCandidates(input: string): string[] {
  * 그게 내정보 화면에 그대로 노출됐다. 이제 email 은 저장하지 않는다(컬럼은 기존 회원용으로 남음).
  */
 export async function POST(req: NextRequest) {
-  const { name, password, phone, type, representative, messenger, messengerId } = await req.json();
+  const { name, password, phone, type, representative, messenger, messengerId, securityQuestion, securityAnswer } = await req.json();
 
   if (!name || !password || !phone) {
     return NextResponse.json({ error: '필수 항목(이름/휴대폰/비밀번호)을 입력해주세요.' }, { status: 400 });
@@ -53,6 +53,11 @@ export async function POST(req: NextRequest) {
     insertData.representative = representative || null;
     insertData.messenger = messenger || null;
     insertData.messenger_id = messengerId || null;
+  }
+  // 비밀번호 찾기용 보안질문 (답변은 정규화 후 해시 저장)
+  if (securityQuestion && securityAnswer) {
+    insertData.security_question = securityQuestion;
+    insertData.security_answer_hash = hashPassword(String(securityAnswer).trim().toLowerCase());
   }
 
   const { data: user, error } = await supabase

@@ -2,10 +2,11 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Crown, Clock, Phone, X } from 'lucide-react';
+import { Crown, Clock, Phone, X, ChevronRight } from 'lucide-react';
 import { getRecentBuyers, clearRecentBuyers, RECENT_BUYERS_EVENT, addRecentBuyer, type RecentBuyer } from '@/lib/recentBuyers';
 import { getAdPosts } from '@/lib/api';
 import { getCache, setCache } from '@/lib/cache';
+import { formatPhone } from '@/lib/format';
 import type { DBPost, DBUser } from '@/lib/types';
 
 type AdPost = DBPost & { author?: DBUser };
@@ -73,7 +74,7 @@ export default function HomeAside() {
                     {phone && (
                       <p className="flex items-center gap-1 text-[11.5px] font-bold text-gray-700">
                         <Phone size={10} className="text-accent shrink-0" />
-                        <span className="tabular-nums truncate">{phone}</span>
+                        <span className="tabular-nums truncate">{formatPhone(phone)}</span>
                       </p>
                     )}
                   </Link>
@@ -100,23 +101,41 @@ export default function HomeAside() {
         {recent.length === 0 ? (
           <p className="px-3 py-3 text-[10.5px] text-gray-400 leading-relaxed">업체 카드 클릭 시 기록</p>
         ) : (
-          <ul>
-            {recent.slice(0, 5).map((b) => (
-              <li key={b.id} className="border-b border-gray-50 last:border-b-0">
-                <Link href={`/buyer/${b.id}`} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-gray-50 transition-colors">
-                  {b.image_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={b.image_url} alt="" className="w-5 h-5 rounded object-cover border border-gray-100 shrink-0" />
-                  ) : (
-                    <span className="w-5 h-5 rounded bg-gray-100 shrink-0" />
-                  )}
-                  <span className="text-[11px] text-gray-700 truncate flex-1">{b.name}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <RecentCarousel items={recent.slice(0, 5)} />
         )}
       </div>
     </aside>
+  );
+}
+
+/** 최근 본 업체 — 한 번에 1개씩 순차 표시, 오른쪽 화살표로 다음 업체 */
+function RecentCarousel({ items }: { items: RecentBuyer[] }) {
+  const [idx, setIdx] = useState(0);
+  const cur = items[idx % items.length];
+  if (!cur) return null;
+  return (
+    <div className="flex items-center gap-1 px-2 py-2">
+      <Link
+        href={`/board/${cur.id}`}
+        className="flex items-center gap-2 px-2 py-1.5 flex-1 min-w-0 hover:bg-gray-50 transition-colors"
+      >
+        <span className="w-6 h-6 rounded bg-gray-100 shrink-0" />
+        <span className="text-[11.5px] text-gray-700 truncate flex-1">{cur.name}</span>
+        {cur.region && <span className="text-[10px] text-gray-400 shrink-0">{cur.region}</span>}
+      </Link>
+      {items.length > 1 && (
+        <>
+          <span className="text-[10px] text-gray-400 tabular-nums shrink-0">{(idx % items.length) + 1}/{items.length}</span>
+          <button
+            type="button"
+            onClick={() => setIdx((v) => (v + 1) % items.length)}
+            aria-label="다음 업체"
+            className="shrink-0 w-6 h-6 flex items-center justify-center border border-gray-200 rounded text-gray-400 hover:border-accent hover:text-accent transition-colors"
+          >
+            <ChevronRight size={13} />
+          </button>
+        </>
+      )}
+    </div>
   );
 }

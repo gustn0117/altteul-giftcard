@@ -169,9 +169,9 @@ export default function Header() {
                 <Search size={18} strokeWidth={1.8} />
               </Link>
               {isLoggedIn && points != null && (
-                <Link href="/dashboard" className="flex flex-col leading-none min-w-0" aria-label="내 포인트">
+                <Link href="/dashboard" className="flex flex-col items-center justify-center text-center leading-tight shrink-0" aria-label="내 포인트">
                   <span className="text-[9px] text-gray-400">포인트</span>
-                  <span className="text-[12.5px] font-extrabold text-accent tabular-nums truncate">{points.toLocaleString()}P</span>
+                  <span className="text-[12px] font-extrabold text-accent tabular-nums whitespace-nowrap">{points.toLocaleString()}P</span>
                 </Link>
               )}
             </div>

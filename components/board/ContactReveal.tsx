@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Phone, MessageSquare, Lock, Eye, RotateCcw } from 'lucide-react';
 import { useCallModal } from '@/contexts/CallModalContext';
+import { formatPhone } from '@/lib/format';
 
 interface Props {
   postId: string;
@@ -108,7 +109,7 @@ export default function ContactReveal(props: Props) {
     <>
       <div className="flex items-center justify-center gap-2 py-2 text-[14px] font-bold text-gray-900 whitespace-nowrap">
         <Phone size={16} className="text-accent shrink-0" />
-        <span className="tabular-nums">{phone}</span>
+        <span className="tabular-nums">{formatPhone(phone)}</span>
       </div>
       <div className="grid grid-cols-2 gap-2">
         <button onClick={() => openCall(authorName, phone)} className="btn-accent w-full h-11 text-[13px]">

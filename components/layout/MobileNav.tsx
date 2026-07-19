@@ -37,7 +37,7 @@ function NavInner() {
         <Link href="/recommended"
           className={`flex flex-col items-center gap-0.5 text-[10px] ${isRecommended ? 'text-accent font-semibold' : 'text-gray-400'}`}>
           <Users size={18} strokeWidth={isRecommended ? 2 : 1.5} />
-          매입업체
+          추천업체
         </Link>
         <Link href={isLoggedIn ? '/dashboard' : '/login'}
           className={`flex flex-col items-center gap-0.5 text-[10px] ${pathname === '/login' || pathname?.startsWith('/dashboard') ? 'text-accent font-semibold' : 'text-gray-400'}`}>

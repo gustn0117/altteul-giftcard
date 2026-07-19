@@ -351,9 +351,15 @@ function WritePostContent() {
           </div>
 
           <div>
-            <label className="block text-[12px] font-medium text-zinc-600 mb-1">제목 *</label>
+            <label className="block text-[12px] font-medium text-zinc-600 mb-1">
+              {form.type === 'buy' ? '박스 중앙문구 *' : '제목 *'}
+            </label>
             <input type="text" value={form.title} onChange={(e) => handleChange('title', e.target.value)}
-              placeholder="예: 신세계 10만원권 판매" className="input" required />
+              placeholder={form.type === 'buy' ? '광고 박스 중앙에 크게 표시됩니다 (예: 신세계 최고가 매입)' : '예: 신세계 10만원권 판매'}
+              className="input" required />
+            {form.type === 'buy' && (
+              <p className="text-[11px] text-zinc-400 mt-1">광고 박스 가운데에 큰 글씨로 나옵니다.</p>
+            )}
           </div>
 
           {/* 팝니다: 판매율(%) + 월/일 발송 */}
@@ -474,9 +480,12 @@ function WritePostContent() {
           </div>
 
           <div>
-            <label className="block text-[12px] font-medium text-zinc-600 mb-1">상세 설명</label>
+            <label className="block text-[12px] font-medium text-zinc-600 mb-1">
+              상세 설명{form.type === 'buy' ? ' (클릭 시 상세페이지에 표시)' : ''}
+            </label>
             <textarea value={form.description} onChange={(e) => handleChange('description', e.target.value)}
-              placeholder="추가 설명을 입력하세요" rows={4} className="input h-auto py-3 resize-none" />
+              placeholder={form.type === 'buy' ? '광고를 클릭하면 보이는 상세 안내를 적어주세요' : '추가 설명을 입력하세요'}
+              rows={4} className="input h-auto py-3 resize-none" />
           </div>
 
           {/* 비회원 정보 — 판매(팝니다)만 비회원 허용 */}
