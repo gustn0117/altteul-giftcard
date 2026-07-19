@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { PenSquare, Tag, ShoppingCart, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import HomeAside from '@/components/layout/HomeAside';
 import AdSection from '@/components/home/AdSection';
-import SellPostItem from '@/components/home/SellPostItem';
+import SellLineRow from '@/components/home/SellLineRow';
 import BuyPostCard from '@/components/home/BuyPostCard';
 import { getPosts } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
@@ -68,6 +68,13 @@ function BoardContent() {
       .catch(() => {});
   }, []);
 
+  // 점프 후 목록 재조회(순서 갱신)에 재사용
+  const refetch = () => {
+    getPosts(activeTab, { limit: 500 })
+      .then((data) => { setPosts(data); setCache(`board_${activeTab}`, data, 60000); })
+      .catch(() => {});
+  };
+
   useEffect(() => {
     const cached = getCache<PostWithAuthor[]>(`board_${activeTab}`);
     if (cached) { setPosts(cached); setLoading(false); }
@@ -83,6 +90,7 @@ function BoardContent() {
       })
       .catch((err) => setError(err.message || '데이터를 불러오지 못했습니다.'))
       .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   // 삽니다(buy)는 박스광고 — 새로고침/탭변경마다 랜덤
@@ -214,15 +222,10 @@ function BoardContent() {
                 </div>
               </>
             ) : (
-              /* 팝니다 — 줄광고 */
+              /* 팝니다 — 줄광고 (홈과 동일한 SellLineRow 사용) */
               <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                {pagedPosts.map((post, idx) => (
-                  <SellPostItem
-                    key={post.id}
-                    post={post}
-                    num={(page - 1) * SELL_PER_PAGE + idx + 1}
-                    showStatus
-                  />
+                {pagedPosts.map((post) => (
+                  <SellLineRow key={post.id} post={post} onJumped={refetch} />
                 ))}
               </div>
             )}

@@ -2,26 +2,15 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { ChevronLeft, ChevronRight, HelpCircle, CheckCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, HelpCircle } from 'lucide-react';
 import type { DBPost, DBUser } from '@/lib/types';
 import { getPosts } from '@/lib/api';
 import { getCache, setCache } from '@/lib/cache';
+import SellLineRow from './SellLineRow';
 
 const PAGE_SIZE = 10;
-const REGION_RE = /서울|경기|부산|대구|광주|인천|대전|울산|제주|강원|충남|충북|전남|전북|경남|경북|세종/;
 
 type SellPost = DBPost & { author?: DBUser };
-
-function extractRegion(post: SellPost): string {
-  const fromTag = post.tags?.find((t) => REGION_RE.test(t));
-  if (fromTag) {
-    const m = fromTag.match(REGION_RE);
-    if (m) return m[0];
-  }
-  const m = post.title.match(REGION_RE);
-  if (m) return m[0];
-  return '전국';
-}
 
 export default function SellLineAds() {
   const [page, setPage] = useState(1);
@@ -64,48 +53,9 @@ export default function SellLineAds() {
           </div>
         ) : (
           <>
-            {pagePosts.map((post, i) => {
-              const isNew = Date.now() - new Date(post.created_at).getTime() < 3 * 86400000;
-              const isCompleted = !!post.completed_at;
-              return (
-                <div key={post.id}>
-                  {i > 0 && <div className="mx-4 h-px bg-gray-200" />}
-                  <Link
-                    href={`/board/${post.id}`}
-                    className={`flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors ${isCompleted ? 'opacity-55 bg-gray-50/40' : ''}`}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="text-[13.5px] text-gray-800 truncate min-w-0">{post.title}</span>
-                        {isNew && !isCompleted && (
-                          <span className="shrink-0 text-[9px] font-black text-white bg-orange-500 px-1 py-px rounded-sm">N</span>
-                        )}
-                      </div>
-                      <p className="text-[11.5px] text-orange-500 mt-0.5 truncate">
-                        <span className="font-medium">{post.author?.name ?? '판매자'}</span>
-                        <span className="text-orange-300 mx-1.5">|</span>
-                        <span>{extractRegion(post)}</span>
-                      </p>
-                    </div>
-                    {/* 판매율 */}
-                    {post.percentage != null && (
-                      <span className="shrink-0 whitespace-nowrap text-accent leading-none">
-                        <span className="text-[10.5px] font-medium text-gray-400">판매율 </span>
-                        <span className="text-[15px] font-extrabold tabular-nums">{post.percentage}<span className="text-[11px]">%</span></span>
-                      </span>
-                    )}
-                    {/* 거래완료 배지 — 맨 오른쪽 */}
-                    {isCompleted ? (
-                      <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold rounded-full bg-zinc-700 text-white">
-                        <CheckCircle size={11} strokeWidth={3} /> 거래완료
-                      </span>
-                    ) : (
-                      <ChevronRight size={14} className="shrink-0 text-gray-300" />
-                    )}
-                  </Link>
-                </div>
-              );
-            })}
+            {pagePosts.map((post) => (
+              <SellLineRow key={post.id} post={post} />
+            ))}
           </>
         )}
       </div>
