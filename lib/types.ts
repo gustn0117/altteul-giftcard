@@ -75,6 +75,14 @@ export interface DBUser {
   points: number;
   /** 팝니다 글 연락처 열람 권한 만료 시각 — 운영자가 부여 */
   contact_view_until: string | null;
+  /** 업체 소개 (업체소개 페이지 관리) */
+  intro?: string | null;
+  /** 업체 운영 시간 */
+  business_hours?: string | null;
+  /** 업체 소개 이미지 URL */
+  intro_image_url?: string | null;
+  /** 주력 상품권 카테고리 (콤마 구분) */
+  main_categories?: string | null;
   created_at: string;
   updated_at: string;
 }

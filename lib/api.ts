@@ -61,7 +61,7 @@ export async function getPost(id: string) {
   supabase.rpc('increment_views', { post_id: id }).then(() => {}, () => {});
   const { data, error } = await supabase
     .from('posts')
-    .select('*, author:users!author_id(id, name, type, phone)')
+    .select('*, author:users!author_id(id, name, type, phone, intro, business_hours, intro_image_url, main_categories)')
     .eq('id', id)
     .single();
   if (error) throw error;

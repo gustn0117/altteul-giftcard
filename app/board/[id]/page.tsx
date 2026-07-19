@@ -296,6 +296,27 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
               />
             </div>
 
+            {/* 업체 소개 (업체회원이 업체소개 페이지에서 등록한 경우) */}
+            {post.author?.type === 'business' && (post.author.intro || post.author.intro_image_url || post.author.business_hours) && (
+              <div className="px-5 py-5 border-t border-gray-100">
+                <p className="text-[12px] font-bold text-gray-800 mb-3">업체 소개</p>
+                {post.author.intro_image_url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={post.author.intro_image_url} alt={`${authorName} 소개`}
+                    className="w-full max-h-56 object-cover rounded-lg border border-gray-200 mb-3" />
+                )}
+                {post.author.intro && (
+                  <p className="text-[13px] text-gray-700 leading-relaxed whitespace-pre-wrap mb-3">{post.author.intro}</p>
+                )}
+                {post.author.business_hours && (
+                  <div className="flex items-center gap-2 text-[12px]">
+                    <span className="text-gray-400">운영 시간</span>
+                    <span className="font-medium text-gray-700">{post.author.business_hours}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Bottom nav */}
             <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50">
               <Link href={`/board?tab=${backTab}`} className="btn-secondary h-8 px-3 text-[12px]">
