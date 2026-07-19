@@ -41,20 +41,20 @@ export async function GET(req: NextRequest) {
     if (!userId) return NextResponse.json({ error: 'user_id 필요' }, { status: 400 });
 
     const supabase = createServiceClient();
+    // 카드 합계는 '누적(전체 기간)', 일별 차트는 최근 30일. 전체를 한 번에 가져와 둘 다 계산.
     const from = kstDate(29);
     const { data: rows, error } = await supabase
       .from('ad_events')
       .select('kind, day')
-      .eq('author_id', userId)
-      .gte('day', from);
+      .eq('author_id', userId);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
     const events = rows ?? [];
-    const totals = { view: 0, phone: 0, sms: 0 };
-    const viewByDay: Record<string, number> = {};
+    const totals = { view: 0, phone: 0, sms: 0 };   // 누적
+    const viewByDay: Record<string, number> = {};    // 최근 30일 조회
     for (const e of events) {
       if (e.kind in totals) totals[e.kind as Kind] += 1;
-      if (e.kind === 'view') viewByDay[e.day] = (viewByDay[e.day] || 0) + 1;
+      if (e.kind === 'view' && e.day >= from) viewByDay[e.day] = (viewByDay[e.day] || 0) + 1;
     }
 
     // 오래된 → 최신 순 30일 (빈 날은 0)

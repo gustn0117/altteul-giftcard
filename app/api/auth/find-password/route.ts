@@ -16,12 +16,13 @@ function phoneCandidates(input: string): string[] {
 
 async function findUser(supabase: ReturnType<typeof createServiceClient>, phone: string, type: string) {
   const userType = type === 'business' ? 'business' : 'normal';
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('users')
     .select('id, name, security_question, security_answer_hash')
     .eq('type', userType)
     .in('phone', phoneCandidates(phone))
     .limit(1);
+  if (error) throw error; // DB 오류를 '번호 없음'으로 둔갑시키지 않는다
   return data?.[0] ?? null;
 }
 

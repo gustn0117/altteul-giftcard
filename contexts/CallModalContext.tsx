@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { Phone, X } from 'lucide-react';
+import { formatPhone } from '@/lib/format';
 
 const NOTICE = '예판상품권 보고 연락드렸다고 말씀해주세요';
 
@@ -92,7 +93,7 @@ function CallConfirmModal({ target, onClose }: { target: CallTarget; onClose: ()
           <div className="flex items-center gap-3 py-3">
             <span className="w-16 shrink-0 text-[13px] text-gray-500">연락처</span>
             <span className="text-gray-300">|</span>
-            <span className="flex-1 min-w-0 text-[14.5px] font-bold text-accent tabular-nums truncate">{target.phone}</span>
+            <span className="flex-1 min-w-0 text-[14.5px] font-bold text-accent tabular-nums truncate">{formatPhone(target.phone)}</span>
           </div>
         </div>
 

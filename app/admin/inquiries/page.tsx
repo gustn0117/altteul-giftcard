@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Mail, Megaphone, Trash2, CheckCircle, RotateCcw } from 'lucide-react';
+import { formatPhone } from '@/lib/format';
 
 interface AdInquiry {
   id: string;
@@ -138,7 +139,7 @@ export default function AdminInquiriesPage() {
                     </div>
                     <p className="text-[12px] text-gray-700 leading-relaxed mb-1.5 whitespace-pre-wrap">{it.message}</p>
                     <div className="flex items-center gap-2 text-[10.5px] text-gray-400">
-                      <a href={`tel:${it.phone}`} className="hover:text-accent">📞 {it.phone}</a>
+                      <a href={`tel:${it.phone}`} className="hover:text-accent">📞 {formatPhone(it.phone)}</a>
                       <span>·</span>
                       <a href={`mailto:${it.email}`} className="hover:text-accent">✉️ {it.email}</a>
                       {tab === 'ad' && (it as AdInquiry).budget && <><span>·</span><span>예산: {(it as AdInquiry).budget}</span></>}
