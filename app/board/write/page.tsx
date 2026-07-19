@@ -9,6 +9,7 @@ import { categories } from '@/data/mock';
 import { createPost, getPost, updatePost } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { AD_TYPES } from '@/lib/types';
+import ImageUploader from '@/components/ImageUploader';
 
 // 만료 정책 (일 단위)
 const SELL_EXPIRE_DAYS = 7;   // 팝니다: 7일 후 잠금 (30일 후 자동삭제)
@@ -67,6 +68,8 @@ function WritePostContent() {
     region: '',
     // 삽니다 광고 종류 (기본: 메인광고)
     adType: 'main' as string,
+    // 광고박스 상단 이미지 URL (삽니다)
+    imageUrl: '',
     guestName: '',
     guestPassword: '',
     guestPhone: '',
@@ -100,6 +103,7 @@ function WritePostContent() {
             // 광고 종류를 로드하지 않으면 수정 시 항상 'main' 으로 덮어써져
             // 전국광고/추천업체가 조용히 메인광고로 강등된다
             adType: post.ad_type ?? 'main',
+            imageUrl: post.image_url ?? '',
             guestName: post.guest_name || '',
             guestPhone: post.guest_phone || '',
           }));
@@ -223,6 +227,8 @@ function WritePostContent() {
         payload.send_day = null;
         // 삽니다 광고 종류 — 승인되면 홈의 해당 칸(전국/메인/추천)에 노출
         payload.ad_type = form.adType || 'main';
+        // 광고박스 상단 이미지
+        payload.image_url = form.imageUrl || null;
       }
 
       // 신규 등록 시에만 만료 시각 설정 (수정 시는 기존 만료 유지)
@@ -403,6 +409,17 @@ function WritePostContent() {
             </>
           ) : (
             <>
+              {/* 광고박스 상단 이미지 (선택) — 올리면 박스 상단에 뜨고 그 위에 중앙문구가 겹쳐 표시됨 */}
+              <div>
+                <label className="block text-[12px] font-medium text-zinc-600 mb-1">광고박스 상단 이미지 (선택)</label>
+                <ImageUploader
+                  value={form.imageUrl}
+                  onChange={(url) => handleChange('imageUrl', url)}
+                  folder="ads"
+                  hint="가로형 이미지 권장(예: 640×400). 광고박스 상단에 표시되고, 그 위에 '박스 중앙문구'가 흰 글씨로 겹쳐 나옵니다. 안 올리면 어두운 배경으로 표시됩니다."
+                />
+              </div>
+
               {/* 광고 종류 — 승인되면 홈의 해당 칸에 노출됨 */}
               <div>
                 <label className="block text-[12px] font-medium text-zinc-600 mb-1">광고 종류 *</label>

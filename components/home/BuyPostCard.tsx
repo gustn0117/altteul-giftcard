@@ -37,11 +37,22 @@ export default function BuyPostCard({ post, publicContact = true }: BuyPostCardP
     trackAdEvent(post.id, 'view');
   };
 
+  const hasImage = !!post.image_url;
+
   return (
     <div className="company-card card-hover group flex flex-col rounded-none overflow-hidden w-full max-w-42 min-[520px]:max-w-none mx-auto">
-      {/* ① 이미지영역 — 중앙문구(title) */}
+      {/* ① 이미지영역 — 상단 이미지(있으면) 위에 중앙문구(title) 겹침 */}
       <Link href={`/board/${post.id}`} onClick={onOpen} className="block">
-        <div className="relative h-16 md:h-20 overflow-hidden" style={DARK_BG}>
+        <div className={`relative overflow-hidden ${hasImage ? 'h-24 md:h-28' : 'h-16 md:h-20'}`} style={!hasImage ? DARK_BG : undefined}>
+          {hasImage && (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={post.image_url!} alt={post.title} loading="lazy"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+              {/* 이미지 위 어둡게 — 흰 글씨 가독성 */}
+              <div className="absolute inset-0 bg-linear-to-b from-black/25 via-black/40 to-black/65" />
+            </>
+          )}
           <div className="absolute inset-0 flex items-center justify-center px-3">
             <h3 className="text-white text-[13px] md:text-[14px] font-bold text-center leading-tight drop-shadow-md line-clamp-2 break-keep">
               {post.title}

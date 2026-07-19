@@ -3,7 +3,7 @@ import type { DBPost, DBUser, DBChat, DBMessage, DBNotice, DBPremiumBuyer, DBMai
 
 // ─── Posts ───
 
-const POST_BASE_COLS = 'id, type, title, category, face_value, price, discount, percentage, send_month, send_day, delivery, delivery_method, region, tags, views, is_active, author_id, guest_name, expires_at, blind_locked, completed_at, deleted_at, approved_at, ad_type, last_jumped_at, notified_expiry_at, created_at';
+const POST_BASE_COLS = 'id, type, title, category, face_value, price, discount, percentage, send_month, send_day, delivery, delivery_method, region, tags, views, is_active, author_id, guest_name, expires_at, blind_locked, completed_at, deleted_at, approved_at, ad_type, image_url, last_jumped_at, notified_expiry_at, created_at';
 
 export async function getPosts(type?: 'sell' | 'buy', opts?: { limit?: number; withAuthor?: boolean; includeBlinded?: boolean; includePending?: boolean }) {
   const limit = opts?.limit ?? 100;

@@ -46,6 +46,8 @@ export interface DBPost {
   approved_at?: string | null;
   /** 삽니다 광고 종류 — 승인 시 홈의 해당 칸에 노출. null이면 'main' 취급 */
   ad_type?: AdType | null;
+  /** 광고박스 상단 이미지 URL (삽니다 광고) */
+  image_url?: string | null;
   /** 마지막 점프 시각 — 정렬 우선순위 */
   last_jumped_at: string | null;
   /** 만료 1시간 전 알림 발송 시각 */
