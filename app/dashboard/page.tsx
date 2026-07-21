@@ -10,12 +10,14 @@ import type { DBPost } from '@/lib/types';
 
 /** 거래(채팅) 기능이 없는 사이트라 거래 현황 대신 내 글/광고 현황을 보여준다 */
 export default function DashboardPage() {
-  const { user, isLoggedIn } = useAuth();
+  const { user, isLoggedIn, ready } = useAuth();
   const router = useRouter();
   const [posts, setPosts] = useState<DBPost[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // 로그인 정보를 다 읽기 전에는 판단하지 않는다 (로그인했는데 /login 으로 튕기던 문제)
+    if (!ready) return;
     if (!isLoggedIn || !user) {
       router.push('/login');
       return;
@@ -25,7 +27,7 @@ export default function DashboardPage() {
       .then(setPosts)
       .catch(() => setPosts([]))
       .finally(() => setLoading(false));
-  }, [user, isLoggedIn, router]);
+  }, [ready, user, isLoggedIn, router]);
 
   if (loading) {
     return (

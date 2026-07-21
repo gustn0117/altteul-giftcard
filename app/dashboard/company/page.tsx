@@ -6,7 +6,7 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function CompanyPage() {
-  const { user, isLoggedIn, login } = useAuth();
+  const { user, isLoggedIn, login, ready } = useAuth();
   const router = useRouter();
   const [form, setForm] = useState({ name: '', email: '', phone: '', representative: '', messenger: '', messengerId: '' });
   const [loading, setLoading] = useState(true);
@@ -15,6 +15,8 @@ export default function CompanyPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // 로그인 정보 로드 전에는 판단 보류 (로그인했는데 /login 으로 튕기던 문제)
+    if (!ready) return;
     if (!isLoggedIn || !user) {
       router.push('/login');
       return;
@@ -35,7 +37,7 @@ export default function CompanyPage() {
       })
       .catch(() => setError('프로필을 불러올 수 없습니다.'))
       .finally(() => setLoading(false));
-  }, [user, isLoggedIn, router]);
+  }, [ready, user, isLoggedIn, router]);
 
   const handleChange = (field: string, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
