@@ -45,17 +45,39 @@ export async function GET(req: NextRequest) {
     const from = kstDate(29);
     const { data: rows, error } = await supabase
       .from('ad_events')
-      .select('kind, day')
+      .select('kind, day, post_id')
       .eq('author_id', userId);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
     const events = rows ?? [];
     const totals = { view: 0, phone: 0, sms: 0 };   // 누적
     const viewByDay: Record<string, number> = {};    // 최근 30일 조회
+    const byPost: Record<string, { view: number; phone: number; sms: number }> = {};
     for (const e of events) {
       if (e.kind in totals) totals[e.kind as Kind] += 1;
       if (e.kind === 'view' && e.day >= from) viewByDay[e.day] = (viewByDay[e.day] || 0) + 1;
+      const pid = (e as { post_id?: string }).post_id;
+      if (pid) {
+        byPost[pid] = byPost[pid] || { view: 0, phone: 0, sms: 0 };
+        if (e.kind in byPost[pid]) byPost[pid][e.kind as Kind] += 1;
+      }
     }
+
+    // 글별 내역 (제목·조회수와 함께) — 수치가 어느 광고에서 나왔는지 확인 가능하게
+    const { data: myPosts } = await supabase
+      .from('posts')
+      .select('id, title, type, views, created_at')
+      .eq('author_id', userId)
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false })
+      .limit(200);
+    const posts = (myPosts ?? []).map((p: { id: string; title: string; type: string; views: number }) => ({
+      id: p.id,
+      title: p.title,
+      type: p.type,
+      views: p.views ?? 0,
+      ...(byPost[p.id] || { view: 0, phone: 0, sms: 0 }),
+    }));
 
     // 오래된 → 최신 순 30일 (빈 날은 0)
     const today = kstDate();
@@ -65,7 +87,7 @@ export async function GET(req: NextRequest) {
     });
     void today;
 
-    return NextResponse.json({ totals, last30 });
+    return NextResponse.json({ totals, last30, posts });
   } catch (err) {
     return NextResponse.json({ error: err instanceof Error ? err.message : 'fail' }, { status: 500 });
   }

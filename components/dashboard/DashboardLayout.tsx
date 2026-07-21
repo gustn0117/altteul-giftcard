@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabase';
 
 const navItems = [
   { href: '/dashboard', label: '현황', icon: LayoutDashboard },
+  { href: '/dashboard/my-posts', label: '내 상품', icon: PenSquare },
   { href: '/dashboard/access-stats', label: '접속 통계', icon: TrendingUp },
   { href: '/dashboard/company', label: '업체 정보', icon: Building2 },
   { href: '/dashboard/profile', label: '업체 소개 페이지', icon: Globe },

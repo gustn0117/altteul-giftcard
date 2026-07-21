@@ -56,6 +56,19 @@ export async function getAdPosts(adType: 'national' | 'main' | 'recommend' | ('n
   return (data as unknown) as (DBPost & { author?: DBUser })[];
 }
 
+/** 내가 쓴 글 전체 (대시보드 '내 상품') — 승인 대기/블라인드 포함해서 본인 글은 다 보여준다 */
+export async function getMyPosts(userId: string) {
+  const { data, error } = await supabase
+    .from('posts')
+    .select(POST_BASE_COLS)
+    .eq('author_id', userId)
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false })
+    .limit(500);
+  if (error) throw error;
+  return (data as unknown) as DBPost[];
+}
+
 export async function getPost(id: string) {
   // 조회수를 먼저 올리고 나서 조회한다.
   // (예전엔 await 없이 동시에 실행돼서 화면에 '증가 전' 값이 떠 조회수가 안 오르는 것처럼 보였음)

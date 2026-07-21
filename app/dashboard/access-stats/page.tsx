@@ -11,6 +11,7 @@ const PERIOD_OPTIONS = [
 ];
 
 interface Totals { view: number; phone: number; sms: number; }
+interface PostStat { id: string; title: string; type: string; views: number; view: number; phone: number; sms: number; }
 
 export default function AccessStatsPage() {
   const { user } = useAuth();
@@ -18,6 +19,7 @@ export default function AccessStatsPage() {
   const [totals, setTotals] = useState<Totals>({ view: 0, phone: 0, sms: 0 });
   const [dailyData, setDailyData] = useState<{ date: string; count: number }[]>([]);
   const [allDays, setAllDays] = useState<{ date: string; count: number }[]>([]);
+  const [postStats, setPostStats] = useState<PostStat[]>([]);
 
   // 로그인한 업체 본인의 광고 이벤트만 집계 (예전엔 전역 방문자를 모든 업체가 동일하게 봤음)
   useEffect(() => {
@@ -27,6 +29,7 @@ export default function AccessStatsPage() {
       .then((res) => {
         setTotals(res.totals ?? { view: 0, phone: 0, sms: 0 });
         setAllDays(res.last30 ?? []);
+        setPostStats(res.posts ?? []);
       })
       .catch(() => {});
   }, [user?.id]);
@@ -109,6 +112,45 @@ export default function AccessStatsPage() {
                   <span className="text-[11px] text-zinc-600 w-8 text-right tabular-nums">{day.count}</span>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+
+        {/* 글별 상세 — 어느 광고에서 나온 수치인지 확인 */}
+        <div className="card p-5">
+          <h3 className="text-[13px] font-semibold text-zinc-800 mb-1">내 글별 상세</h3>
+          <p className="text-[11px] text-zinc-400 mb-3">조회수는 상세페이지를 연 총 횟수, 클릭은 광고 카드에서 누른 횟수입니다.</p>
+          {postStats.length === 0 ? (
+            <div className="py-8 text-center text-zinc-400 text-[13px]">작성한 글이 없습니다.</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-125 text-[13px]">
+                <thead>
+                  <tr className="bg-zinc-50 border-b border-zinc-200">
+                    <th className="py-2.5 px-3 text-left text-[11px] text-zinc-500">글</th>
+                    <th className="py-2.5 px-3 text-center text-[11px] text-zinc-500">조회수</th>
+                    <th className="py-2.5 px-3 text-center text-[11px] text-zinc-500">상품 클릭</th>
+                    <th className="py-2.5 px-3 text-center text-[11px] text-zinc-500">전화</th>
+                    <th className="py-2.5 px-3 text-center text-[11px] text-zinc-500">문자</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {postStats.map((p) => (
+                    <tr key={p.id} className="border-b border-zinc-100 hover:bg-zinc-50">
+                      <td className="py-2.5 px-3 max-w-60 truncate">
+                        <span className={`badge mr-1.5 ${p.type === 'sell' ? 'bg-orange-50 text-orange-600' : 'bg-blue-50 text-blue-600'}`}>
+                          {p.type === 'sell' ? '팝니다' : '삽니다'}
+                        </span>
+                        {p.title}
+                      </td>
+                      <td className="py-2.5 px-3 text-center tabular-nums font-medium">{p.views}</td>
+                      <td className="py-2.5 px-3 text-center tabular-nums text-purple-600">{p.view}</td>
+                      <td className="py-2.5 px-3 text-center tabular-nums text-green-600">{p.phone}</td>
+                      <td className="py-2.5 px-3 text-center tabular-nums text-blue-600">{p.sms}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
