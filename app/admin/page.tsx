@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
-import { getMessages, getPremiumBuyers, createNotice as apiCreateNotice, deleteNotice as apiDeleteNotice, deleteUser as apiDeleteUser, updateUser, deletePost as apiDeletePost, deleteChat as apiDeleteChat, createPremiumBuyer, updatePremiumBuyer, deletePremiumBuyer as apiDeletePremiumBuyer } from '@/lib/api';
+import { getPremiumBuyers, createNotice as apiCreateNotice, deleteNotice as apiDeleteNotice, deleteUser as apiDeleteUser, updateUser, deletePost as apiDeletePost, createPremiumBuyer, updatePremiumBuyer, deletePremiumBuyer as apiDeletePremiumBuyer } from '@/lib/api';
 import ImageUpload from '@/components/ImageUpload';
-import type { DBUser, DBPost, DBNotice, DBChat, DBMessage, DBPremiumBuyer } from '@/lib/types';
+import type { DBUser, DBPost, DBNotice, DBPremiumBuyer } from '@/lib/types';
 import { AD_TYPES, adTypeLabel } from '@/lib/types';
 import { formatPhone } from '@/lib/format';
 import ImageUploader from '@/components/ImageUploader';
@@ -22,7 +22,7 @@ const ALL_SLOTS = Object.keys(AD_SLOT_LABELS) as AdSlot[];
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [pw, setPw] = useState('');
-  const [tab, setTab] = useState<'overview' | 'users' | 'posts' | 'notices' | 'chats' | 'premium' | 'ads' | 'community' | 'national' | 'main' | 'recommend'>('overview');
+  const [tab, setTab] = useState<'overview' | 'users' | 'posts' | 'notices' | 'premium' | 'ads' | 'community' | 'national' | 'main' | 'recommend'>('overview');
   // 회원 목록 일반/업체 구분 필터
   const [userFilter, setUserFilter] = useState<'all' | 'normal' | 'business'>('all');
   // 업체 소개 편집 모달
@@ -31,14 +31,12 @@ export default function AdminPage() {
   const [stats, setStats] = useState<{
     users: { total: number; business: number; normal: number; todayNew: number };
     posts: { total: number; sell: number; buy: number; active: number; todayNew: number };
-    chats: { total: number; completed: number; inProgress: number; escrow: number; todayNew: number };
     premium: { total: number; active: number; premium: number };
     notices: { total: number; pinned: number };
   } | null>(null);
   const [users, setUsers] = useState<DBUser[]>(() => getCache<DBUser[]>('admin_users') ?? []);
   const [posts, setPosts] = useState<(DBPost & { author?: DBUser })[]>(() => getCache<(DBPost & { author?: DBUser })[]>('admin_posts') ?? []);
   const [notices, setNotices] = useState<DBNotice[]>(() => getCache<DBNotice[]>('admin_notices') ?? []);
-  const [chats, setChats] = useState<DBChat[]>(() => getCache<DBChat[]>('admin_chats') ?? []);
   const [premiumBuyers, setPremiumBuyers] = useState<DBPremiumBuyer[]>(() => getCache<DBPremiumBuyer[]>('admin_premium') ?? []);
   const [ads, setAds] = useState<Ad[]>(() => getCache<Ad[]>('admin_ads') ?? []);
   const [visitors, setVisitors] = useState<{ total: number; today: number; trades?: number; last30: { date: string; count: number }[] }>({ total: 0, today: 0, trades: 0, last30: [] });
@@ -57,10 +55,6 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(() => !getCache('admin_users'));
 
   // Chat viewer
-  const [viewingChat, setViewingChat] = useState<DBChat | null>(null);
-  const [chatMessages, setChatMessages] = useState<DBMessage[]>([]);
-  const [chatMsgLoading, setChatMsgLoading] = useState(false);
-  const msgEndRef = useRef<HTMLDivElement>(null);
 
   // Notice form
   const [noticeTitle, setNoticeTitle] = useState('');
@@ -130,11 +124,10 @@ export default function AdminPage() {
     if (!getCache('admin_users')) setLoading(true);
 
     // 모든 데이터를 동시에 병렬 요청
-    const [u, p, n, c, v, pb, ad, st] = await Promise.allSettled([
+    const [u, p, n, v, pb, ad, st] = await Promise.allSettled([
       supabase.from('users').select('*').order('created_at', { ascending: false }).limit(200),
       supabase.from('posts').select('*, author:users!author_id(id, name, type)').order('created_at', { ascending: false }).limit(200),
       supabase.from('notices').select('*').order('created_at', { ascending: false }).limit(50),
-      supabase.from('chats').select('id, post_id, buyer_id, seller_id, status, current_step, trade_type, escrow_status, created_at, updated_at').order('updated_at', { ascending: false }).limit(200),
       fetch('/api/visitors').then(r => r.json()),
       getPremiumBuyers(false),
       fetch('/api/ads').then(r => r.json()),
@@ -144,7 +137,6 @@ export default function AdminPage() {
     if (u.status === 'fulfilled' && u.value.data) { setUsers(u.value.data); setCache('admin_users', u.value.data, ADMIN_CACHE_TTL); }
     if (p.status === 'fulfilled' && p.value.data) { setPosts(p.value.data); setCache('admin_posts', p.value.data, ADMIN_CACHE_TTL); }
     if (n.status === 'fulfilled' && n.value.data) { setNotices(n.value.data); setCache('admin_notices', n.value.data, ADMIN_CACHE_TTL); }
-    if (c.status === 'fulfilled' && c.value.data) { setChats(c.value.data); setCache('admin_chats', c.value.data, ADMIN_CACHE_TTL); }
     if (v.status === 'fulfilled') setVisitors(v.value);
     if (pb.status === 'fulfilled') { setPremiumBuyers(pb.value); setCache('admin_premium', pb.value, ADMIN_CACHE_TTL); }
     if (ad.status === 'fulfilled') { setAds(ad.value); setCache('admin_ads', ad.value, ADMIN_CACHE_TTL); }
@@ -254,35 +246,6 @@ export default function AdminPage() {
       setIntroSaving(false);
     }
   };
-  const deleteChat = async (id: string) => { if (!confirm('채팅을 삭제하시겠습니까?')) return; await apiDeleteChat(id); if (viewingChat?.id === id) setViewingChat(null); fetchData(); };
-
-  // 채팅 실시간 뷰어
-  const openChatViewer = async (chat: DBChat) => {
-    setViewingChat(chat);
-    setChatMsgLoading(true);
-    try {
-      const msgs = await getMessages(chat.id);
-      setChatMessages(msgs);
-    } catch { setChatMessages([]); }
-    setChatMsgLoading(false);
-  };
-
-  useEffect(() => {
-    if (!viewingChat) return;
-    const channel = supabase
-      .channel(`admin-chat-${viewingChat.id}`)
-      .on('postgres_changes', {
-        event: 'INSERT', schema: 'altteul_giftcard', table: 'messages',
-        filter: `chat_id=eq.${viewingChat.id}`,
-      }, (payload: { new: DBMessage }) => {
-        setChatMessages(prev => prev.some(m => m.id === payload.new.id) ? prev : [...prev, payload.new]);
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [viewingChat]);
-
-  useEffect(() => { msgEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [chatMessages]);
-
   // Premium Buyer CRUD
   const resetPremiumForm = () => { setPremiumForm({ name: '', headline: '', description: '', phone: '', region: '', brands: '', image_url: '', user_id: '', priority: 0, is_active: true, tier: 'standard', buy_rate: '', is_best: false }); setEditingPremium(null); setShowPremiumForm(false); };
   const startEditPremium = (b: DBPremiumBuyer) => { setPremiumForm({ name: b.name, headline: b.headline || '', description: b.description, phone: b.phone, region: b.region, brands: b.brands?.join(', ') || '', image_url: b.image_url, user_id: b.user_id || '', priority: b.priority, is_active: b.is_active, tier: b.tier || 'standard', buy_rate: b.buy_rate != null ? String(b.buy_rate) : '', is_best: b.is_best ?? false }); setEditingPremium(b); setShowPremiumForm(true); };
@@ -424,7 +387,7 @@ export default function AdminPage() {
       {!loading && (
         <div className="card p-4 mb-5">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-[13px] font-semibold">방문자 · 거래 현황</h3>
+            <h3 className="text-[13px] font-semibold">방문자 현황</h3>
             <button onClick={() => setShowStatsEdit(!showStatsEdit)}
               className="text-[11px] text-zinc-500 hover:text-zinc-900">
               {showStatsEdit ? '닫기' : '수치 수정'}
@@ -432,7 +395,7 @@ export default function AdminPage() {
           </div>
 
           {showStatsEdit ? (
-            <div className="grid grid-cols-3 gap-3 mb-3">
+            <div className="grid grid-cols-2 gap-3 mb-3">
               <div>
                 <label className="block text-[10px] text-zinc-400 mb-1">오늘 방문자</label>
                 <input type="number" value={statsEdit.today} onChange={e => setStatsEdit(p => ({ ...p, today: Number(e.target.value) }))}
@@ -443,18 +406,13 @@ export default function AdminPage() {
                 <input type="number" value={statsEdit.total} onChange={e => setStatsEdit(p => ({ ...p, total: Number(e.target.value) }))}
                   className="input h-8 text-[12px]" />
               </div>
-              <div>
-                <label className="block text-[10px] text-zinc-400 mb-1">총 거래량</label>
-                <input type="number" value={statsEdit.trades} onChange={e => setStatsEdit(p => ({ ...p, trades: Number(e.target.value) }))}
-                  className="input h-8 text-[12px]" />
-              </div>
-              <div className="col-span-3 flex gap-2">
+              <div className="col-span-2 flex gap-2">
                 <button onClick={saveStats} className="btn-primary h-8 text-[12px] px-4">저장</button>
                 <button onClick={() => setShowStatsEdit(false)} className="btn-secondary h-8 text-[12px] px-4">취소</button>
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-3 mb-3">
+            <div className="grid grid-cols-2 gap-3 mb-3">
               <div className="text-center p-2 bg-zinc-50 rounded">
                 <p className="text-[10px] text-zinc-400 mb-0.5">오늘 방문자</p>
                 <p className="text-[18px] font-bold">{(visitors.today || 0).toLocaleString()}</p>
@@ -462,10 +420,6 @@ export default function AdminPage() {
               <div className="text-center p-2 bg-zinc-50 rounded">
                 <p className="text-[10px] text-zinc-400 mb-0.5">누적 방문자</p>
                 <p className="text-[18px] font-bold">{(visitors.total || 0).toLocaleString()}</p>
-              </div>
-              <div className="text-center p-2 bg-zinc-50 rounded">
-                <p className="text-[10px] text-zinc-400 mb-0.5">총 거래량</p>
-                <p className="text-[18px] font-bold">{(visitors.trades || 0).toLocaleString()}</p>
               </div>
             </div>
           )}
@@ -544,23 +498,11 @@ export default function AdminPage() {
             </div>
             <div className="card p-4">
               <div className="flex items-center gap-2 mb-1">
-                <MessageCircle size={13} className="text-zinc-400" />
-                <span className="text-[11px] text-zinc-500">거래</span>
-              </div>
-              <p className="text-xl font-semibold">{stats?.chats.total ?? 0}</p>
-              <p className="text-[11px] text-zinc-400 mt-1">
-                완료 {stats?.chats.completed ?? 0} · 진행 {stats?.chats.inProgress ?? 0}
-              </p>
-              <p className="text-[11px] text-emerald-600 mt-0.5">오늘 +{stats?.chats.todayNew ?? 0}</p>
-            </div>
-            <div className="card p-4">
-              <div className="flex items-center gap-2 mb-1">
                 <TrendingUp size={13} className="text-zinc-400" />
                 <span className="text-[11px] text-zinc-500">방문자</span>
               </div>
               <p className="text-xl font-semibold">{(visitors.today || 0).toLocaleString()}</p>
               <p className="text-[11px] text-zinc-400 mt-1">누적 {(visitors.total || 0).toLocaleString()}</p>
-              <p className="text-[11px] text-zinc-400 mt-0.5">거래량 {(visitors.trades || 0).toLocaleString()}</p>
             </div>
           </div>
 
@@ -635,28 +577,6 @@ export default function AdminPage() {
                   </div>
                 ))}
                 {posts.length === 0 && <p className="py-6 text-center text-[12px] text-zinc-400">게시글이 없습니다.</p>}
-              </div>
-            </div>
-
-            <div className="card p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-[13px] font-semibold">최근 거래</h3>
-                <button onClick={() => setTab('chats')} className="text-[11px] text-zinc-500 hover:text-zinc-900">전체 보기</button>
-              </div>
-              <div className="divide-y divide-zinc-100">
-                {chats.slice(0, 5).map(c => {
-                  const postTitle = posts.find(p => p.id === c.post_id)?.title || '삭제된 게시글';
-                  return (
-                    <div key={c.id} className="flex items-center justify-between py-2 gap-2">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[12px] font-medium truncate">{postTitle}</p>
-                        <p className="text-[11px] text-zinc-400">단계 {c.current_step}/{c.trade_type === 'escrow' ? 8 : 6}</p>
-                      </div>
-                      {c.trade_type === 'escrow' && <span className="badge shrink-0 bg-blue-50 text-blue-600">중개</span>}
-                    </div>
-                  );
-                })}
-                {chats.length === 0 && <p className="py-6 text-center text-[12px] text-zinc-400">거래가 없습니다.</p>}
               </div>
             </div>
 
@@ -968,98 +888,6 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* ─── Chats ─── */}
-      {!loading && tab === 'chats' && (
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-          {/* 채팅 목록 */}
-          <div className={`card overflow-hidden ${viewingChat ? 'lg:col-span-2' : 'lg:col-span-5'}`}>
-            <div className="px-4 py-2.5 bg-zinc-50 border-b border-zinc-200 text-[12px] font-medium text-zinc-600">
-              채팅 목록 ({chats.length})
-            </div>
-            <div className="divide-y divide-zinc-100 max-h-[600px] overflow-y-auto">
-              {chats.map(c => {
-                const buyerName = users.find(u => u.id === c.buyer_id)?.name || '-';
-                const sellerName = users.find(u => u.id === c.seller_id)?.name || '-';
-                const postTitle = posts.find(p => p.id === c.post_id)?.title || '삭제됨';
-                const isViewing = viewingChat?.id === c.id;
-                return (
-                  <div key={c.id} onClick={() => openChatViewer(c)}
-                    className={`px-4 py-3 cursor-pointer hover:bg-zinc-50 transition-colors ${isViewing ? 'bg-zinc-100' : ''}`}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[13px] font-medium text-zinc-800 truncate min-w-0">{postTitle}</span>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="badge bg-zinc-100 text-zinc-500">{c.current_step}/{c.trade_type === 'escrow' ? 8 : 6}</span>
-                        {c.trade_type === 'escrow' && <span className="badge bg-blue-50 text-blue-500">중개</span>}
-                        <button onClick={(e) => { e.stopPropagation(); deleteChat(c.id); }} className="text-red-400 hover:text-red-600"><Trash2 size={12} /></button>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 text-[11px] text-zinc-400">
-                      <span>{buyerName}</span>
-                      <span className="text-zinc-300">&harr;</span>
-                      <span>{sellerName}</span>
-                      <span className="ml-auto">{new Date(c.updated_at).toLocaleDateString('ko-KR')}</span>
-                    </div>
-                  </div>
-                );
-              })}
-              {chats.length === 0 && <div className="py-12 text-center text-zinc-400 text-[13px]">채팅이 없습니다.</div>}
-            </div>
-          </div>
-
-          {/* 실시간 메시지 뷰어 */}
-          {viewingChat && (
-            <div className="card lg:col-span-3 flex flex-col overflow-hidden">
-              <div className="px-4 py-2.5 bg-zinc-50 border-b border-zinc-200 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <button onClick={() => setViewingChat(null)} className="text-zinc-400 hover:text-zinc-700 lg:hidden"><ArrowLeft size={16} /></button>
-                  <Radio size={12} className="text-green-500 animate-pulse" />
-                  <span className="text-[12px] font-medium text-zinc-700">실시간 조회</span>
-                  <span className="text-[11px] text-zinc-400">| {users.find(u => u.id === viewingChat.buyer_id)?.name || '?'} &harr; {users.find(u => u.id === viewingChat.seller_id)?.name || '?'}</span>
-                </div>
-                <span className="text-[11px] text-zinc-400">{chatMessages.length}건</span>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-zinc-50 max-h-[520px] min-h-[300px]">
-                {chatMsgLoading ? (
-                  <div className="py-8 text-center text-zinc-400 text-[13px]">불러오는 중...</div>
-                ) : chatMessages.length === 0 ? (
-                  <div className="py-8 text-center text-zinc-400 text-[13px]">메시지가 없습니다.</div>
-                ) : chatMessages.map(msg => {
-                  const isBuyer = msg.sender_id === viewingChat.buyer_id;
-                  const isSeller = msg.sender_id === viewingChat.seller_id;
-                  const senderName = isBuyer ? users.find(u => u.id === viewingChat.buyer_id)?.name : isSeller ? users.find(u => u.id === viewingChat.seller_id)?.name : '시스템';
-                  const time = new Date(msg.created_at);
-                  const timeStr = `${String(time.getHours()).padStart(2, '0')}:${String(time.getMinutes()).padStart(2, '0')}`;
-
-                  if (msg.type === 'notice' || msg.type === 'system-action') {
-                    return (
-                      <div key={msg.id} className="text-center">
-                        <span className="inline-block bg-white border border-zinc-200 rounded px-3 py-1.5 text-[11px] text-zinc-500 max-w-[90%]">
-                          {msg.content.length > 80 ? msg.content.slice(0, 80) + '...' : msg.content}
-                        </span>
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <div key={msg.id} className={`flex gap-2 ${isBuyer ? '' : 'flex-row-reverse'}`}>
-                      <div className={`max-w-[70%] ${isBuyer ? '' : 'text-right'}`}>
-                        <p className="text-[10px] text-zinc-400 mb-0.5">{senderName} <span className="text-zinc-300">{timeStr}</span></p>
-                        <div className={`inline-block px-3 py-2 rounded-lg text-[13px] ${
-                          isBuyer ? 'bg-white border border-zinc-200 text-zinc-800' : 'bg-zinc-900 text-white'
-                        }`}>
-                          {msg.content}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-                <div ref={msgEndRef} />
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* ─── Premium Buyers ─── */}
       {!loading && tab === 'premium' && (
