@@ -5,7 +5,6 @@ import { Phone, MessageSquare, User, MapPin, Search } from 'lucide-react';
 import type { DBPost, DBUser } from '@/lib/types';
 import { useCallModal } from '@/contexts/CallModalContext';
 import { addRecentBuyer } from '@/lib/recentBuyers';
-import { trackAdEvent } from '@/lib/trackEvent';
 
 interface BuyPostCardProps {
   post: DBPost & { author?: DBUser };
@@ -31,10 +30,9 @@ export default function BuyPostCard({ post, publicContact = true }: BuyPostCardP
   const phoneDigits = stripPhone(phone);
   const region = post.region || post.tags?.find((t) => /서울|경기|부산|대구|광주|인천|대전|울산|제주|세종|강원|충북|충남|전북|전남|경북|경남/.test(t))?.replace(/^#/, '') || '전국';
 
-  // 카드/상세 클릭 → 최근 본 업체 기록 + 조회 이벤트(업체별 통계)
+  // 카드/상세 클릭 → 최근 본 업체 기록
   const onOpen = () => {
     addRecentBuyer({ id: post.id, name, region });
-    trackAdEvent(post.id, 'view');
   };
 
   const hasImage = !!post.image_url;
@@ -102,7 +100,7 @@ export default function BuyPostCard({ post, publicContact = true }: BuyPostCardP
         <div className="flex gap-1.5 px-3 pt-1 pb-2.5">
           <button
             type="button"
-            onClick={() => { trackAdEvent(post.id, 'phone'); openCall(name, phone); }}
+            onClick={() => openCall(name, phone)}
             className="flex-1 min-w-0 overflow-hidden h-9 appearance-none rounded-none border border-transparent flex items-center justify-center gap-1 text-[11.5px] font-bold text-white bg-accent hover:bg-blue-700 transition-colors whitespace-nowrap"
             aria-label={`${name} 전화하기`}
           >
@@ -110,7 +108,6 @@ export default function BuyPostCard({ post, publicContact = true }: BuyPostCardP
           </button>
           <a
             href={`sms:${phoneDigits}?&body=${encodeURIComponent(SMS_BODY)}`}
-            onClick={() => trackAdEvent(post.id, 'sms')}
             className="flex-1 min-w-0 overflow-hidden h-9 rounded-none border border-gray-300 flex items-center justify-center gap-1 text-[11.5px] font-bold text-gray-700 bg-white hover:bg-gray-50 transition-colors whitespace-nowrap"
             aria-label={`${name} 문자하기`}
           >

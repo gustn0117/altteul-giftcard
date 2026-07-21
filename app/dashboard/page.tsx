@@ -66,7 +66,7 @@ export default function DashboardPage() {
         <div className="card p-4">
           <p className="text-[11px] text-zinc-400 mb-1">총 조회수</p>
           <p className="text-2xl font-semibold text-accent">{totalViews.toLocaleString()}</p>
-          <Link href="/dashboard/access-stats" className="text-[11px] text-zinc-400 hover:text-accent mt-2 inline-block">접속 통계 보기 →</Link>
+          <Link href="/dashboard/my-posts" className="text-[11px] text-zinc-400 hover:text-accent mt-2 inline-block">글별 조회수 보기 →</Link>
         </div>
       </div>
 
