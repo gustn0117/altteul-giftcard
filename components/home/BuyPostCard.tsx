@@ -43,8 +43,9 @@ export default function BuyPostCard({ post, publicContact = true }: BuyPostCardP
 
   return (
     <div className="company-card card-hover group flex flex-col rounded-none overflow-hidden w-full max-w-42 min-[520px]:max-w-none mx-auto">
-      {/* ① 사진칸 — 상단문구(title). 사진 유무와 무관하게 높이 고정 */}
+      {/* 전화/문자 버튼을 제외한 박스 전체가 클릭 영역 (어디를 눌러도 상세로 이동) */}
       <Link href={`/board/${post.id}`} onClick={onOpen} className="block">
+        {/* ① 사진칸 — 상단문구(title). 사진 유무와 무관하게 높이 고정 */}
         <div className="relative overflow-hidden h-20 md:h-24" style={!hasImage ? DARK_BG : undefined}>
           {hasImage && (
             <>
@@ -62,39 +63,39 @@ export default function BuyPostCard({ post, publicContact = true }: BuyPostCardP
             </h3>
           </div>
         </div>
-      </Link>
 
-      {/* ② 중앙문구 — 최대 2줄. 비어 있어도 높이 고정(카드 크기 일정) */}
-      <Link href={`/board/${post.id}`} onClick={onOpen} className="block px-2 pt-1.5">
-        <div className="h-8 flex flex-col items-center justify-center gap-px">
-          {centerLines.map((line, i) => (
-            <p key={i} className="w-full text-[11px] min-[360px]:text-[12px] text-gray-700 font-medium text-center leading-tight whitespace-nowrap overflow-hidden text-ellipsis">
-              {line}
+        {/* ② 중앙문구 — 최대 2줄. 비어 있어도 높이 고정(카드 크기 일정) */}
+        <div className="px-2 pt-1.5">
+          <div className="h-8 flex flex-col items-center justify-center gap-px">
+            {centerLines.map((line, i) => (
+              <p key={i} className="w-full text-[11px] min-[360px]:text-[12px] text-gray-700 font-medium text-center leading-tight whitespace-nowrap overflow-hidden text-ellipsis">
+                {line}
+              </p>
+            ))}
+          </div>
+        </div>
+
+        {/* ③ 작성한 매입률 — 예판상품권 N% 매입 (높이 고정) */}
+        <div className="h-6 flex items-center justify-center px-3">
+          {post.percentage != null && (
+            <p className="text-center text-[11px] min-[360px]:text-[13px] font-extrabold text-accent whitespace-nowrap">
+              예판상품권 {post.percentage}% 매입
             </p>
-          ))}
+          )}
+        </div>
+
+        {/* 구분선(양옆 인셋) + 업체명·지역 */}
+        <div className="mx-3 h-px bg-gray-200" />
+        <div className="flex justify-between items-center px-3 py-1 text-[11px]">
+          <span className="text-accent font-bold flex items-center gap-1 min-w-0 flex-1">
+            <User size={10} className="shrink-0" />
+            <span className="truncate">{name}</span>
+          </span>
+          <span className="text-gray-500 shrink-0 ml-2 flex items-center gap-0.5">
+            <MapPin size={9} className="shrink-0" /> {region}
+          </span>
         </div>
       </Link>
-
-      {/* ③ 작성한 매입률 — 예판상품권 N% 매입 (높이 고정) */}
-      <div className="h-6 flex items-center justify-center px-3">
-        {post.percentage != null && (
-          <p className="text-center text-[11px] min-[360px]:text-[13px] font-extrabold text-accent whitespace-nowrap">
-            예판상품권 {post.percentage}% 매입
-          </p>
-        )}
-      </div>
-
-      {/* 구분선(양옆 인셋) + 업체명·지역 */}
-      <div className="mx-3 h-px bg-gray-200" />
-      <div className="flex justify-between items-center px-3 py-1 text-[11px]">
-        <span className="text-accent font-bold flex items-center gap-1 min-w-0 flex-1">
-          <User size={10} className="shrink-0" />
-          <span className="truncate">{name}</span>
-        </span>
-        <span className="text-gray-500 shrink-0 ml-2 flex items-center gap-0.5">
-          <MapPin size={9} className="shrink-0" /> {region}
-        </span>
-      </div>
 
       {/* 버튼: 전화하기(좌) / 문자하기(우) */}
       {phone && publicContact ? (
