@@ -171,7 +171,7 @@ export default function Header() {
               {isLoggedIn && points != null && (
                 <Link href="/dashboard" className="flex flex-col items-center justify-center text-center leading-tight shrink-0" aria-label="내 포인트">
                   <span className="text-[9px] text-gray-400">포인트</span>
-                  <span className="text-[12px] font-extrabold text-accent tabular-nums whitespace-nowrap">{points.toLocaleString()}P</span>
+                  <span className="text-[12px] font-extrabold text-accent tabular-nums whitespace-nowrap">{points.toLocaleString()}</span>
                 </Link>
               )}
             </div>
@@ -180,8 +180,8 @@ export default function Header() {
               <Image src="/logo.png" alt="예판상품권" width={612} height={277}
                 className="h-16 w-auto object-contain" priority />
             </Link>
-            {/* 우: 알림 + 햄버거 */}
-            <div className="flex items-center justify-end gap-1">
+            {/* 우: 알림 + 햄버거 (알림과 삼선메뉴 사이 간격) */}
+            <div className="flex items-center justify-end gap-3">
               {isLoggedIn && <NotificationBell />}
               <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="inline-flex items-center gap-1 h-10 px-3 border border-gray-200 rounded-md text-gray-700 hover:border-accent hover:text-accent text-[12px] font-bold transition-colors"

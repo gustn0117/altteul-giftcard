@@ -3,7 +3,7 @@ import type { DBPost, DBUser, DBChat, DBMessage, DBNotice, DBPremiumBuyer, DBMai
 
 // ─── Posts ───
 
-const POST_BASE_COLS = 'id, type, title, category, face_value, price, discount, percentage, send_month, send_day, delivery, delivery_method, region, tags, views, is_active, author_id, guest_name, expires_at, blind_locked, completed_at, deleted_at, approved_at, ad_type, image_url, last_jumped_at, notified_expiry_at, created_at';
+const POST_BASE_COLS = 'id, type, title, category, face_value, price, discount, percentage, send_month, send_day, delivery, delivery_method, region, tags, views, is_active, author_id, guest_name, expires_at, blind_locked, completed_at, deleted_at, approved_at, ad_type, image_url, center_text, last_jumped_at, notified_expiry_at, created_at';
 
 export async function getPosts(type?: 'sell' | 'buy', opts?: { limit?: number; withAuthor?: boolean; includeBlinded?: boolean; includePending?: boolean }) {
   const limit = opts?.limit ?? 100;
@@ -57,8 +57,13 @@ export async function getAdPosts(adType: 'national' | 'main' | 'recommend' | ('n
 }
 
 export async function getPost(id: string) {
-  // 조회수 증가는 비동기로 background 실행 (await 안함)
-  supabase.rpc('increment_views', { post_id: id }).then(() => {}, () => {});
+  // 조회수를 먼저 올리고 나서 조회한다.
+  // (예전엔 await 없이 동시에 실행돼서 화면에 '증가 전' 값이 떠 조회수가 안 오르는 것처럼 보였음)
+  try {
+    await supabase.rpc('increment_views', { post_id: id });
+  } catch {
+    /* 조회수 실패는 무시 */
+  }
   const { data, error } = await supabase
     .from('posts')
     .select('*, author:users!author_id(id, name, type, phone, intro, business_hours, intro_image_url, main_categories)')

@@ -38,12 +38,14 @@ export default function BuyPostCard({ post, publicContact = true }: BuyPostCardP
   };
 
   const hasImage = !!post.image_url;
+  // 중앙문구: 최대 2줄 (줄바꿈 구분)
+  const centerLines = (post.center_text || '').split('\n').filter(Boolean).slice(0, 2);
 
   return (
     <div className="company-card card-hover group flex flex-col rounded-none overflow-hidden w-full max-w-42 min-[520px]:max-w-none mx-auto">
-      {/* ① 이미지영역 — 상단 이미지(있으면) 위에 중앙문구(title) 겹침 */}
+      {/* ① 사진칸 — 상단문구(title). 사진 유무와 무관하게 높이 고정 */}
       <Link href={`/board/${post.id}`} onClick={onOpen} className="block">
-        <div className={`relative overflow-hidden ${hasImage ? 'h-24 md:h-28' : 'h-16 md:h-20'}`} style={!hasImage ? DARK_BG : undefined}>
+        <div className="relative overflow-hidden h-20 md:h-24" style={!hasImage ? DARK_BG : undefined}>
           {hasImage && (
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -53,20 +55,34 @@ export default function BuyPostCard({ post, publicContact = true }: BuyPostCardP
               <div className="absolute inset-0 bg-linear-to-b from-black/25 via-black/40 to-black/65" />
             </>
           )}
-          <div className="absolute inset-0 flex items-center justify-center px-3">
-            <h3 className="text-white text-[13px] md:text-[14px] font-bold text-center leading-tight drop-shadow-md line-clamp-2 break-keep">
+          <div className="absolute inset-0 flex items-center justify-center px-2">
+            {/* 상단문구 — 한 줄만, 넘치면 말줄임 (아래로 안 내려감) */}
+            <h3 className="w-full text-white text-[12.5px] md:text-[14px] font-bold text-center leading-tight drop-shadow-md whitespace-nowrap overflow-hidden text-ellipsis">
               {post.title}
             </h3>
           </div>
         </div>
       </Link>
 
-      {/* ② 작성한 매입률 — 예판상품권 N% 매입 */}
-      {post.percentage != null && (
-        <p className="px-3 pt-2 pb-1.5 text-center text-[11px] min-[360px]:text-[13px] font-extrabold text-accent whitespace-nowrap">
-          예판상품권 {post.percentage}% 매입
-        </p>
-      )}
+      {/* ② 중앙문구 — 최대 2줄. 비어 있어도 높이 고정(카드 크기 일정) */}
+      <Link href={`/board/${post.id}`} onClick={onOpen} className="block px-2 pt-1.5">
+        <div className="h-8 flex flex-col items-center justify-center gap-px">
+          {centerLines.map((line, i) => (
+            <p key={i} className="w-full text-[11px] min-[360px]:text-[12px] text-gray-700 font-medium text-center leading-tight whitespace-nowrap overflow-hidden text-ellipsis">
+              {line}
+            </p>
+          ))}
+        </div>
+      </Link>
+
+      {/* ③ 작성한 매입률 — 예판상품권 N% 매입 (높이 고정) */}
+      <div className="h-6 flex items-center justify-center px-3">
+        {post.percentage != null && (
+          <p className="text-center text-[11px] min-[360px]:text-[13px] font-extrabold text-accent whitespace-nowrap">
+            예판상품권 {post.percentage}% 매입
+          </p>
+        )}
+      </div>
 
       {/* 구분선(양옆 인셋) + 업체명·지역 */}
       <div className="mx-3 h-px bg-gray-200" />

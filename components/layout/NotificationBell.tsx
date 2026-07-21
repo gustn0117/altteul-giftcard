@@ -101,16 +101,16 @@ export default function NotificationBell() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="relative flex flex-col items-center gap-0 leading-none text-gray-600 hover:text-accent transition-colors"
+        className="relative flex flex-col items-center gap-0.5 leading-none text-gray-600 hover:text-accent transition-colors"
         aria-label="알림"
       >
-        <Bell size={20} strokeWidth={1.5} />
+        <Bell size={19} strokeWidth={1.5} />
         {unread > 0 && (
           <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
             {unread > 99 ? '99+' : unread}
           </span>
         )}
-        <span className="text-[10px] -mt-0.5">알림</span>
+        <span className="text-[10px] leading-none">알림</span>
       </button>
 
       {open && (

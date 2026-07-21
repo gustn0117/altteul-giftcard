@@ -48,6 +48,8 @@ export interface DBPost {
   ad_type?: AdType | null;
   /** 광고박스 상단 이미지 URL (삽니다 광고) */
   image_url?: string | null;
+  /** 중앙문구 — 매입률 위에 표시 (최대 2줄, 줄바꿈으로 구분). title은 사진칸의 '상단문구' */
+  center_text?: string | null;
   /** 마지막 점프 시각 — 정렬 우선순위 */
   last_jumped_at: string | null;
   /** 만료 1시간 전 알림 발송 시각 */

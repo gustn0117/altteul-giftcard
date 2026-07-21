@@ -17,6 +17,9 @@ const BUY_EXPIRE_DAYS = 7;    // 삽니다: 7일 후 잠금 (운영자 해제)
 // 글 작성 시엔 실제 지역만 선택(전국 제외 — 전국은 목록에서 '전체 보기' 필터로만 사용)
 const REGION_OPTIONS = ['서울', '경기', '인천', '대전', '대구', '부산', '광주', '울산', '세종', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'];
 const DELIVERY_METHODS = [{ value: 'mobile', label: '모바일', tag: '#모바일' }, { value: 'parcel', label: '택배', tag: '#택배' }, { value: 'direct', label: '직접만남', tag: '#직접만남' }];
+// 광고박스는 폭이 좁아 한 줄을 넘기면 잘리므로 입력 단계에서 글자수를 강제 제한한다
+const TOP_MAX = 14;     // 상단문구(사진칸) 한 줄
+const CENTER_MAX = 16;  // 중앙문구 각 줄
 
 export default function WritePostPage() {
   return (
@@ -70,6 +73,9 @@ function WritePostContent() {
     adType: 'main' as string,
     // 광고박스 상단 이미지 URL (삽니다)
     imageUrl: '',
+    // 중앙문구 (최대 2줄)
+    centerLine1: '',
+    centerLine2: '',
     guestName: '',
     guestPassword: '',
     guestPhone: '',
@@ -104,6 +110,8 @@ function WritePostContent() {
             // 전국광고/추천업체가 조용히 메인광고로 강등된다
             adType: post.ad_type ?? 'main',
             imageUrl: post.image_url ?? '',
+            centerLine1: (post.center_text || '').split('\n')[0] || '',
+            centerLine2: (post.center_text || '').split('\n')[1] || '',
             guestName: post.guest_name || '',
             guestPhone: post.guest_phone || '',
           }));
@@ -195,6 +203,9 @@ function WritePostContent() {
       if (deliveryList.length === 0) return alert('배송 방법을 1개 이상 선택하세요.');
     }
 
+    // 지역은 반드시 선택 (미선택 시 '전국'으로 처리되던 것 방지)
+    if (!form.region) return alert('지역을 선택하세요.');
+
     setSubmitting(true);
     try {
       const expireDays = form.type === 'sell' ? SELL_EXPIRE_DAYS : BUY_EXPIRE_DAYS;
@@ -229,6 +240,8 @@ function WritePostContent() {
         payload.ad_type = form.adType || 'main';
         // 광고박스 상단 이미지
         payload.image_url = form.imageUrl || null;
+        // 중앙문구 (2줄을 줄바꿈으로 합쳐 저장)
+        payload.center_text = [form.centerLine1.trim(), form.centerLine2.trim()].filter(Boolean).join('\n') || null;
       }
 
       // 신규 등록 시에만 만료 시각 설정 (수정 시는 기존 만료 유지)
@@ -358,13 +371,16 @@ function WritePostContent() {
 
           <div>
             <label className="block text-[12px] font-medium text-zinc-600 mb-1">
-              {form.type === 'buy' ? '박스 중앙문구 *' : '제목 *'}
+              {form.type === 'buy' ? '상단문구 (사진칸에 표시) *' : '제목 *'}
             </label>
             <input type="text" value={form.title} onChange={(e) => handleChange('title', e.target.value)}
-              placeholder={form.type === 'buy' ? '광고 박스 중앙에 크게 표시됩니다 (예: 신세계 최고가 매입)' : '예: 신세계 10만원권 판매'}
+              placeholder={form.type === 'buy' ? '예: 신세계 최고가 매입' : '예: 신세계 10만원권 판매'}
+              maxLength={form.type === 'buy' ? TOP_MAX : undefined}
               className="input" required />
             {form.type === 'buy' && (
-              <p className="text-[11px] text-zinc-400 mt-1">광고 박스 가운데에 큰 글씨로 나옵니다.</p>
+              <p className="text-[11px] text-zinc-400 mt-1">
+                광고박스 사진칸에 <b>한 줄</b>로 표시됩니다. (띄어쓰기 포함 {form.title.length}/{TOP_MAX}자)
+              </p>
             )}
           </div>
 
@@ -418,6 +434,18 @@ function WritePostContent() {
                   folder="ads"
                   hint="가로형 이미지 권장(예: 640×400). 광고박스 상단에 표시되고, 그 위에 '박스 중앙문구'가 흰 글씨로 겹쳐 나옵니다. 안 올리면 어두운 배경으로 표시됩니다."
                 />
+              </div>
+
+              {/* 중앙문구 — 매입률 바로 위, 최대 2줄 */}
+              <div>
+                <label className="block text-[12px] font-medium text-zinc-600 mb-1">중앙문구 (최대 2줄)</label>
+                <input type="text" value={form.centerLine1} onChange={(e) => handleChange('centerLine1', e.target.value)}
+                  placeholder="1줄 (예: 24시간 신속 매입)" maxLength={CENTER_MAX} className="input mb-2" />
+                <input type="text" value={form.centerLine2} onChange={(e) => handleChange('centerLine2', e.target.value)}
+                  placeholder="2줄 (선택)" maxLength={CENTER_MAX} className="input" />
+                <p className="text-[11px] text-zinc-400 mt-1">
+                  &apos;예판상품권 N% 매입&apos; 바로 위에 표시됩니다. 각 줄은 한 줄로 고정 (1줄 {form.centerLine1.length}/{CENTER_MAX}자 · 2줄 {form.centerLine2.length}/{CENTER_MAX}자)
+                </p>
               </div>
 
               {/* 광고 종류 — 승인되면 홈의 해당 칸에 노출됨 */}
@@ -487,8 +515,8 @@ function WritePostContent() {
           </div>
 
           <div>
-            <label className="block text-[12px] font-medium text-zinc-600 mb-1">지역</label>
-            <select value={form.region} onChange={(e) => handleChange('region', e.target.value)} className="input">
+            <label className="block text-[12px] font-medium text-zinc-600 mb-1">지역 *</label>
+            <select value={form.region} onChange={(e) => handleChange('region', e.target.value)} className="input" required>
               <option value="">지역 선택</option>
               {REGION_OPTIONS.map((r) => (
                 <option key={r} value={r}>{r}</option>
