@@ -217,18 +217,19 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
               <div className="bg-gray-50 border border-gray-100 p-5">
                 {post.percentage != null ? (
                   /* 팝니다=판매율+발송일 / 삽니다=매입률+매입가능시간 */
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-[13px]">
-                    <div>
-                      <p className="text-[11px] text-gray-400 mb-1">상품권 종류</p>
-                      <p className="font-bold text-gray-800">{getCategoryName(post.category)}</p>
+                  /* 3개 항목을 항상 가로 한 줄로 */
+                  <div className="grid grid-cols-3 gap-2 md:gap-4 text-[13px]">
+                    <div className="min-w-0">
+                      <p className="text-[11px] text-gray-400 mb-1 whitespace-nowrap">상품권 종류</p>
+                      <p className="font-bold text-gray-800 truncate">{getCategoryName(post.category)}</p>
                     </div>
-                    <div>
-                      <p className="text-[11px] text-gray-400 mb-1">{isSell ? '판매율' : '매입률'}</p>
-                      <p className="font-bold text-accent text-[20px]">{post.percentage}%</p>
+                    <div className="min-w-0">
+                      <p className="text-[11px] text-gray-400 mb-1 whitespace-nowrap">{isSell ? '판매율' : '매입률'}</p>
+                      <p className="font-bold text-accent text-[18px] md:text-[20px] whitespace-nowrap">{post.percentage}%</p>
                     </div>
-                    <div>
-                      <p className="text-[11px] text-gray-400 mb-1">{isSell ? '발송 예정일' : '매입 가능 시간'}</p>
-                      <p className="font-bold text-gray-800">
+                    <div className="min-w-0">
+                      <p className="text-[11px] text-gray-400 mb-1 whitespace-nowrap">{isSell ? '발송 예정일' : '매입 가능 시간'}</p>
+                      <p className="font-bold text-gray-800 truncate">
                         {isSell
                           ? (post.send_month && post.send_day ? `${post.send_month}월 ${post.send_day}일` : '협의')
                           : (post.delivery || '-')}
@@ -237,22 +238,22 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                   </div>
                 ) : (
                   /* 삽니다 또는 기존 데이터: 액면가/할인율/가격 */
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-[13px]">
-                    <div>
-                      <p className="text-[11px] text-gray-400 mb-1">상품권 종류</p>
-                      <p className="font-bold text-gray-800">{getCategoryName(post.category)}</p>
+                  <div className="grid grid-cols-4 gap-2 md:gap-4 text-[12px] md:text-[13px]">
+                    <div className="min-w-0">
+                      <p className="text-[11px] text-gray-400 mb-1 whitespace-nowrap">상품권 종류</p>
+                      <p className="font-bold text-gray-800 truncate">{getCategoryName(post.category)}</p>
                     </div>
-                    <div>
-                      <p className="text-[11px] text-gray-400 mb-1">액면가</p>
-                      <p className="font-bold text-gray-800">{(post.face_value ?? 0).toLocaleString()}원</p>
+                    <div className="min-w-0">
+                      <p className="text-[11px] text-gray-400 mb-1 whitespace-nowrap">액면가</p>
+                      <p className="font-bold text-gray-800 truncate">{(post.face_value ?? 0).toLocaleString()}원</p>
                     </div>
-                    <div>
-                      <p className="text-[11px] text-gray-400 mb-1">할인율</p>
-                      <p className="font-bold text-accent">{post.discount ?? 0}%</p>
+                    <div className="min-w-0">
+                      <p className="text-[11px] text-gray-400 mb-1 whitespace-nowrap">할인율</p>
+                      <p className="font-bold text-accent whitespace-nowrap">{post.discount ?? 0}%</p>
                     </div>
-                    <div>
-                      <p className="text-[11px] text-gray-400 mb-1">{isSell ? '판매가' : '희망가'}</p>
-                      <p className="font-bold text-[16px] text-gray-900">{(post.price ?? 0).toLocaleString()}원</p>
+                    <div className="min-w-0">
+                      <p className="text-[11px] text-gray-400 mb-1 whitespace-nowrap">{isSell ? '판매가' : '희망가'}</p>
+                      <p className="font-bold text-[14px] md:text-[16px] text-gray-900 truncate">{(post.price ?? 0).toLocaleString()}원</p>
                     </div>
                   </div>
                 )}
