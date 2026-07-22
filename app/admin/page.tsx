@@ -374,6 +374,10 @@ export default function AdminPage() {
 
       {/* 신규 운영자 페이지 빠른 링크 */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 mb-3">
+        <a href="/admin/pages" className="card card-hover p-3 text-left">
+          <span className="text-[10.5px] text-indigo-600 font-bold">안내 페이지</span>
+          <p className="text-[12.5px] font-bold text-gray-900 mt-0.5">약관 / 이용안내 편집</p>
+        </a>
         <a href="/admin/hero-promo" className="card card-hover p-3 text-left">
           <span className="text-[10.5px] text-violet-600 font-bold">메인 홍보</span>
           <p className="text-[12.5px] font-bold text-gray-900 mt-0.5">홍보 박스 편집</p>
