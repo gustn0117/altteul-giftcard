@@ -456,17 +456,23 @@ function WritePostContent() {
                     <button
                       key={a.value}
                       type="button"
+                      disabled={isEdit}
                       onClick={() => handleChange('adType', a.value)}
                       className={`h-10 text-[12.5px] font-bold border transition-colors ${
                         form.adType === a.value
                           ? 'border-accent bg-accent text-white'
                           : 'border-gray-200 bg-white text-gray-600 hover:border-accent hover:text-accent'
-                      }`}
+                      } ${isEdit ? 'opacity-60 cursor-not-allowed' : ''}`}
                     >
                       {a.label}
                     </button>
                   ))}
                 </div>
+                {isEdit && (
+                  <p className="text-[11px] text-amber-600 mt-1">
+                    광고 종류는 수정할 수 없습니다. 변경이 필요하면 관리자에게 문의해주세요.
+                  </p>
+                )}
                 <p className="text-[11px] text-zinc-400 mt-1">
                   {AD_TYPES.find((a) => a.value === form.adType)?.desc}
                 </p>

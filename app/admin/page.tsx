@@ -187,6 +187,32 @@ export default function AdminPage() {
     if (error) return alert('승인 실패: ' + error.message);
     fetchData();
   };
+  // 연장 신청 승인 — 만료 시각을 days 만큼 늘리고 다시 노출(승인) 상태로
+  const approveExtension = async (id: string, days: number) => {
+    if (!days || days <= 0) return alert('연장 기간(일)을 입력하세요.');
+    const now = new Date();
+    const cur = posts.find(p => p.id === id);
+    // 이미 만료됐으면 지금부터, 아직 남았으면 남은 기간에 이어서
+    const base = cur?.expires_at && new Date(cur.expires_at) > now ? new Date(cur.expires_at) : now;
+    const expires = new Date(base.getTime() + days * 86400000).toISOString();
+    const { error } = await supabase.from('posts').update({
+      expires_at: expires,
+      approved_at: cur?.approved_at ?? now.toISOString(),
+      extension_requested_at: null,
+      notified_expiry_at: null,
+      is_active: true,
+      updated_at: now.toISOString(),
+    }).eq('id', id);
+    if (error) return alert('연장 승인 실패: ' + error.message);
+    fetchData();
+  };
+  const rejectExtension = async (id: string) => {
+    if (!confirm('연장 신청을 거절할까요? (글은 그대로 유지됩니다)')) return;
+    const { error } = await supabase.from('posts').update({ extension_requested_at: null, updated_at: new Date().toISOString() }).eq('id', id);
+    if (error) return alert('실패: ' + error.message);
+    fetchData();
+  };
+
   // 광고 종류 변경 (전국/메인/추천 간 이동)
   const changeAdType = async (id: string, adType: string) => {
     const { error } = await supabase.from('posts').update({ ad_type: adType, updated_at: new Date().toISOString() }).eq('id', id);
@@ -664,8 +690,10 @@ export default function AdminPage() {
         const cur = tab as 'national' | 'main' | 'recommend';
         const label = adTypeLabel(cur);
         const buyPosts = posts.filter(p => p.type === 'buy' && !p.deleted_at);
-        const pending = buyPosts.filter(p => !p.approved_at && (p.ad_type ?? 'main') === cur);
+        const pending = buyPosts.filter(p => !p.approved_at && !p.extension_requested_at && (p.ad_type ?? 'main') === cur);
         const live = buyPosts.filter(p => p.approved_at && (p.ad_type ?? 'main') === cur);
+        // 작성자가 연장을 신청한 글 (승인 대기 목록과 분리)
+        const extReq = buyPosts.filter(p => p.extension_requested_at && (p.ad_type ?? 'main') === cur);
         return (
           <div className="space-y-4">
             <div className="card p-3 text-[12px] text-gray-600">
@@ -699,6 +727,36 @@ export default function AdminPage() {
                 </div>
               )}
             </div>
+
+            {/* 연장 신청 */}
+            {extReq.length > 0 && (
+              <div className="card p-4 border border-blue-200 bg-blue-50/40">
+                <h3 className="text-[13px] font-bold text-blue-800 mb-3">🔁 {label} 연장 신청 ({extReq.length})</h3>
+                <div className="space-y-2">
+                  {extReq.map(p => {
+                    const exp = p.expires_at ? new Date(p.expires_at) : null;
+                    const expired = exp ? exp.getTime() < Date.now() : false;
+                    return (
+                      <div key={p.id} className="flex flex-wrap items-center gap-2 bg-white border border-blue-200 px-3 py-2">
+                        <span className="text-[12px] font-medium flex-1 min-w-[140px] truncate">
+                          {p.title} <span className="text-zinc-400 font-normal">/ {p.author?.name || '비회원'}{exp ? ` / ${expired ? '만료됨' : '만료 ' + exp.toLocaleDateString('ko-KR')}` : ''}</span>
+                        </span>
+                        {[20, 25, 30].map(d => (
+                          <button key={d} type="button" onClick={() => approveExtension(p.id, d)}
+                            className="h-8 px-2.5 text-[12px] font-bold border border-blue-300 hover:bg-blue-100">{d}일</button>
+                        ))}
+                        <input type="number" min={1} placeholder="직접(일)" value={approveDaysMap[p.id] ?? ''}
+                          onChange={e => setApproveDaysMap(m => ({ ...m, [p.id]: e.target.value }))} className="input h-8 w-20" />
+                        <button type="button" onClick={() => approveExtension(p.id, Number(approveDaysMap[p.id]))}
+                          className="h-8 px-3 text-[12px] font-bold bg-accent text-white hover:bg-blue-700">연장 승인</button>
+                        <button type="button" onClick={() => rejectExtension(p.id)}
+                          className="h-8 px-2.5 text-[12px] border border-zinc-300 text-zinc-600 hover:bg-zinc-100">거절</button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* 노출 중 */}
             <div className="card overflow-hidden">

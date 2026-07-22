@@ -4,7 +4,7 @@ import { use, useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Eye, Clock, Pencil, Tag, ShoppingCart, CheckCircle, Timer, RotateCcw } from 'lucide-react';
-import { getPost, togglePostComplete, extendPostExpiry } from '@/lib/api';
+import { getPost, togglePostComplete, requestExtension } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import ContactReveal from '@/components/board/ContactReveal';
 import type { DBPost, DBUser } from '@/lib/types';
@@ -99,16 +99,17 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
     }
   };
 
+  // 직접 연장이 아니라 '연장 신청' — 실제 연장은 관리자가 기간을 정해 승인한다
   const handleExtend = async () => {
     if (!isAuthor) return;
-    const days = isSell ? 7 : 7;
-    if (!confirm(`만료를 ${days}일 연장하시겠습니까?`)) return;
+    if (!confirm('게시기간 연장을 신청하시겠습니까?\n관리자 승인 후 연장됩니다.')) return;
     setBusy(true);
     try {
-      await extendPostExpiry(id, days);
+      await requestExtension(id);
       await reload();
+      alert('연장 신청이 접수되었습니다. 관리자 승인 후 연장됩니다.');
     } catch (err) {
-      alert(err instanceof Error ? err.message : '연장 실패');
+      alert(err instanceof Error ? err.message : '연장 신청 실패');
     } finally {
       setBusy(false);
     }
@@ -148,15 +149,20 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
           {!isCompleted && !isAuthor && remaining && (
             <div className="mb-3 px-4 py-2 bg-gray-50 border border-gray-200 text-[12px] text-gray-600 flex items-start gap-2">
               <Timer size={14} className="text-accent shrink-0 mt-0.5" />
-              <span className="min-w-0">글 만료까지 {remaining} <span className="text-gray-400">(만료 시 작성자가 7일 연장 가능)</span></span>
+              <span className="min-w-0">글 만료까지 {remaining}</span>
             </div>
           )}
-          {!isCompleted && isAuthor && remaining && (
+          {!isCompleted && isAuthor && (
             <div className="mb-3 px-4 py-2 bg-gray-50 border border-gray-200 text-[12px] text-gray-600 flex items-center gap-2">
-              <Timer size={14} className="text-accent shrink-0" /> 만료까지 {remaining}
-              <button onClick={handleExtend} disabled={busy} className="ml-auto text-[12px] text-accent font-bold hover:underline flex items-center gap-1">
-                <RotateCcw size={11} /> 7일 연장
-              </button>
+              <Timer size={14} className="text-accent shrink-0" />
+              {remaining ? `만료까지 ${remaining}` : '게시기간이 만료되어 광고칸에서 내려간 상태입니다. (글은 삭제되지 않습니다)'}
+              {post.extension_requested_at ? (
+                <span className="ml-auto shrink-0 text-[12px] text-amber-600 font-bold">연장 신청됨 · 승인 대기</span>
+              ) : (
+                <button onClick={handleExtend} disabled={busy} className="ml-auto shrink-0 text-[12px] text-accent font-bold hover:underline flex items-center gap-1">
+                  <RotateCcw size={11} /> 연장 신청
+                </button>
+              )}
             </div>
           )}
 

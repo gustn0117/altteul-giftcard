@@ -3,7 +3,7 @@ import type { DBPost, DBUser, DBChat, DBMessage, DBNotice, DBPremiumBuyer, DBMai
 
 // ─── Posts ───
 
-const POST_BASE_COLS = 'id, type, title, category, face_value, price, discount, percentage, send_month, send_day, delivery, delivery_method, region, tags, views, is_active, author_id, guest_name, expires_at, blind_locked, completed_at, deleted_at, approved_at, ad_type, image_url, center_text, last_jumped_at, notified_expiry_at, created_at';
+const POST_BASE_COLS = 'id, type, title, category, face_value, price, discount, percentage, send_month, send_day, delivery, delivery_method, region, tags, views, is_active, author_id, guest_name, expires_at, blind_locked, completed_at, deleted_at, approved_at, ad_type, image_url, center_text, extension_requested_at, last_jumped_at, notified_expiry_at, created_at';
 
 export async function getPosts(type?: 'sell' | 'buy', opts?: { limit?: number; withAuthor?: boolean; includeBlinded?: boolean; includePending?: boolean }) {
   const limit = opts?.limit ?? 100;
@@ -117,6 +117,15 @@ export async function togglePostComplete(id: string, completed: boolean) {
 }
 
 /** 작성자가 만료 시각을 연장 — 기본 +N일 */
+/** 작성자가 게시기간 연장을 '신청' — 실제 연장은 관리자 승인으로만 이뤄진다 */
+export async function requestExtension(id: string) {
+  const { error } = await supabase
+    .from('posts')
+    .update({ extension_requested_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+    .eq('id', id);
+  if (error) throw error;
+}
+
 export async function extendPostExpiry(id: string, addDays: number) {
   const { data: existing, error: getErr } = await supabase.from('posts').select('expires_at').eq('id', id).single();
   if (getErr) throw getErr;

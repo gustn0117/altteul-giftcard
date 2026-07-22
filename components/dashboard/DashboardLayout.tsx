@@ -37,8 +37,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <p className="text-[12px] text-zinc-500">업체 정보와 상품을 관리할 수 있습니다.</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <Link href="/buyer/me" className="btn-secondary text-[11px] h-[30px] px-3 gap-1 whitespace-nowrap shrink-0">
-            <Eye size={12} />내 페이지 보기
+          {/* '내 페이지 보기'는 존재하지 않는 /buyer/me 로 연결돼 아무것도 안 떠서 제거.
+              대신 실제로 쓰는 내 상품 목록으로 연결 */}
+          <Link href="/dashboard/my-posts" className="btn-secondary text-[11px] h-[30px] px-3 gap-1 whitespace-nowrap shrink-0">
+            <Eye size={12} />내 상품 보기
           </Link>
         </div>
       </div>

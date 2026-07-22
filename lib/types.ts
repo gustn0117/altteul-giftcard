@@ -50,6 +50,8 @@ export interface DBPost {
   image_url?: string | null;
   /** 중앙문구 — 매입률 위에 표시 (최대 2줄, 줄바꿈으로 구분). title은 사진칸의 '상단문구' */
   center_text?: string | null;
+  /** 작성자의 게시기간 연장 신청 시각 (관리자 승인 시 해제) */
+  extension_requested_at?: string | null;
   /** 마지막 점프 시각 — 정렬 우선순위 */
   last_jumped_at: string | null;
   /** 만료 1시간 전 알림 발송 시각 */

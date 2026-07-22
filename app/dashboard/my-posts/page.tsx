@@ -12,8 +12,10 @@ type Filter = 'all' | 'sell' | 'buy';
 
 function statusOf(p: DBPost): { label: string; cls: string } {
   if (p.completed_at) return { label: '거래완료', cls: 'bg-zinc-700 text-white' };
-  if (p.type === 'buy' && !p.approved_at) return { label: '승인 대기', cls: 'bg-amber-100 text-amber-700' };
+  if (p.extension_requested_at) return { label: '연장 신청됨', cls: 'bg-blue-100 text-blue-700' };
+  // 만료를 먼저 판단 — 만료되면 승인이 해제되므로 '승인 대기'로 잘못 보이던 문제
   if (p.expires_at && new Date(p.expires_at).getTime() < Date.now()) return { label: '기간 만료', cls: 'bg-rose-100 text-rose-700' };
+  if (p.type === 'buy' && !p.approved_at) return { label: '승인 대기', cls: 'bg-amber-100 text-amber-700' };
   return { label: '노출중', cls: 'bg-emerald-100 text-emerald-700' };
 }
 
