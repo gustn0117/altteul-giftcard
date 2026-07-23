@@ -24,12 +24,24 @@ export default function AdminPagesEditor() {
   const [saved, setSaved] = useState(false);
   const [preview, setPreview] = useState(false);
 
+  // 편집 화면 표시 순서 + 그룹 라벨
+  const ORDER = ['terms', 'privacy', 'guide-user', 'guide-business', 'guide-about', 'faq', 'fraud'];
+
   useEffect(() => {
     fetch('/api/pages')
       .then((r) => r.json())
-      .then((d) => setPages(d.pages ?? []))
+      .then((d) => {
+        const list: SitePage[] = d.pages ?? [];
+        list.sort((a, b) => {
+          const ia = ORDER.indexOf(a.slug); const ib = ORDER.indexOf(b.slug);
+          return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+        });
+        setPages(list);
+        if (list.length && !list.find((p) => p.slug === slug)) setSlug(list[0].slug);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 선택한 페이지 내용 반영
@@ -98,7 +110,7 @@ export default function AdminPagesEditor() {
               <p className="text-[12px] text-gray-500">
                 수정 후 <b>저장</b>을 누르면 사이트에 바로 반영됩니다.
               </p>
-              <Link href={`/${slug}`} target="_blank" className="text-[11.5px] text-gray-500 hover:text-accent flex items-center gap-1">
+              <Link href={slug.startsWith('guide-') ? `/guide?tab=${slug.replace('guide-', '')}` : `/${slug}`} target="_blank" className="text-[11.5px] text-gray-500 hover:text-accent flex items-center gap-1">
                 실제 화면 보기 <ExternalLink size={11} />
               </Link>
             </div>
