@@ -81,6 +81,13 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   const headerLabel = isSell ? '상품권 팝니다' : '상품권 삽니다';
   const HeaderIcon = isSell ? Tag : ShoppingCart;
 
+  // '목록' 버튼은 브라우저 뒤로가기와 똑같이 동작 → 보던 페이지·지역·스크롤 위치 그대로 복원.
+  // 목록에서 들어온 게 아니거나(직접 URL 접속) 히스토리가 없으면 목록 첫 화면으로.
+  const goToList = () => {
+    if (typeof window !== 'undefined' && window.history.length > 1) router.back();
+    else router.push(`/board?tab=${backTab}`);
+  };
+
   const isCompleted = !!post.completed_at;
   const rawPhone = post.guest_phone || post.author?.phone || '';
   const remaining = formatRemainingTime(post.expires_at);
@@ -171,9 +178,9 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
           <article className="bg-white border border-gray-200 mb-4 overflow-hidden">
             {/* Top bar */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-              <Link href={`/board?tab=${backTab}`} className="flex items-center gap-1 text-[12px] text-gray-500 hover:text-accent">
+              <button type="button" onClick={goToList} className="flex items-center gap-1 text-[12px] text-gray-500 hover:text-accent">
                 <ArrowLeft size={12} /> 목록
-              </Link>
+              </button>
               <span className="flex items-center gap-1.5 text-[12px] text-accent font-bold">
                 <HeaderIcon size={12} /> {headerLabel}
               </span>
@@ -328,9 +335,9 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
 
             {/* Bottom nav */}
             <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50">
-              <Link href={`/board?tab=${backTab}`} className="btn-secondary h-8 px-3 text-[12px]">
+              <button type="button" onClick={goToList} className="btn-secondary h-8 px-3 text-[12px]">
                 <ArrowLeft size={12} /> 목록
-              </Link>
+              </button>
               <Link href={`/board/write?type=${backTab}`} className="btn-accent h-8 px-3 text-[12px]">
                 새 글 작성
               </Link>
