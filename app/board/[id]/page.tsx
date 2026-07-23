@@ -92,8 +92,15 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   const rawPhone = post.guest_phone || post.author?.phone || '';
   const remaining = formatRemainingTime(post.expires_at);
 
+  // 판매완료(거래완료) 표시/해제 권한:
+  //  - 회원 본인 글: 작성자 본인만
+  //  - 비회원(전화 접수) 글: 관리할 작성자 계정이 없으므로, 로그인한 회원이면 대신 처리 가능
+  // (연락처 블라인드·연장 등 다른 권한은 계속 작성자에게만 → isAuthor 그대로 사용,
+  //  그래서 회원이 비회원글을 열어도 블라인드는 유지된다)
+  const canToggleComplete = isAuthor || (isLoggedIn && isGuestPost);
+
   const handleToggleComplete = async () => {
-    if (!isAuthor) return;
+    if (!canToggleComplete) return;
     const next = !isCompleted;
     if (next && !confirm('판매완료로 표시하면 연락처가 비공개되고 글이 회색 처리됩니다. 진행할까요?')) return;
     if (!next && !confirm('판매완료를 해제하시겠습니까?')) return;
@@ -148,7 +155,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
             <div className="mb-3 px-4 py-3 bg-zinc-100 border border-zinc-300 text-[13px] text-zinc-700 flex items-start gap-2">
               <CheckCircle size={16} className="shrink-0 mt-0.5" />
               <span className="min-w-0"><strong>판매완료</strong> 처리된 글입니다. 연락처는 비공개됩니다.</span>
-              {isAuthor && (
+              {canToggleComplete && (
                 <button onClick={handleToggleComplete} disabled={busy} className="ml-auto shrink-0 text-[12px] text-accent hover:underline">
                   완료 해제
                 </button>
@@ -184,11 +191,14 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
               <span className="flex items-center gap-1.5 text-[12px] text-accent font-bold">
                 <HeaderIcon size={12} /> {headerLabel}
               </span>
-              {isAuthor ? (
+              {canToggleComplete ? (
                 <div className="flex items-center gap-3">
-                  <Link href={`/board/write?edit=${post.id}`} className="text-[11px] text-gray-500 hover:text-accent flex items-center gap-0.5">
-                    <Pencil size={11} /> 수정
-                  </Link>
+                  {/* 글 수정은 작성자 본인만 (비회원글은 로그인 회원이 판매완료만 처리 가능) */}
+                  {isAuthor && (
+                    <Link href={`/board/write?edit=${post.id}`} className="text-[11px] text-gray-500 hover:text-accent flex items-center gap-0.5">
+                      <Pencil size={11} /> 수정
+                    </Link>
+                  )}
                   {!isCompleted && (
                     <button onClick={handleToggleComplete} disabled={busy} className="flex items-center gap-1 text-[11px] text-zinc-600 hover:text-zinc-900 font-bold">
                       <CheckCircle size={11} /> {busy ? '처리 중...' : '판매완료'}
