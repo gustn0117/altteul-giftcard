@@ -18,8 +18,9 @@ export default function Home() {
   return (
     <div className="bg-linear-to-b from-gray-50/50 to-white min-h-[calc(100vh-200px)] pb-3 md:pb-8">
       <div className="container-main pt-1 md:pt-3">
-        {/* PC: 좌(최근 본 업체) · 중앙 · 우(오늘의 추천업체 2개 랜덤). 모바일은 중앙만. */}
-        <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr_210px] gap-5">
+        {/* PC: 좌(최근 본 업체) · 중앙 · 우(오늘의 추천업체 2개 랜덤). 모바일은 중앙만.
+            양옆 레일을 좁혀 중앙(메인/광고)을 최대한 넓게 확보한다. */}
+        <div className="grid grid-cols-1 lg:grid-cols-[176px_1fr_184px] gap-4">
           {/* 좌측 사이드 (PC만) */}
           <div className="hidden lg:block">
             <HomeAside />
