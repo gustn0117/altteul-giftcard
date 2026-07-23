@@ -24,6 +24,8 @@ interface AdSectionProps {
   emptyText?: string;
   /** 지정하면 페이지 번호를 이 이름의 URL 쿼리로 관리 → 글 보고 돌아와도 보던 페이지 복원 */
   pageParam?: string;
+  /** PC(lg 이상)에서 한 줄에 보일 카드 수 (기본 4, 홈은 5) */
+  desktopCols?: 4 | 5;
 }
 
 function shuffleArr<T>(arr: T[]): T[] {
@@ -40,7 +42,11 @@ function shuffleArr<T>(arr: T[]): T[] {
  * 세 칸의 카드 크기·간격·내용이 반드시 같아야 한다는 요구사항 때문에 컴포넌트를 하나로 통일했다.
  * 데이터는 전부 '관리자 승인된 삽니다(buy) 글'.
  */
-export default function AdSection({ adType, title, icon, perPage = 50, shuffle = false, emptyText, pageParam }: AdSectionProps) {
+export default function AdSection({ adType, title, icon, perPage = 50, shuffle = false, emptyText, pageParam, desktopCols = 4 }: AdSectionProps) {
+  // Tailwind JIT 때문에 동적 문자열 대신 완성된 클래스명을 그대로 사용
+  const gridCls = desktopCols === 5
+    ? 'grid grid-cols-2 min-[520px]:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-3'
+    : 'grid grid-cols-2 min-[520px]:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3';
   const types = useMemo(() => (Array.isArray(adType) ? adType : [adType]), [adType]);
   const cacheKey = `ads_${types.join('_')}`;
 
@@ -97,7 +103,7 @@ export default function AdSection({ adType, title, icon, perPage = 50, shuffle =
     return (
       <section className="mb-5">
         <h2 className="flex items-center gap-1.5 text-[15px] font-bold text-gray-800 mb-3">{icon}{title}</h2>
-        <div className="grid grid-cols-2 min-[520px]:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div className={gridCls}>
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="h-56 bg-gray-100 animate-pulse" />
           ))}
@@ -125,7 +131,7 @@ export default function AdSection({ adType, title, icon, perPage = 50, shuffle =
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 min-[520px]:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className={gridCls}>
             {paged.map((p) => (
               <BuyPostCard key={p.id} post={p} publicContact={publicContact} />
             ))}

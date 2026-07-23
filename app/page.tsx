@@ -8,6 +8,7 @@ import VisitorCounter from '@/components/home/VisitorCounter';
 import HomeAside from '@/components/layout/HomeAside';
 import AdSection from '@/components/home/AdSection';
 import SellLineAds from '@/components/home/SellLineAds';
+import RecommendRail from '@/components/home/RecommendRail';
 
 /**
  * 홈 광고칸 3종 — 전부 '관리자 승인된 삽니다(buy) 글'로 통일.
@@ -17,7 +18,8 @@ export default function Home() {
   return (
     <div className="bg-linear-to-b from-gray-50/50 to-white min-h-[calc(100vh-200px)] pb-3 md:pb-8">
       <div className="container-main pt-1 md:pt-3">
-        <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-5">
+        {/* PC: 좌(최근 본 업체) · 중앙 · 우(오늘의 추천업체 2개 랜덤). 모바일은 중앙만. */}
+        <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr_210px] gap-5">
           {/* 좌측 사이드 (PC만) */}
           <div className="hidden lg:block">
             <HomeAside />
@@ -37,6 +39,7 @@ export default function Home() {
                 icon={<Globe size={15} className="text-accent" />}
                 perPage={50}
                 pageParam="np"
+                desktopCols={5}
                 emptyText="전국 광고 모집중입니다."
               />
 
@@ -48,12 +51,18 @@ export default function Home() {
                 perPage={50}
                 shuffle
                 pageParam="mp"
+                desktopCols={5}
                 emptyText="메인 광고 모집중입니다."
               />
 
               {/* 팝니다 줄광고 */}
               <SellLineAds />
             </Suspense>
+          </div>
+
+          {/* 우측 레일 — 오늘의 추천업체 2개 랜덤 (PC만) */}
+          <div className="hidden lg:block">
+            <RecommendRail />
           </div>
         </div>
       </div>
