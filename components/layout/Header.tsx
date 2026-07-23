@@ -54,7 +54,7 @@ export default function Header() {
     <header className="bg-white sticky top-0 z-50 border-b border-gray-200">
       {/* ───────────────── 데스크탑 헤더 ───────────────── */}
       <div className="hidden md:block">
-        <div className="container-main">
+        <div className="container-wide">
           {/* 윗줄: 로고(좌) | 검색(중앙) | 액션(우) */}
           <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6 h-20">
             {/* 로고 */}

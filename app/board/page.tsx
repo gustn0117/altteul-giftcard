@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { PenSquare, Tag, ShoppingCart, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import HomeAside from '@/components/layout/HomeAside';
+import RecommendRail from '@/components/home/RecommendRail';
 import AdSection from '@/components/home/AdSection';
 import SellPostCard from '@/components/home/SellPostCard';
 import BuyPostCard from '@/components/home/BuyPostCard';
@@ -129,11 +130,11 @@ function BoardContent() {
 
   return (
     <>
-      <div className="container-main pt-4">
-        <AdSection adType="national" title="전국 광고" icon={<MapPin size={15} className="text-accent" />} perPage={50} />
+      <div className="container-wide pt-4">
+        <AdSection adType="national" title="전국 광고" icon={<MapPin size={15} className="text-accent" />} perPage={50} desktopCols={5} />
       </div>
 
-      <div className="container-main py-6">
+      <div className="container-wide py-6">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-[18px] font-bold text-gray-800">{title}</h1>
           <div className="breadcrumb">
@@ -141,8 +142,11 @@ function BoardContent() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-5">
-          <HomeAside />
+        {/* 홈과 동일한 3분할: 좌(최근 본 업체) · 중앙 · 우(오늘의 추천업체) */}
+        <div className="grid grid-cols-1 lg:grid-cols-[176px_1fr_184px] gap-4">
+          <div className="hidden lg:block">
+            <HomeAside />
+          </div>
 
           <div className="min-w-0">
             {/* 탭 */}
@@ -226,7 +230,7 @@ function BoardContent() {
             ) : activeTab === 'buy' ? (
               <>
                 {/* 삽니다 — 박스광고 그리드 */}
-                <div className="grid grid-cols-2 min-[520px]:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-5">
+                <div className="grid grid-cols-2 min-[520px]:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-5">
                   {pagedPosts.map((post) => (
                     <BuyPostCard key={post.id} post={post} publicContact={buyPublic} />
                   ))}
@@ -234,7 +238,7 @@ function BoardContent() {
               </>
             ) : (
               /* 팝니다 — 삽니다처럼 2칸 카드 그리드 (대표님 요청) */
-              <div className="grid grid-cols-2 min-[520px]:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-5">
+              <div className="grid grid-cols-2 min-[520px]:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-5">
                 {pagedPosts.map((post) => (
                   <SellPostCard key={post.id} post={post} onJumped={refetch} />
                 ))}
@@ -262,6 +266,11 @@ function BoardContent() {
                 </button>
               </div>
             )}
+          </div>
+
+          {/* 우측 — 오늘의 추천업체 2개 랜덤 (PC만) */}
+          <div className="hidden lg:block">
+            <RecommendRail />
           </div>
         </div>
       </div>

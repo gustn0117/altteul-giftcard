@@ -266,6 +266,15 @@ html { scroll-behavior: smooth; }
   padding-right: 15px;
 }
 
+/* 홈·지역별·추천 등 광고칸이 많은 페이지 — 화면을 꽉 채우도록 넓게 */
+.container-wide {
+  max-width: 1600px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
 .sidebar-box {
   background: white;
   border: 1px solid #e0e0e0;
