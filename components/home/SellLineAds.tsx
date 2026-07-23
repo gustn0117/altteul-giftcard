@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ChevronLeft, ChevronRight, HelpCircle } from 'lucide-react';
 import type { DBPost, DBUser } from '@/lib/types';
 import { getPosts } from '@/lib/api';
@@ -9,11 +10,20 @@ import { getCache, setCache } from '@/lib/cache';
 import SellLineRow from './SellLineRow';
 
 const PAGE_SIZE = 10;
+const PAGE_PARAM = 'sp'; // 줄광고 페이지 번호를 URL 쿼리로 → 글 보고 돌아와도 보던 페이지 복원
 
 type SellPost = DBPost & { author?: DBUser };
 
 export default function SellLineAds() {
-  const [page, setPage] = useState(1);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const page = Math.max(1, Number(searchParams.get(PAGE_PARAM)) || 1);
+  const goPage = (n: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (n <= 1) params.delete(PAGE_PARAM); else params.set(PAGE_PARAM, String(n));
+    const qs = params.toString();
+    router.push(qs ? `/?${qs}` : '/', { scroll: false });
+  };
   const [posts, setPosts] = useState<SellPost[]>(() => getCache<SellPost[]>('home_sell_posts') ?? []);
   const [loading, setLoading] = useState(() => !getCache('home_sell_posts'));
 
@@ -65,7 +75,7 @@ export default function SellLineAds() {
         <div className="mt-4 flex flex-wrap items-center justify-center gap-1.5">
           <button
             type="button"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            onClick={() => goPage(Math.max(1, safePage - 1))}
             disabled={safePage === 1}
             className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-200 bg-white text-gray-600 disabled:opacity-40 hover:border-accent hover:text-accent transition-colors"
             aria-label="이전 페이지"
@@ -76,7 +86,7 @@ export default function SellLineAds() {
             <button
               key={n}
               type="button"
-              onClick={() => setPage(n)}
+              onClick={() => goPage(n)}
               className={`min-w-8 h-8 px-2 rounded-md border text-[12px] font-bold transition-colors ${
                 n === safePage
                   ? 'border-accent bg-accent text-white'
@@ -89,7 +99,7 @@ export default function SellLineAds() {
           ))}
           <button
             type="button"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            onClick={() => goPage(Math.min(totalPages, safePage + 1))}
             disabled={safePage === totalPages}
             className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-200 bg-white text-gray-600 disabled:opacity-40 hover:border-accent hover:text-accent transition-colors"
             aria-label="다음 페이지"

@@ -39,6 +39,9 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [buyPublic, setBuyPublic] = useState(true); // 삽니다 연락처 공개 설정 (기본 공개)
+  // 비회원글 판매완료 처리 시 비밀번호 확인 모달 (작성 시 설정한 guest_password)
+  const [pwModal, setPwModal] = useState<null | 'complete' | 'uncomplete'>(null);
+  const [pwInput, setPwInput] = useState('');
 
   const reload = useCallback(() => {
     return getPost(id)
@@ -92,18 +95,13 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   const rawPhone = post.guest_phone || post.author?.phone || '';
   const remaining = formatRemainingTime(post.expires_at);
 
-  // 판매완료(거래완료) 표시/해제 권한:
-  //  - 회원 본인 글: 작성자 본인만
-  //  - 비회원(전화 접수) 글: 관리할 작성자 계정이 없으므로, 로그인한 회원이면 대신 처리 가능
-  // (연락처 블라인드·연장 등 다른 권한은 계속 작성자에게만 → isAuthor 그대로 사용,
-  //  그래서 회원이 비회원글을 열어도 블라인드는 유지된다)
-  const canToggleComplete = isAuthor || (isLoggedIn && isGuestPost);
+  // 판매완료(거래완료)·수정 버튼을 보여줄 대상:
+  //  - 회원 본인 글: 작성자 본인
+  //  - 비회원(전화 접수) 글: 누구에게나 버튼은 보이되, 실제 처리 전에 작성 시 설정한 비밀번호를 확인
+  // (연락처 블라인드·연장은 계속 작성자 전용 → isAuthor 유지, 회원이 비회원글 열어도 블라인드 유지)
+  const canManage = isAuthor || isGuestPost;
 
-  const handleToggleComplete = async () => {
-    if (!canToggleComplete) return;
-    const next = !isCompleted;
-    if (next && !confirm('판매완료로 표시하면 연락처가 비공개되고 글이 회색 처리됩니다. 진행할까요?')) return;
-    if (!next && !confirm('판매완료를 해제하시겠습니까?')) return;
+  const doToggle = async (next: boolean) => {
     setBusy(true);
     try {
       await togglePostComplete(id, next);
@@ -112,6 +110,33 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       alert(err instanceof Error ? err.message : '처리 실패');
     } finally {
       setBusy(false);
+    }
+  };
+
+  const handleToggleComplete = () => {
+    const next = !isCompleted;
+    if (isAuthor) {
+      // 회원 본인 글: 비밀번호 없이 바로
+      if (next && !confirm('판매완료로 표시하면 연락처가 비공개되고 글이 회색 처리됩니다. 진행할까요?')) return;
+      if (!next && !confirm('판매완료를 해제하시겠습니까?')) return;
+      doToggle(next);
+    } else if (isGuestPost) {
+      // 비회원글: 비밀번호 확인 모달을 띄운다
+      setPwInput('');
+      setPwModal(next ? 'complete' : 'uncomplete');
+    }
+  };
+
+  const submitGuestPassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pwModal) return;
+    if (post.guest_password && pwInput === post.guest_password) {
+      const next = pwModal === 'complete';
+      setPwModal(null);
+      setPwInput('');
+      doToggle(next);
+    } else {
+      alert('비밀번호가 일치하지 않습니다.');
     }
   };
 
@@ -133,6 +158,29 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
 
   return (
     <div className="container-main py-6">
+      {/* 비회원글 판매완료 처리 — 작성 시 설정한 비밀번호 확인 모달 */}
+      {pwModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6" onClick={() => setPwModal(null)}>
+          <form onClick={(e) => e.stopPropagation()} onSubmit={submitGuestPassword} className="w-full max-w-80 bg-white rounded-lg p-5 space-y-3">
+            <div>
+              <h2 className="text-[15px] font-bold text-gray-800">비밀번호 확인</h2>
+              <p className="text-[12px] text-gray-500 mt-1">
+                {pwModal === 'complete' ? '판매완료로 표시하려면' : '판매완료를 해제하려면'} 글 작성 시 설정한 비밀번호를 입력하세요.
+              </p>
+            </div>
+            <input
+              type="password" value={pwInput} onChange={(e) => setPwInput(e.target.value)}
+              placeholder="비밀번호" autoFocus
+              className="w-full h-10 px-3 border border-gray-300 text-[13px] rounded focus:border-accent focus:outline-none"
+            />
+            <div className="flex gap-2 pt-1">
+              <button type="button" onClick={() => setPwModal(null)} className="flex-1 h-10 border border-gray-300 rounded text-[13px] text-gray-600 hover:bg-gray-50">취소</button>
+              <button type="submit" disabled={busy} className="flex-1 h-10 rounded text-[13px] font-bold text-white bg-accent hover:bg-blue-700 disabled:opacity-60">확인</button>
+            </div>
+          </form>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-[18px] font-bold text-gray-800">{headerLabel}</h1>
         <div className="breadcrumb">
@@ -155,7 +203,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
             <div className="mb-3 px-4 py-3 bg-zinc-100 border border-zinc-300 text-[13px] text-zinc-700 flex items-start gap-2">
               <CheckCircle size={16} className="shrink-0 mt-0.5" />
               <span className="min-w-0"><strong>판매완료</strong> 처리된 글입니다. 연락처는 비공개됩니다.</span>
-              {canToggleComplete && (
+              {canManage && (
                 <button onClick={handleToggleComplete} disabled={busy} className="ml-auto shrink-0 text-[12px] text-accent hover:underline">
                   완료 해제
                 </button>
@@ -191,14 +239,12 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
               <span className="flex items-center gap-1.5 text-[12px] text-accent font-bold">
                 <HeaderIcon size={12} /> {headerLabel}
               </span>
-              {canToggleComplete ? (
+              {canManage ? (
                 <div className="flex items-center gap-3">
-                  {/* 글 수정은 작성자 본인만 (비회원글은 로그인 회원이 판매완료만 처리 가능) */}
-                  {isAuthor && (
-                    <Link href={`/board/write?edit=${post.id}`} className="text-[11px] text-gray-500 hover:text-accent flex items-center gap-0.5">
-                      <Pencil size={11} /> 수정
-                    </Link>
-                  )}
+                  {/* 수정: 회원 본인은 바로, 비회원글은 수정화면에서 비밀번호 확인 후 진행 */}
+                  <Link href={`/board/write?edit=${post.id}`} className="text-[11px] text-gray-500 hover:text-accent flex items-center gap-0.5">
+                    <Pencil size={11} /> 수정
+                  </Link>
                   {!isCompleted && (
                     <button onClick={handleToggleComplete} disabled={busy} className="flex items-center gap-1 text-[11px] text-zinc-600 hover:text-zinc-900 font-bold">
                       <CheckCircle size={11} /> {busy ? '처리 중...' : '판매완료'}

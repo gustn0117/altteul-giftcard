@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { Globe, Megaphone } from 'lucide-react';
 import HeroPromo from '@/components/home/HeroPromo';
 import QuickLinks from '@/components/home/QuickLinks';
@@ -27,27 +28,32 @@ export default function Home() {
             <QuickLinks />
             <VisitorCounter />
 
-            {/* 전국광고 */}
-            <AdSection
-              adType="national"
-              title="전국 광고"
-              icon={<Globe size={15} className="text-accent" />}
-              perPage={50}
-              emptyText="전국 광고 모집중입니다."
-            />
+            {/* 광고칸 3종 — 페이지 번호를 URL 쿼리로 관리하므로 useSearchParams Suspense 경계로 감싼다 */}
+            <Suspense fallback={null}>
+              {/* 전국광고 */}
+              <AdSection
+                adType="national"
+                title="전국 광고"
+                icon={<Globe size={15} className="text-accent" />}
+                perPage={50}
+                pageParam="np"
+                emptyText="전국 광고 모집중입니다."
+              />
 
-            {/* 메인광고 — 전국광고 바로 아래, 50개가 한 칸 */}
-            <AdSection
-              adType="main"
-              title="메인 광고"
-              icon={<Megaphone size={15} className="text-accent" />}
-              perPage={50}
-              shuffle
-              emptyText="메인 광고 모집중입니다."
-            />
+              {/* 메인광고 — 전국광고 바로 아래, 50개가 한 칸 */}
+              <AdSection
+                adType="main"
+                title="메인 광고"
+                icon={<Megaphone size={15} className="text-accent" />}
+                perPage={50}
+                shuffle
+                pageParam="mp"
+                emptyText="메인 광고 모집중입니다."
+              />
 
-            {/* 팝니다 줄광고 */}
-            <SellLineAds />
+              {/* 팝니다 줄광고 */}
+              <SellLineAds />
+            </Suspense>
           </div>
         </div>
       </div>

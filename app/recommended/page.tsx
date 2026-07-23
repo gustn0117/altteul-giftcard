@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { MapPin, Crown } from 'lucide-react';
 import AdSection from '@/components/home/AdSection';
@@ -11,7 +12,7 @@ import AdSection from '@/components/home/AdSection';
  */
 export default function RecommendedPage() {
   return (
-    <>
+    <Suspense fallback={null}>
       {/* 상단 고정 전국광고 (판매/매입찾기와 동일) */}
       <div className="container-main pt-4">
         <AdSection adType="national" title="전국 광고" icon={<MapPin size={15} className="text-accent" />} perPage={50} />
@@ -34,6 +35,6 @@ export default function RecommendedPage() {
           emptyText="추천 업체 모집중입니다."
         />
       </div>
-    </>
+    </Suspense>
   );
 }

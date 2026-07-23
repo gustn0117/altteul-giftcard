@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { ChevronLeft, ChevronRight, PenSquare } from 'lucide-react';
 import BuyPostCard from './BuyPostCard';
 import { getAdPosts } from '@/lib/api';
@@ -21,6 +22,8 @@ interface AdSectionProps {
   /** 매 진입마다 순서 셔플 */
   shuffle?: boolean;
   emptyText?: string;
+  /** 지정하면 페이지 번호를 이 이름의 URL 쿼리로 관리 → 글 보고 돌아와도 보던 페이지 복원 */
+  pageParam?: string;
 }
 
 function shuffleArr<T>(arr: T[]): T[] {
@@ -37,13 +40,26 @@ function shuffleArr<T>(arr: T[]): T[] {
  * 세 칸의 카드 크기·간격·내용이 반드시 같아야 한다는 요구사항 때문에 컴포넌트를 하나로 통일했다.
  * 데이터는 전부 '관리자 승인된 삽니다(buy) 글'.
  */
-export default function AdSection({ adType, title, icon, perPage = 50, shuffle = false, emptyText }: AdSectionProps) {
+export default function AdSection({ adType, title, icon, perPage = 50, shuffle = false, emptyText, pageParam }: AdSectionProps) {
   const types = useMemo(() => (Array.isArray(adType) ? adType : [adType]), [adType]);
   const cacheKey = `ads_${types.join('_')}`;
 
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [posts, setPosts] = useState<Post[]>(() => getCache<Post[]>(cacheKey) ?? []);
   const [loading, setLoading] = useState(() => !getCache(cacheKey));
-  const [page, setPage] = useState(1);
+  const [localPage, setLocalPage] = useState(1);
+  // pageParam 이 있으면 URL 쿼리로, 없으면 로컬 state 로 페이지 관리
+  const page = pageParam ? Math.max(1, Number(searchParams.get(pageParam)) || 1) : localPage;
+  const setPage = (n: number) => {
+    if (!pageParam) { setLocalPage(n); return; }
+    const params = new URLSearchParams(searchParams.toString());
+    if (n <= 1) params.delete(pageParam); else params.set(pageParam, String(n));
+    const qs = params.toString();
+    router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  };
   const [seed, setSeed] = useState(0);
   // 관리자의 '삽니다 연락처 공개' 설정 — 게시판만 지키고 홈은 무시하면 설정이 무력화된다
   const [publicContact, setPublicContact] = useState(true);
@@ -117,7 +133,7 @@ export default function AdSection({ adType, title, icon, perPage = 50, shuffle =
 
           {totalPages > 1 && (
             <div className="flex flex-wrap items-center justify-center gap-1 mt-4">
-              <button onClick={() => setPage((v) => Math.max(1, v - 1))} disabled={page === 1}
+              <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1}
                 className="shrink-0 w-8 h-8 flex items-center justify-center border border-gray-200 text-gray-500 hover:border-accent hover:text-accent disabled:opacity-30">
                 <ChevronLeft size={13} />
               </button>
@@ -127,7 +143,7 @@ export default function AdSection({ adType, title, icon, perPage = 50, shuffle =
                   {p}
                 </button>
               ))}
-              <button onClick={() => setPage((v) => Math.min(totalPages, v + 1))} disabled={page === totalPages}
+              <button onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page === totalPages}
                 className="shrink-0 w-8 h-8 flex items-center justify-center border border-gray-200 text-gray-500 hover:border-accent hover:text-accent disabled:opacity-30">
                 <ChevronRight size={13} />
               </button>
