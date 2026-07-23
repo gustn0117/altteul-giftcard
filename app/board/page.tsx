@@ -6,7 +6,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { PenSquare, Tag, ShoppingCart, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import HomeAside from '@/components/layout/HomeAside';
 import AdSection from '@/components/home/AdSection';
-import SellLineRow from '@/components/home/SellLineRow';
+import SellPostCard from '@/components/home/SellPostCard';
 import BuyPostCard from '@/components/home/BuyPostCard';
 import { getPosts } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
@@ -233,10 +233,10 @@ function BoardContent() {
                 </div>
               </>
             ) : (
-              /* 팝니다 — 줄광고 (홈과 동일한 SellLineRow 사용) */
-              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+              /* 팝니다 — 삽니다처럼 2칸 카드 그리드 (대표님 요청) */
+              <div className="grid grid-cols-2 min-[520px]:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-5">
                 {pagedPosts.map((post) => (
-                  <SellLineRow key={post.id} post={post} onJumped={refetch} />
+                  <SellPostCard key={post.id} post={post} onJumped={refetch} />
                 ))}
               </div>
             )}
