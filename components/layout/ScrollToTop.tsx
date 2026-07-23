@@ -4,25 +4,29 @@ import { useEffect } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 
 /**
- * 페이지 이동 시 항상 최상단부터 보이게 한다.
- * (브라우저 스크롤 복원 때문에 홈/팝니다/삽니다를 눌러도 살짝 내려간 상태로 뜨던 문제)
+ * 링크로 '앞으로' 이동할 때만 최상단으로 올린다.
+ * 뒤로/앞으로 가기(popstate)는 브라우저가 직전 스크롤 위치를 복원하도록 그대로 둔다.
+ * (예전엔 뒤로가기까지 최상단으로 밀어서 '들어오기 전 화면'이 안 보였음)
  */
 export default function ScrollToTop() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  // 뒤로/앞으로 가기 여부를 표시하는 플래그. popstate 직후의 경로 변경에서만 true.
   useEffect(() => {
-    // 브라우저 자동 스크롤 복원 끄기
-    if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
-      window.history.scrollRestoration = 'manual';
-    }
+    const onPop = () => {
+      (window as unknown as { __isPop?: boolean }).__isPop = true;
+      // 다음 렌더/복원 이후 플래그 해제
+      setTimeout(() => { (window as unknown as { __isPop?: boolean }).__isPop = false; }, 300);
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
   }, []);
 
   useEffect(() => {
+    // 뒤로가기(popstate)로 인한 경로 변경이면 스크롤 복원을 방해하지 않는다.
+    if ((window as unknown as { __isPop?: boolean }).__isPop) return;
     window.scrollTo(0, 0);
-    // 데이터가 늦게 로드되며 레이아웃이 밀리는 경우까지 보정
-    const t = setTimeout(() => window.scrollTo(0, 0), 120);
-    return () => clearTimeout(t);
   }, [pathname, searchParams]);
 
   return null;

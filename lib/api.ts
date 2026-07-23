@@ -5,6 +5,19 @@ import type { DBPost, DBUser, DBChat, DBMessage, DBNotice, DBPremiumBuyer, DBMai
 
 const POST_BASE_COLS = 'id, type, title, category, face_value, price, discount, percentage, send_month, send_day, delivery, delivery_method, region, tags, views, is_active, author_id, guest_name, expires_at, blind_locked, completed_at, deleted_at, approved_at, ad_type, image_url, center_text, extension_requested_at, last_jumped_at, notified_expiry_at, created_at';
 
+// 점프는 '영구 고정'이 아니라 '다시 끌어올리기(재등록)'로 취급한다.
+// 점프한 시각과 작성 시각 중 더 최근 값을 기준으로 정렬 → 방금 쓴 새 글이
+// 며칠 전 점프한 글 위로 올라온다. (예전엔 점프글이 last_jumped_at 로 영구 상단 고정돼
+// 새 글이 항상 그 아래로 묻혔음)
+function bumpTime(p: { last_jumped_at?: string | null; created_at: string }): number {
+  const created = new Date(p.created_at).getTime();
+  const jumped = p.last_jumped_at ? new Date(p.last_jumped_at).getTime() : 0;
+  return Math.max(created, jumped);
+}
+function sortByBump<T extends { last_jumped_at?: string | null; created_at: string }>(rows: T[]): T[] {
+  return [...rows].sort((a, b) => bumpTime(b) - bumpTime(a));
+}
+
 export async function getPosts(type?: 'sell' | 'buy', opts?: { limit?: number; withAuthor?: boolean; includeBlinded?: boolean; includePending?: boolean }) {
   const limit = opts?.limit ?? 100;
   const withAuthor = opts?.withAuthor ?? true;
@@ -31,7 +44,7 @@ export async function getPosts(type?: 'sell' | 'buy', opts?: { limit?: number; w
   if (type === 'buy' && !opts?.includePending) q = q.not('approved_at', 'is', null);
   const { data, error } = await q;
   if (error) throw error;
-  return (data as unknown) as (DBPost & { author: DBUser })[];
+  return sortByBump((data as unknown) as (DBPost & { author: DBUser })[]);
 }
 
 /**
@@ -53,7 +66,7 @@ export async function getAdPosts(adType: 'national' | 'main' | 'recommend' | ('n
     .order('created_at', { ascending: false })
     .limit(limit);
   if (error) throw error;
-  return (data as unknown) as (DBPost & { author?: DBUser })[];
+  return sortByBump((data as unknown) as (DBPost & { author?: DBUser })[]);
 }
 
 /** 내가 쓴 글 전체 (대시보드 '내 상품') — 승인 대기/블라인드 포함해서 본인 글은 다 보여준다 */

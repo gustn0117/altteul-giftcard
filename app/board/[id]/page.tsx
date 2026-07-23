@@ -73,7 +73,9 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
 
   const isSell = post.type === 'sell';
   const isGuestPost = !post.author_id;
-  const isAuthor = (isLoggedIn && user?.id === post.author_id) || isGuestPost;
+  // 비회원 글은 로그인 세션으로 작성자를 식별할 수 없으므로 방문자를 작성자로 취급하면 안 된다.
+  // (예전엔 || isGuestPost 라서 비회원 글의 블라인드·완료해제·연장 권한이 모두 뚫렸음)
+  const isAuthor = isLoggedIn && !!post.author_id && user?.id === post.author_id;
   const authorName = post.author?.name || post.guest_name || '알 수 없음';
   const backTab = isSell ? 'sell' : 'buy';
   const headerLabel = isSell ? '상품권 팝니다' : '상품권 삽니다';

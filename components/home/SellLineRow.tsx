@@ -70,7 +70,7 @@ export default function SellLineRow({ post, onJumped }: SellLineRowProps) {
           )}
         </div>
         <p className="text-[11.5px] text-orange-500 mt-0.5 truncate">
-          <span className="font-medium">{post.author?.name ?? '판매자'}</span>
+          <span className="font-medium">{post.author?.name ?? post.guest_name ?? '판매자'}</span>
           <span className="text-orange-300 mx-1.5">|</span>
           <span>{region}</span>
           {hasSend && (

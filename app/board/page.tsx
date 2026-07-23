@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { PenSquare, Tag, ShoppingCart, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import HomeAside from '@/components/layout/HomeAside';
 import AdSection from '@/components/home/AdSection';
@@ -43,16 +43,28 @@ function shuffle<T>(arr: T[]): T[] {
 
 function BoardContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const { isLoggedIn } = useAuth();
   const tabParam = searchParams.get('tab');
   const activeTab: 'buy' | 'sell' = tabParam === 'buy' ? 'buy' : 'sell';
 
+  // 페이지·지역을 URL 쿼리로 관리 → 글 보고 뒤로가면 보던 페이지/지역 그대로 복원됨
+  const page = Math.max(1, Number(searchParams.get('page')) || 1);
+  const selectedRegion = searchParams.get('region') || '전국';
+  const setQuery = (next: { page?: number; region?: string }) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (next.region !== undefined) {
+      if (next.region === '전국') params.delete('region'); else params.set('region', next.region);
+    }
+    if (next.page !== undefined) {
+      if (next.page <= 1) params.delete('page'); else params.set('page', String(next.page));
+    }
+    router.push(`/board?${params.toString()}`);
+  };
+
   const [posts, setPosts] = useState<PostWithAuthor[]>(() => getCache<PostWithAuthor[]>(`board_${activeTab}`) ?? []);
   const [loading, setLoading] = useState(() => !getCache(`board_${activeTab}`));
   const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  // 지역 필터 — 첫 진입 시 자동 '전국'
-  const [selectedRegion, setSelectedRegion] = useState<string>('전국');
   const [buyPublic, setBuyPublic] = useState(true); // 삽니다 연락처 공개 (기본 공개)
   // shuffleSeed: 페이지 진입 / 새로고침 시 새로 생성됨 → 박스광고 매번 다른 순서
   const [shuffleSeed, setShuffleSeed] = useState(0);
@@ -80,8 +92,7 @@ function BoardContent() {
     if (cached) { setPosts(cached); setLoading(false); }
     else { setLoading(true); }
     setError(null);
-    setPage(1);
-    setSelectedRegion('전국'); // 탭 변경 시 지역도 전국으로 초기화
+    // 페이지·지역은 URL 쿼리로 관리됨 (탭 링크에 page/region 파라미터가 없어 자동 초기화)
     setShuffleSeed(Math.random()); // 탭 변경 시도 다시 셔플
 
     getPosts(activeTab, { limit: 500 })
@@ -181,7 +192,7 @@ function BoardContent() {
                   <button
                     key={r}
                     type="button"
-                    onClick={() => { setSelectedRegion(r); setPage(1); }}
+                    onClick={() => setQuery({ region: r, page: 1 })}
                     className={`h-8 text-[11px] font-bold rounded-md border transition-colors ${
                       selectedRegion === r
                         ? 'border-accent bg-accent/5 text-accent'
@@ -233,19 +244,19 @@ function BoardContent() {
             {/* 페이지네이션 */}
             {totalPages > 1 && (
               <div className="flex flex-wrap items-center justify-center gap-1 px-4 py-4 mt-3 border-t border-gray-100">
-                <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
+                <button onClick={() => setQuery({ page: Math.max(1, page - 1) })} disabled={page === 1}
                   className="shrink-0 w-8 h-8 flex items-center justify-center border border-gray-200 rounded text-gray-500 hover:border-accent hover:text-accent disabled:opacity-30">
                   <ChevronLeft size={13} />
                 </button>
                 {Array.from({ length: totalPages }, (_, i) => i + 1).slice(0, 10).map((p) => (
-                  <button key={p} onClick={() => setPage(p)}
+                  <button key={p} onClick={() => setQuery({ page: p })}
                     className={`shrink-0 w-8 h-8 text-[12px] border rounded ${
                       p === page ? 'border-accent bg-accent text-white font-bold' : 'border-gray-200 text-gray-600 hover:border-accent hover:text-accent'
                     }`}>
                     {p}
                   </button>
                 ))}
-                <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+                <button onClick={() => setQuery({ page: Math.min(totalPages, page + 1) })} disabled={page === totalPages}
                   className="shrink-0 w-8 h-8 flex items-center justify-center border border-gray-200 rounded text-gray-500 hover:border-accent hover:text-accent disabled:opacity-30">
                   <ChevronRight size={13} />
                 </button>
