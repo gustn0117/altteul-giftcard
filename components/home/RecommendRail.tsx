@@ -42,7 +42,7 @@ export default function RecommendRail() {
   }, []);
 
   return (
-    <aside className="lg:sticky lg:top-4 self-start space-y-2.5">
+    <aside className="lg:sticky lg:top-37.5 self-start space-y-2.5">
       <h2 className="flex items-center gap-1.5 text-[13px] font-bold text-gray-800">
         <Crown size={14} className="text-accent" /> 오늘의 추천업체
       </h2>

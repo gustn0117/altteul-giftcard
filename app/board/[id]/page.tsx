@@ -11,6 +11,7 @@ import type { DBPost, DBUser } from '@/lib/types';
 import { getCategoryName } from '@/data/mock';
 import { BrandLogo } from '@/components/BrandLogo';
 import HomeAside from '@/components/layout/HomeAside';
+import RecommendRail from '@/components/home/RecommendRail';
 
 type PostWithAuthor = DBPost & { author: DBUser };
 
@@ -157,7 +158,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   };
 
   return (
-    <div className="container-main py-6">
+    <div className="container-wide py-6">
       {/* 비회원글 판매완료 처리 — 작성 시 설정한 비밀번호 확인 모달 */}
       {pwModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6" onClick={() => setPwModal(null)}>
@@ -188,8 +189,11 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
-        <HomeAside />
+      {/* 홈과 동일한 3분할: 좌(최근 본 업체) · 중앙(상세) · 우(오늘의 추천업체) — PC만 */}
+      <div className="grid grid-cols-1 lg:grid-cols-[176px_1fr_184px] gap-4">
+        <div className="hidden lg:block">
+          <HomeAside />
+        </div>
 
         <div className="flex-1 min-w-0">
           {/* 상태 안내 배너 */}
@@ -401,6 +405,10 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
           </article>
         </div>
 
+        {/* 우측 — 오늘의 추천업체 2개 랜덤 (PC만) */}
+        <div className="hidden lg:block">
+          <RecommendRail />
+        </div>
       </div>
     </div>
   );

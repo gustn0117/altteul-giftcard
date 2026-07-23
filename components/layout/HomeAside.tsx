@@ -24,7 +24,8 @@ export default function HomeAside() {
   }, []);
 
   return (
-    <aside className="space-y-3.5">
+    // 스크롤 내려도 헤더(약 142px) 바로 아래에 고정 — 데스크탑만
+    <aside className="lg:sticky lg:top-37.5 self-start space-y-3.5">
       {/* (추천 업체 블록 제거 — 지역별 판매/매입찾기 상단에 뜨지 않게) */}
 
       {/* 최근 본 업체 — 컴팩트 */}
