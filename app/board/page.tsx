@@ -60,7 +60,8 @@ function BoardContent() {
     if (next.page !== undefined) {
       if (next.page <= 1) params.delete('page'); else params.set('page', String(next.page));
     }
-    router.push(`/board?${params.toString()}`);
+    // scroll:false — 지역 선택·페이지 이동 시 보던 위치 그대로 (기본값이면 맨 위로 튐)
+    router.push(`/board?${params.toString()}`, { scroll: false });
   };
 
   const [posts, setPosts] = useState<PostWithAuthor[]>(() => getCache<PostWithAuthor[]>(`board_${activeTab}`) ?? []);
