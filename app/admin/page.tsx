@@ -39,19 +39,10 @@ export default function AdminPage() {
   const [notices, setNotices] = useState<DBNotice[]>(() => getCache<DBNotice[]>('admin_notices') ?? []);
   const [premiumBuyers, setPremiumBuyers] = useState<DBPremiumBuyer[]>(() => getCache<DBPremiumBuyer[]>('admin_premium') ?? []);
   const [ads, setAds] = useState<Ad[]>(() => getCache<Ad[]>('admin_ads') ?? []);
-  const [visitors, setVisitors] = useState<{ total: number; today: number; trades?: number; last30: { date: string; count: number }[] }>({ total: 0, today: 0, trades: 0, last30: [] });
-  const [showStatsEdit, setShowStatsEdit] = useState(false);
+  const [visitors, setVisitors] = useState<{ total: number; today: number; last30: { date: string; count: number }[] }>({ total: 0, today: 0, last30: [] });
   const [buyContactPublic, setBuyContactPublic] = useState(true);
   const [settingBusy, setSettingBusy] = useState(false);
   const [approveDaysMap, setApproveDaysMap] = useState<Record<string, string>>({});
-  const [statsEdit, setStatsEdit] = useState({ today: 0, total: 0, trades: 0 });
-  useEffect(() => { if (!showStatsEdit) setStatsEdit({ today: visitors.today || 0, total: visitors.total || 0, trades: visitors.trades || 0 }); }, [visitors, showStatsEdit]);
-  const saveStats = async () => {
-    await fetch('/api/visitors', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(statsEdit) });
-    const res = await fetch('/api/visitors');
-    if (res.ok) setVisitors(await res.json());
-    setShowStatsEdit(false);
-  };
   const [loading, setLoading] = useState(() => !getCache('admin_users'));
 
   // Chat viewer
@@ -418,41 +409,19 @@ export default function AdminPage() {
         <div className="card p-4 mb-5">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-[13px] font-semibold">방문자 현황</h3>
-            <button onClick={() => setShowStatsEdit(!showStatsEdit)}
-              className="text-[11px] text-zinc-500 hover:text-zinc-900">
-              {showStatsEdit ? '닫기' : '수치 수정'}
-            </button>
+            <span className="text-[10px] text-zinc-400">실제 방문 집계 (IP 기준 하루 1회)</span>
           </div>
 
-          {showStatsEdit ? (
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <div>
-                <label className="block text-[10px] text-zinc-400 mb-1">오늘 방문자</label>
-                <input type="number" value={statsEdit.today} onChange={e => setStatsEdit(p => ({ ...p, today: Number(e.target.value) }))}
-                  className="input h-8 text-[12px]" />
-              </div>
-              <div>
-                <label className="block text-[10px] text-zinc-400 mb-1">누적 방문자</label>
-                <input type="number" value={statsEdit.total} onChange={e => setStatsEdit(p => ({ ...p, total: Number(e.target.value) }))}
-                  className="input h-8 text-[12px]" />
-              </div>
-              <div className="col-span-2 flex gap-2">
-                <button onClick={saveStats} className="btn-primary h-8 text-[12px] px-4">저장</button>
-                <button onClick={() => setShowStatsEdit(false)} className="btn-secondary h-8 text-[12px] px-4">취소</button>
-              </div>
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <div className="text-center p-2 bg-zinc-50 rounded">
+              <p className="text-[10px] text-zinc-400 mb-0.5">오늘 방문자</p>
+              <p className="text-[18px] font-bold">{(visitors.today || 0).toLocaleString()}</p>
             </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <div className="text-center p-2 bg-zinc-50 rounded">
-                <p className="text-[10px] text-zinc-400 mb-0.5">오늘 방문자</p>
-                <p className="text-[18px] font-bold">{(visitors.today || 0).toLocaleString()}</p>
-              </div>
-              <div className="text-center p-2 bg-zinc-50 rounded">
-                <p className="text-[10px] text-zinc-400 mb-0.5">누적 방문자</p>
-                <p className="text-[18px] font-bold">{(visitors.total || 0).toLocaleString()}</p>
-              </div>
+            <div className="text-center p-2 bg-zinc-50 rounded">
+              <p className="text-[10px] text-zinc-400 mb-0.5">누적 방문자</p>
+              <p className="text-[18px] font-bold">{(visitors.total || 0).toLocaleString()}</p>
             </div>
-          )}
+          </div>
           <div className="flex items-end gap-[3px] h-[80px]">
             {visitors.last30.map((d, i) => {
               const max = Math.max(...visitors.last30.map(v => v.count), 1);

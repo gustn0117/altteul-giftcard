@@ -1,20 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
-import { verifyAdminSession } from '../admin/route';
 
 /**
- * 방문자 통계 — DB(altteul_giftcard.visitors) 영구 저장.
+ * 방문자 통계 — DB(altteul_giftcard.visitors)에 실제 방문만 영구 집계.
  *
- * 과거 구조의 문제로 수치가 안 늘어났음:
- *  1) data/visitors.json 로컬 파일에 저장 → Docker 볼륨이 없어 재배포마다 초기화됨
- *  2) 관리자 '수치 수정'이 _override 로 저장돼 GET을 영구히 가로챔(해제 수단 없음)
- *     → 실제 방문이 아무리 쌓여도 화면은 고정값만 표시
- *
- * 현재 구조:
- *  - 실제 방문은 visitors(date, ip) 로 하루 1IP 1회 집계 (DB 영구 저장)
- *  - '수치 수정'은 고정값이 아니라 **시작값(오프셋)** 으로 저장 → 표시값 = 실제 + 오프셋
- *    이므로 관리자가 숫자를 맞춰놔도 이후 실제 방문만큼 계속 증가한다.
- *  - 날짜는 KST 기준 (UTC로 하면 한국시간 오전 9시에 '오늘'이 바뀜)
+ * 관리자 페이지는 '순수 실제 방문자'만 본다(대표님 요청).
+ *  - 실제 방문 = visitors(date, ip) 로 하루 1IP 1회 집계 (KST 기준)
+ *  - 예전의 '수치 수정(오프셋)'은 제거 — 관리자 숫자를 부풀리지 않고 있는 그대로 표시
+ *  - 공개 홈의 마케팅 카운터(VisitorCounter)는 이 API와 무관한 별도 결정론적 숫자다
  */
 
 // KST(UTC+9) 기준 YYYY-MM-DD
@@ -22,18 +15,6 @@ function kstDate(offsetDays = 0): string {
   const t = Date.now() + 9 * 3600 * 1000 - offsetDays * 86400000;
   return new Date(t).toISOString().slice(0, 10);
 }
-
-type Settings = Record<string, string | null>;
-
-async function getSettings(supabase: ReturnType<typeof createServiceClient>): Promise<Settings> {
-  const { data } = await supabase.from('site_settings').select('key, value');
-  return Object.fromEntries((data ?? []).map((r: { key: string; value: string | null }) => [r.key, r.value]));
-}
-
-const num = (v: string | null | undefined) => {
-  const n = Number(v);
-  return Number.isFinite(n) ? n : 0;
-};
 
 // POST: 방문 기록 (하루 1IP 1회)
 export async function POST(req: NextRequest) {
@@ -51,56 +32,9 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET: 통계 조회 (표시값 = 실제 집계 + 관리자 오프셋)
+// GET: 순수 실제 통계 (오늘 / 누적 / 최근 30일)
 export async function GET() {
   try {
-    const supabase = createServiceClient();
-    const today = kstDate();
-
-    const [{ count: realToday }, { count: realTotal }, settings] = await Promise.all([
-      supabase.from('visitors').select('id', { count: 'exact', head: true }).eq('date', today),
-      supabase.from('visitors').select('id', { count: 'exact', head: true }),
-      getSettings(supabase),
-    ]);
-
-    // 최근 30일 (한 번의 쿼리로 가져와 집계 — 과거엔 30번 반복 조회했음)
-    const from = kstDate(29);
-    const { data: rows } = await supabase.from('visitors').select('date').gte('date', from).lte('date', today);
-    const byDate: Record<string, number> = {};
-    (rows ?? []).forEach((r: { date: string }) => {
-      byDate[r.date] = (byDate[r.date] || 0) + 1;
-    });
-
-    // 관리자가 설정한 오늘 방문자는 '매일 기준값'으로 유지한다.
-    // (예전엔 저장 날짜가 지나면 무시돼서 다음날 오늘 방문자가 리셋됐음 → "반영 안됨"의 원인)
-    // 오늘 = 오늘 실제 방문 + 기준값 → 매일 기준값에서 시작해 실제 방문만큼 올라간다.
-    const todayOffset = num(settings.visitor_offset_today);
-    const totalOffset = num(settings.visitor_offset_total);
-
-    const last30 = Array.from({ length: 30 }, (_, i) => {
-      const d = kstDate(29 - i);
-      return { date: d, count: Math.max(0, (byDate[d] || 0) + (d === today ? todayOffset : 0)) };
-    });
-
-    return NextResponse.json({
-      today: Math.max(0, (realToday ?? 0) + todayOffset),
-      total: Math.max(0, (realTotal ?? 0) + totalOffset),
-      trades: num(settings.trades_total),
-      last30,
-    });
-  } catch (err) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'fail' }, { status: 500 });
-  }
-}
-
-// PUT: 관리자 '수치 수정' — 고정이 아니라 시작값(오프셋)으로 저장
-export async function PUT(req: NextRequest) {
-  // 관리자 전용 — 게이트가 없으면 누구나 사이트 방문자 수치를 바꿀 수 있다
-  if (!verifyAdminSession(req.cookies.get('altteul-giftcard_admin')?.value)) {
-    return NextResponse.json({ error: '관리자 인증이 필요합니다.' }, { status: 401 });
-  }
-  try {
-    const { today: wantToday, total: wantTotal, trades } = await req.json();
     const supabase = createServiceClient();
     const today = kstDate();
 
@@ -109,17 +43,23 @@ export async function PUT(req: NextRequest) {
       supabase.from('visitors').select('id', { count: 'exact', head: true }),
     ]);
 
-    // 원하는 표시값 - 실제 집계 = 오프셋 (이후 실제 방문이 이 위에 계속 누적됨)
-    const rows = [
-      { key: 'visitor_offset_today', value: String(Number(wantToday ?? 0) - (realToday ?? 0)) },
-      { key: 'visitor_offset_today_date', value: today },
-      { key: 'visitor_offset_total', value: String(Number(wantTotal ?? 0) - (realTotal ?? 0)) },
-      { key: 'trades_total', value: String(Number(trades ?? 0)) },
-    ];
-    const { error } = await supabase.from('site_settings').upsert(rows, { onConflict: 'key' });
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    // 최근 30일 (한 번의 쿼리로 가져와 날짜별 집계)
+    const from = kstDate(29);
+    const { data: rows } = await supabase.from('visitors').select('date').gte('date', from).lte('date', today);
+    const byDate: Record<string, number> = {};
+    (rows ?? []).forEach((r: { date: string }) => {
+      byDate[r.date] = (byDate[r.date] || 0) + 1;
+    });
+    const last30 = Array.from({ length: 30 }, (_, i) => {
+      const d = kstDate(29 - i);
+      return { date: d, count: byDate[d] || 0 };
+    });
 
-    return NextResponse.json({ ok: true, today: Number(wantToday ?? 0), total: Number(wantTotal ?? 0) });
+    return NextResponse.json({
+      today: realToday ?? 0,
+      total: realTotal ?? 0,
+      last30,
+    });
   } catch (err) {
     return NextResponse.json({ error: err instanceof Error ? err.message : 'fail' }, { status: 500 });
   }
