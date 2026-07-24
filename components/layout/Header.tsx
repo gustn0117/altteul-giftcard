@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
 import {
   Search, Menu, X, MapPin, Tag as TagIcon, Star,
   LogIn, UserPlus, LayoutDashboard, PenSquare, Megaphone, ShieldAlert, HelpCircle,
@@ -16,6 +16,47 @@ const PRIMARY_NAV = [
   { href: '/board?tab=buy',  label: '지역별 매입찾기', badge: 'N', Icon: MapPin },
   { href: '/recommended',    label: '오늘의 추천업체', badge: 'N', Icon: Star },
 ];
+
+/**
+ * 모바일 카테고리 nav (판매찾기 / 매입찾기 / 추천업체).
+ * 터치 기기는 hover 가 없어서 "눌렸는지" 알 수 없었다 →
+ *  - 현재 보고 있는 메뉴: 글씨 강조 + 연한 배경 + 하단 굵은 밑줄
+ *  - 누르는 순간: active: 배경이 진해져 즉시 반응이 보임
+ */
+function MobileCategoryNav() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const tab = searchParams.get('tab');
+
+  const isActive = (href: string) => {
+    if (href === '/recommended') return !!pathname?.startsWith('/recommended');
+    // 게시판 목록에서만 표시 (상세/글쓰기에서는 강조하지 않음)
+    if (pathname !== '/board') return false;
+    return href === '/board?tab=buy' ? tab === 'buy' : tab !== 'buy';
+  };
+
+  return (
+    <div className="grid grid-cols-3 border-t border-gray-100">
+      {PRIMARY_NAV.map(({ href, label, badge }) => {
+        const active = isActive(href);
+        return (
+          <Link
+            key={href}
+            href={href}
+            aria-current={active ? 'page' : undefined}
+            className={`relative inline-flex items-center justify-center gap-0.5 py-2.5 text-[12px] font-extrabold min-w-0 transition-colors active:bg-accent/20 ${
+              active ? 'text-accent bg-accent/10' : 'text-gray-900'
+            }`}
+          >
+            <span className="truncate min-w-0">{label.replace('지역별 ', '').replace('오늘의 ', '')}</span>
+            <span className="shrink-0 text-[9px] font-black text-white px-1 rounded bg-rose-500">{badge}</span>
+            {active && <span aria-hidden className="absolute left-0 right-0 bottom-0 h-0.75 bg-accent" />}
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
 
 const SECONDARY_NAV = [
   { href: '/board?tab=sell',   label: '판매찾기' },
@@ -192,15 +233,9 @@ export default function Header() {
           </div>
 
           {/* 모바일 카테고리 nav — 스크롤 없이 한 줄에 균등 배치 */}
-          <div className="grid grid-cols-3 border-t border-gray-100">
-            {PRIMARY_NAV.map(({ href, label, badge }) => (
-              <Link key={href} href={href}
-                className="inline-flex items-center justify-center gap-0.5 py-2.5 text-[12px] font-extrabold text-gray-900 hover:text-accent transition-colors min-w-0">
-                <span className="truncate min-w-0">{label.replace('지역별 ', '').replace('오늘의 ', '')}</span>
-                <span className="shrink-0 text-[9px] font-black text-white px-1 rounded bg-rose-500">{badge}</span>
-              </Link>
-            ))}
-          </div>
+          <Suspense fallback={<div className="h-10.25 border-t border-gray-100" />}>
+            <MobileCategoryNav />
+          </Suspense>
         </div>
       </div>
 
