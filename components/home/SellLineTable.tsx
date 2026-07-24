@@ -5,14 +5,16 @@ import SellLineRow from './SellLineRow';
 
 type SellPost = DBPost & { author?: DBUser };
 
-/** 표 머리글 — 행의 칸 너비와 동일하게 맞춘다 (지역 w-12 / 제목 flex / 판매율 w-16 / 업체명 w-24) */
+/** 표 머리글 — 행의 칸 너비와 1:1로 맞춘다 (지역12 / 제목flex / 발송20 / 판매율14 / 업체20 / 상태14) */
 function HeadRow({ className = '' }: { className?: string }) {
   return (
-    <div className={`items-center gap-3 px-4 py-2 bg-gray-50 border-b border-gray-200 text-[11px] font-bold text-gray-500 ${className}`}>
+    <div className={`items-center gap-3 pl-4 pr-3 py-2 bg-gray-50 border-b border-gray-200 text-[11px] font-bold text-gray-400 ${className}`}>
       <span className="shrink-0 w-12 text-center">지역</span>
-      <span className="flex-1 min-w-0 text-center">제목</span>
-      <span className="shrink-0 w-16 text-right">판매율</span>
-      <span className="shrink-0 w-24 text-right">업체명</span>
+      <span className="flex-1 min-w-0">제목</span>
+      <span className="hidden lg:block shrink-0 w-20 text-right">발송일</span>
+      <span className="shrink-0 w-14 text-right">판매율</span>
+      <span className="hidden lg:block shrink-0 w-20 text-right">업체명</span>
+      <span className="shrink-0 w-14" aria-hidden />
     </div>
   );
 }

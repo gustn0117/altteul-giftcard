@@ -61,17 +61,33 @@ export default function SellLineRow({ post, onJumped }: SellLineRowProps) {
   return (
     <Link
       href={`/board/${post.id}`}
-      className={`flex items-center gap-3 px-4 py-2.5 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors ${isCompleted ? 'opacity-55 bg-gray-50/40' : ''}`}
+      className={`group relative flex items-center gap-3 pl-4 pr-3 py-2.5 lg:py-3 border-b border-gray-100 last:border-b-0 transition-colors ${
+        isCompleted ? 'bg-gray-50/60' : 'hover:bg-accent/4'
+      }`}
     >
-      {/* 지역 — 표의 첫 칸 (배지) */}
-      <span className="shrink-0 w-12 inline-flex items-center justify-center h-5.5 text-[10.5px] rounded-full border border-gray-300 text-gray-600 bg-white">
+      {/* 호버 시 왼쪽 강조 바 — 어느 줄을 보고 있는지 눈에 걸리게 */}
+      <span
+        aria-hidden
+        className={`absolute left-0 top-0 bottom-0 w-0.5 bg-accent transition-opacity ${
+          isCompleted ? 'opacity-0' : 'opacity-0 group-hover:opacity-100'
+        }`}
+      />
+
+      {/* 지역 — 표의 첫 칸 (연한 배경 칩) */}
+      <span
+        className={`shrink-0 w-12 inline-flex items-center justify-center h-6 text-[11px] font-bold rounded-md ${
+          isCompleted ? 'bg-gray-100 text-gray-400' : 'bg-accent/10 text-accent'
+        }`}
+      >
         {region}
       </span>
 
       {/* 제목 (모바일은 아래에 판매자·발송일 한 줄 더) */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 min-w-0">
-          <span className="text-[13px] text-gray-800 truncate min-w-0">{post.title}</span>
+          <span className={`text-[13.5px] font-medium truncate min-w-0 ${isCompleted ? 'text-gray-400' : 'text-gray-900'}`}>
+            {post.title}
+          </span>
           {isNew && !isCompleted && (
             <span className="shrink-0 text-[9px] font-black text-white bg-orange-500 px-1 py-px rounded-sm">N</span>
           )}
@@ -82,15 +98,25 @@ export default function SellLineRow({ post, onJumped }: SellLineRowProps) {
         </p>
       </div>
 
-      {/* 판매율 */}
-      <span className="shrink-0 w-16 text-right whitespace-nowrap text-accent leading-none">
-        {post.percentage != null && (
-          <span className="text-[14px] font-extrabold tabular-nums">{post.percentage}<span className="text-[10.5px]">%</span></span>
+      {/* 발송일 — PC 전용 칸 (넓은 화면의 빈 공간을 정보로 채운다) */}
+      <span className="hidden lg:block shrink-0 w-20 text-right text-[11.5px] text-gray-500 tabular-nums whitespace-nowrap">
+        {hasSend ? `${post.send_month}/${post.send_day} 발송` : '—'}
+      </span>
+
+      {/* 판매율 — 이 표에서 제일 먼저 읽히는 숫자 (세로로 쭉 훑을 수 있게 우측 정렬) */}
+      <span className="shrink-0 w-14 text-right whitespace-nowrap leading-none">
+        {post.percentage != null ? (
+          <span className={`tabular-nums font-extrabold ${isCompleted ? 'text-gray-400 text-[14px]' : 'text-accent text-[17px]'}`}>
+            {post.percentage}
+            <span className="text-[10.5px] font-bold">%</span>
+          </span>
+        ) : (
+          <span className="text-[11.5px] text-gray-300">—</span>
         )}
       </span>
 
       {/* 업체명(판매자) — PC에서만 별도 칸 */}
-      <span className="hidden lg:block shrink-0 w-24 text-right text-[11.5px] text-gray-500 truncate">
+      <span className="hidden lg:block shrink-0 w-20 text-right text-[11.5px] text-gray-500 truncate">
         {sellerName}
       </span>
 
@@ -107,14 +133,16 @@ export default function SellLineRow({ post, onJumped }: SellLineRowProps) {
         </button>
       )}
 
-      {/* 완료 배지 / 화살표 */}
-      {isCompleted ? (
-        <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold rounded-full bg-zinc-700 text-white">
-          <CheckCircle size={11} strokeWidth={3} /> 거래완료
-        </span>
-      ) : (
-        <ChevronRight size={14} className="shrink-0 text-gray-300" />
-      )}
+      {/* 완료 표시 / 화살표 — 완료 줄은 조용히 물러나게 */}
+      <span className="shrink-0 w-14 flex justify-end">
+        {isCompleted ? (
+          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-bold rounded bg-gray-200 text-gray-500">
+            <CheckCircle size={10} strokeWidth={3} /> 완료
+          </span>
+        ) : (
+          <ChevronRight size={14} className="text-gray-300 group-hover:text-accent transition-colors" />
+        )}
+      </span>
     </Link>
   );
 }

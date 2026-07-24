@@ -15,9 +15,9 @@ import type { DBPost, DBUser } from '@/lib/types';
 import { getCache, setCache } from '@/lib/cache';
 import { PostRowSkeleton } from '@/components/Skeleton';
 
-// 팝니다 줄광고 페이지당 — PC에서 2열로 깔리므로 짝수여야 마지막 줄이 반만 차지 않는다.
-// (15였을 때: 1페이지 마지막 줄에 1개만 남고 나머지 1개가 2페이지로 따로 넘어갔음)
-const SELL_PER_PAGE = 20;
+// 팝니다 줄광고 페이지당 — PC는 2열이라 한 열에 15줄씩 = 한 페이지 30개.
+// 반드시 짝수여야 2열이 딱 떨어진다(홀수면 마지막 줄이 반만 참).
+const SELL_PER_PAGE = 30;
 const BUY_BOX_PER_PAGE = 50;  // 삽니다 박스광고 페이지당
 
 // 지역 탭 — 첫 진입 기본값은 '전국'(전체 표시)
