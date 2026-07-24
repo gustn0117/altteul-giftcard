@@ -34,6 +34,7 @@ export default function SellLineRow({ post, onJumped }: SellLineRowProps) {
   const canJump = isOwner && !isCompleted;
   const region = extractRegion(post);
   const hasSend = post.send_month != null && post.send_day != null;
+  const sellerName = post.author?.name ?? post.guest_name ?? '판매자';
 
   const handleJump = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -62,33 +63,36 @@ export default function SellLineRow({ post, onJumped }: SellLineRowProps) {
       href={`/board/${post.id}`}
       className={`flex items-center gap-3 px-4 py-2.5 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors ${isCompleted ? 'opacity-55 bg-gray-50/40' : ''}`}
     >
+      {/* 지역 — 표의 첫 칸 (배지) */}
+      <span className="shrink-0 w-12 inline-flex items-center justify-center h-5.5 text-[10.5px] rounded-full border border-gray-300 text-gray-600 bg-white">
+        {region}
+      </span>
+
+      {/* 제목 (모바일은 아래에 판매자·발송일 한 줄 더) */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 min-w-0">
-          <span className="text-[13.5px] text-gray-800 truncate min-w-0">{post.title}</span>
+          <span className="text-[13px] text-gray-800 truncate min-w-0">{post.title}</span>
           {isNew && !isCompleted && (
             <span className="shrink-0 text-[9px] font-black text-white bg-orange-500 px-1 py-px rounded-sm">N</span>
           )}
         </div>
-        <p className="text-[11.5px] text-orange-500 mt-0.5 truncate">
-          <span className="font-medium">{post.author?.name ?? post.guest_name ?? '판매자'}</span>
-          <span className="text-orange-300 mx-1.5">|</span>
-          <span>{region}</span>
-          {hasSend && (
-            <>
-              <span className="text-orange-300 mx-1.5">|</span>
-              <span className="text-gray-500">{post.send_month}월 {post.send_day}일 발송</span>
-            </>
-          )}
+        <p className="lg:hidden text-[11px] text-gray-500 mt-0.5 truncate">
+          <span className="text-orange-500 font-medium">{sellerName}</span>
+          {hasSend && <span> · {post.send_month}월 {post.send_day}일 발송</span>}
         </p>
       </div>
 
       {/* 판매율 */}
-      {post.percentage != null && (
-        <span className="shrink-0 whitespace-nowrap text-accent leading-none">
-          <span className="text-[10.5px] font-medium text-gray-400">판매율 </span>
-          <span className="text-[15px] font-extrabold tabular-nums">{post.percentage}<span className="text-[11px]">%</span></span>
-        </span>
-      )}
+      <span className="shrink-0 w-16 text-right whitespace-nowrap text-accent leading-none">
+        {post.percentage != null && (
+          <span className="text-[14px] font-extrabold tabular-nums">{post.percentage}<span className="text-[10.5px]">%</span></span>
+        )}
+      </span>
+
+      {/* 업체명(판매자) — PC에서만 별도 칸 */}
+      <span className="hidden lg:block shrink-0 w-24 text-right text-[11.5px] text-gray-500 truncate">
+        {sellerName}
+      </span>
 
       {/* 점프 (작성자 본인만) */}
       {canJump && (

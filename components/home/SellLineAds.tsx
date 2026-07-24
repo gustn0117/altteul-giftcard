@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight, HelpCircle } from 'lucide-react';
 import type { DBPost, DBUser } from '@/lib/types';
 import { getPosts } from '@/lib/api';
 import { getCache, setCache } from '@/lib/cache';
-import SellLineRow from './SellLineRow';
+import SellLineTable from './SellLineTable';
 
 const PAGE_SIZE = 10;
 const PAGE_PARAM = 'sp'; // 줄광고 페이지 번호를 URL 쿼리로 → 글 보고 돌아와도 보던 페이지 복원
@@ -54,22 +54,15 @@ export default function SellLineAds() {
         </Link>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-        {loading ? (
-          <div className="py-10 text-center text-gray-400 text-[12px]">불러오는 중...</div>
-        ) : posts.length === 0 ? (
-          <div className="py-10 text-center text-gray-400 text-[12px]">
-            아직 등록된 팝니다 줄광고가 없습니다.
-          </div>
-        ) : (
-          // PC에서만 2열로 나눠 넓은 화면을 채운다 (모바일은 기존처럼 한 줄씩)
-          <div className="lg:grid lg:grid-cols-2 lg:divide-x lg:divide-gray-100">
-            {pagePosts.map((post) => (
-              <SellLineRow key={post.id} post={post} />
-            ))}
-          </div>
-        )}
-      </div>
+      {loading ? (
+        <div className="bg-white border border-gray-200 rounded-xl py-10 text-center text-gray-400 text-[12px]">불러오는 중...</div>
+      ) : posts.length === 0 ? (
+        <div className="bg-white border border-gray-200 rounded-xl py-10 text-center text-gray-400 text-[12px]">
+          아직 등록된 팝니다 줄광고가 없습니다.
+        </div>
+      ) : (
+        <SellLineTable posts={pagePosts} />
+      )}
 
       {/* 페이지네이션 */}
       {!loading && totalPages > 1 && (

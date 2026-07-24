@@ -7,7 +7,7 @@ import { PenSquare, Tag, ShoppingCart, ChevronLeft, ChevronRight, MapPin } from 
 import HomeAside from '@/components/layout/HomeAside';
 import RecommendRail from '@/components/home/RecommendRail';
 import AdSection from '@/components/home/AdSection';
-import SellLineRow from '@/components/home/SellLineRow';
+import SellLineTable from '@/components/home/SellLineTable';
 import BuyPostCard from '@/components/home/BuyPostCard';
 import { getPosts } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
@@ -241,11 +241,9 @@ function BoardContent() {
                 </div>
               </>
             ) : (
-              /* 팝니다 — 홈과 동일한 줄광고. PC에서만 2열로 나눠 넓게 활용 */
-              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mb-5 lg:grid lg:grid-cols-2 lg:divide-x lg:divide-gray-100">
-                {pagedPosts.map((post) => (
-                  <SellLineRow key={post.id} post={post} onJumped={refetch} />
-                ))}
+              /* 팝니다 — 홈과 동일한 줄광고 표 (지역·제목·판매율·업체명). PC에서 2열 */
+              <div className="mb-5">
+                <SellLineTable posts={pagedPosts} onJumped={refetch} />
               </div>
             )}
 
