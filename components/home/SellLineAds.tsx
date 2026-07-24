@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { ChevronLeft, ChevronRight, HelpCircle } from 'lucide-react';
 import type { DBPost, DBUser } from '@/lib/types';
 import { getPosts } from '@/lib/api';
@@ -15,14 +15,14 @@ const PAGE_PARAM = 'sp'; // 줄광고 페이지 번호를 URL 쿼리로 → 글 
 type SellPost = DBPost & { author?: DBUser };
 
 export default function SellLineAds() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const page = Math.max(1, Number(searchParams.get(PAGE_PARAM)) || 1);
   const goPage = (n: number) => {
     const params = new URLSearchParams(searchParams.toString());
     if (n <= 1) params.delete(PAGE_PARAM); else params.set(PAGE_PARAM, String(n));
     const qs = params.toString();
-    router.push(qs ? `/?${qs}` : '/', { scroll: false });
+    // Native History API — useSearchParams 와 동기화되고 화면이 위로 안 튄다
+    window.history.pushState(null, '', qs ? `?${qs}` : window.location.pathname);
   };
   const [posts, setPosts] = useState<SellPost[]>(() => getCache<SellPost[]>('home_sell_posts') ?? []);
   const [loading, setLoading] = useState(() => !getCache('home_sell_posts'));

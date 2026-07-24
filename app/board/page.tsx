@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { PenSquare, Tag, ShoppingCart, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import HomeAside from '@/components/layout/HomeAside';
 import RecommendRail from '@/components/home/RecommendRail';
@@ -44,7 +44,6 @@ function shuffle<T>(arr: T[]): T[] {
 
 function BoardContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const { isLoggedIn } = useAuth();
   const tabParam = searchParams.get('tab');
   const activeTab: 'buy' | 'sell' = tabParam === 'buy' ? 'buy' : 'sell';
@@ -60,8 +59,10 @@ function BoardContent() {
     if (next.page !== undefined) {
       if (next.page <= 1) params.delete('page'); else params.set('page', String(next.page));
     }
-    // scroll:false — 지역 선택·페이지 이동 시 보던 위치 그대로 (기본값이면 맨 위로 튐)
-    router.push(`/board?${params.toString()}`, { scroll: false });
+    // Next 16에서는 router.push 로 '같은 경로에 파라미터를 추가'하면 무시돼서 지역/페이지가 안 먹었다.
+    // 공식 문서의 Native History API 방식 — useSearchParams 와 동기화되고 화면도 위로 안 튄다.
+    const qs = params.toString();
+    window.history.pushState(null, '', qs ? `?${qs}` : window.location.pathname);
   };
 
   const [posts, setPosts] = useState<PostWithAuthor[]>(() => getCache<PostWithAuthor[]>(`board_${activeTab}`) ?? []);

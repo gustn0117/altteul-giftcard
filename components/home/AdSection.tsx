@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { ChevronLeft, ChevronRight, PenSquare } from 'lucide-react';
 import BuyPostCard from './BuyPostCard';
 import { getAdPosts } from '@/lib/api';
@@ -50,8 +50,6 @@ export default function AdSection({ adType, title, icon, perPage = 50, shuffle =
   const types = useMemo(() => (Array.isArray(adType) ? adType : [adType]), [adType]);
   const cacheKey = `ads_${types.join('_')}`;
 
-  const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const [posts, setPosts] = useState<Post[]>(() => getCache<Post[]>(cacheKey) ?? []);
@@ -64,7 +62,8 @@ export default function AdSection({ adType, title, icon, perPage = 50, shuffle =
     const params = new URLSearchParams(searchParams.toString());
     if (n <= 1) params.delete(pageParam); else params.set(pageParam, String(n));
     const qs = params.toString();
-    router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    // Native History API — useSearchParams 와 동기화되고 화면이 위로 안 튄다
+    window.history.pushState(null, '', qs ? `?${qs}` : window.location.pathname);
   };
   const [seed, setSeed] = useState(0);
   // 관리자의 '삽니다 연락처 공개' 설정 — 게시판만 지키고 홈은 무시하면 설정이 무력화된다
