@@ -13,7 +13,15 @@ import RecommendRail from '@/components/home/RecommendRail';
  */
 export default function RecommendedPage() {
   return (
-    <div className="container-wide py-4">
+    <>
+      {/* 상단 전국광고 — 판매/매입찾기와 동일하게 화면 전체 폭으로 */}
+      <div className="container-wide pt-4">
+        <Suspense fallback={null}>
+          <AdSection adType="national" title="전국 광고" icon={<MapPin size={15} className="text-accent" />} perPage={50} desktopCols={5} shuffle />
+        </Suspense>
+      </div>
+
+      <div className="container-wide py-4">
       <div className="grid grid-cols-1 lg:grid-cols-[176px_1fr_184px] gap-4">
         {/* 좌측 — 최근 본 업체 (PC만) */}
         <div className="hidden lg:block">
@@ -30,9 +38,6 @@ export default function RecommendedPage() {
           </div>
 
           <Suspense fallback={null}>
-            {/* 상단 고정 전국광고 (판매/매입찾기와 동일) */}
-            <AdSection adType="national" title="전국 광고" icon={<MapPin size={15} className="text-accent" />} perPage={50} desktopCols={5} />
-
             <AdSection
               adType="recommend"
               title="추천 업체"
@@ -50,6 +55,7 @@ export default function RecommendedPage() {
           <RecommendRail />
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

@@ -41,6 +41,7 @@ export default function Home() {
                 perPage={50}
                 pageParam="np"
                 desktopCols={5}
+                shuffle
                 emptyText="전국 광고 모집중입니다."
               />
 

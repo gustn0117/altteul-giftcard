@@ -7,7 +7,7 @@ import { PenSquare, Tag, ShoppingCart, ChevronLeft, ChevronRight, MapPin } from 
 import HomeAside from '@/components/layout/HomeAside';
 import RecommendRail from '@/components/home/RecommendRail';
 import AdSection from '@/components/home/AdSection';
-import SellPostCard from '@/components/home/SellPostCard';
+import SellLineRow from '@/components/home/SellLineRow';
 import BuyPostCard from '@/components/home/BuyPostCard';
 import { getPosts } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
@@ -131,7 +131,7 @@ function BoardContent() {
   return (
     <>
       <div className="container-wide pt-4">
-        <AdSection adType="national" title="전국 광고" icon={<MapPin size={15} className="text-accent" />} perPage={50} desktopCols={5} />
+        <AdSection adType="national" title="전국 광고" icon={<MapPin size={15} className="text-accent" />} perPage={50} desktopCols={5} shuffle />
       </div>
 
       <div className="container-wide py-6">
@@ -237,10 +237,10 @@ function BoardContent() {
                 </div>
               </>
             ) : (
-              /* 팝니다 — 삽니다처럼 2칸 카드 그리드 (대표님 요청) */
-              <div className="grid grid-cols-2 min-[520px]:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-5">
+              /* 팝니다 — 홈과 동일한 줄광고. PC에서만 2열로 나눠 넓게 활용 */
+              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mb-5 lg:grid lg:grid-cols-2 lg:divide-x lg:divide-gray-100">
                 {pagedPosts.map((post) => (
-                  <SellPostCard key={post.id} post={post} onJumped={refetch} />
+                  <SellLineRow key={post.id} post={post} onJumped={refetch} />
                 ))}
               </div>
             )}

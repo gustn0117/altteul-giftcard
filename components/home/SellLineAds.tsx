@@ -62,11 +62,12 @@ export default function SellLineAds() {
             아직 등록된 팝니다 줄광고가 없습니다.
           </div>
         ) : (
-          <>
+          // PC에서만 2열로 나눠 넓은 화면을 채운다 (모바일은 기존처럼 한 줄씩)
+          <div className="lg:grid lg:grid-cols-2 lg:divide-x lg:divide-gray-100">
             {pagePosts.map((post) => (
               <SellLineRow key={post.id} post={post} />
             ))}
-          </>
+          </div>
         )}
       </div>
 
