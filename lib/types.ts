@@ -67,6 +67,8 @@ export interface DBUser {
   email?: string | null;
   name: string;
   phone: string | null;
+  phone_verified?: boolean;
+  phone_verified_at?: string | null;
   type: 'normal' | 'business';
   password_hash?: string;
   /** 업체 회원: 대표자명 */
