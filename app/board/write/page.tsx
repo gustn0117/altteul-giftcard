@@ -10,6 +10,7 @@ import { createPost, getPost, updatePost } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { AD_TYPES } from '@/lib/types';
 import ImageUploader from '@/components/ImageUploader';
+import PhoneVerifyBox from '@/components/auth/PhoneVerifyBox';
 
 // 만료 정책 (일 단위)
 const SELL_EXPIRE_DAYS = 7;   // 팝니다: 7일 후 잠금 (30일 후 자동삭제)
@@ -32,7 +33,7 @@ export default function WritePostPage() {
 function WritePostContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, isLoggedIn } = useAuth();
+  const { user, isLoggedIn, login } = useAuth();
 
   const editId = searchParams.get('edit');
   const postType = (searchParams.get('type') as 'sell' | 'buy') || 'sell';
@@ -81,6 +82,8 @@ function WritePostContent() {
     guestPhone: '',
   });
   const [submitting, setSubmitting] = useState(false);
+  const [showVerify, setShowVerify] = useState(false);
+  const [guestVerifiedPhone, setGuestVerifiedPhone] = useState<string | null>(null);
   const [loadingEdit, setLoadingEdit] = useState(isEdit);
   const [editAuth, setEditAuth] = useState({ verified: false, password: '' });
   const [editPost, setEditPost] = useState<{ guest_password?: string | null; author_id?: string | null } | null>(null);
@@ -205,6 +208,25 @@ function WritePostContent() {
 
     // 지역은 반드시 선택 (미선택 시 '전국'으로 처리되던 것 방지)
     if (!form.region) return alert('지역을 선택하세요.');
+
+    // 휴대폰 인증 게이트 (수정 제외)
+    if (!isEdit) {
+      if (isLoggedIn && user) {
+        if (!user.phone_verified) {
+          setShowVerify(true);
+          alert('인증받은 회원이 아닙니다. 휴대폰 인증 후 등록됩니다.');
+          return; // 인증 UI에서 통과하면 사용자가 다시 등록
+        }
+      } else {
+        // 비회원: 입력한 번호가 방금 인증되지 않았으면 인증 요구
+        const digits = form.guestPhone.replace(/[^0-9]/g, '');
+        if (!digits || guestVerifiedPhone !== digits) {
+          setShowVerify(true);
+          alert('휴대폰 인증 후 등록됩니다.');
+          return;
+        }
+      }
+    }
 
     setSubmitting(true);
     try {
@@ -566,6 +588,25 @@ function WritePostContent() {
               </div>
             </div>
           )}
+
+              {showVerify && !isEdit && (
+                <PhoneVerifyBox
+                  phone={isLoggedIn ? (user?.phone ?? '') : form.guestPhone}
+                  editablePhone={!isLoggedIn}
+                  userId={isLoggedIn ? user?.id : undefined}
+                  onVerified={({ phone }) => {
+                    if (isLoggedIn && user) {
+                      login({ ...user, phone_verified: true }); // 로컬 사용자 갱신 → 재인증 불필요
+                    } else {
+                      setGuestVerifiedPhone(phone.replace(/[^0-9]/g, ''));
+                      // 비회원은 인증한 번호를 폼에도 반영
+                      setForm((f) => ({ ...f, guestPhone: phone }));
+                    }
+                    setShowVerify(false);
+                    alert('인증 완료! 등록 버튼을 다시 눌러주세요.');
+                  }}
+                />
+              )}
 
               <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
                 <Link href={`/board?tab=${form.type}`} className="btn-secondary h-10 px-4 text-[13px]">취소</Link>
