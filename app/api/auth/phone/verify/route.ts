@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     const { phone, code, userId } = await req.json();
     const digits = normalize(phone);
     const codeStr = String(code || '').trim();
-    if (digits.length < 10 || !/^\d{6}$/.test(codeStr)) {
+    if (digits.length < 10 || digits.length > 11 || !/^\d{6}$/.test(codeStr)) {
       return NextResponse.json({ error: '인증번호를 정확히 입력해주세요.' }, { status: 400 });
     }
     const supabase = createServiceClient();
@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
     }
     return NextResponse.json({ ok: true, verificationId: v.id });
   } catch (err) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'fail' }, { status: 500 });
+    console.error('[phone/verify] error:', err);
+    return NextResponse.json({ error: '인증 처리에 실패했습니다. 잠시 후 다시 시도해주세요.' }, { status: 500 });
   }
 }

@@ -84,6 +84,15 @@ function WritePostContent() {
   const [submitting, setSubmitting] = useState(false);
   const [showVerify, setShowVerify] = useState(false);
   const [guestVerifiedPhone, setGuestVerifiedPhone] = useState<string | null>(null);
+  // 문자 인증이 실제로 동작 가능할 때(SOLAPI 설정됨) 또는 개발환경에서만 인증 게이트 적용
+  const [phoneVerifyRequired, setPhoneVerifyRequired] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/settings')
+      .then((r) => r.json())
+      .then((d) => setPhoneVerifyRequired(!!d.phoneVerifyRequired))
+      .catch(() => {});
+  }, []);
   const [loadingEdit, setLoadingEdit] = useState(isEdit);
   const [editAuth, setEditAuth] = useState({ verified: false, password: '' });
   const [editPost, setEditPost] = useState<{ guest_password?: string | null; author_id?: string | null } | null>(null);
@@ -209,8 +218,8 @@ function WritePostContent() {
     // 지역은 반드시 선택 (미선택 시 '전국'으로 처리되던 것 방지)
     if (!form.region) return alert('지역을 선택하세요.');
 
-    // 휴대폰 인증 게이트 (수정 제외)
-    if (!isEdit) {
+    // 휴대폰 인증 게이트 (수정 제외, 문자 발송이 실제로 가능할 때만 적용)
+    if (!isEdit && phoneVerifyRequired) {
       if (isLoggedIn && user) {
         if (!user.phone_verified) {
           setShowVerify(true);
@@ -592,7 +601,7 @@ function WritePostContent() {
               {showVerify && !isEdit && (
                 <PhoneVerifyBox
                   phone={isLoggedIn ? (user?.phone ?? '') : form.guestPhone}
-                  editablePhone={!isLoggedIn}
+                  editablePhone={!isLoggedIn || !user?.phone}
                   userId={isLoggedIn ? user?.id : undefined}
                   onVerified={({ phone }) => {
                     if (isLoggedIn && user) {

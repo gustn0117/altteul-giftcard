@@ -9,6 +9,11 @@ function creds() {
   return apiKey && apiSecret && from ? { apiKey, apiSecret, from } : null;
 }
 
+// SOLAPI 발송 키가 모두 설정되어 실제 문자 발송이 가능한지 여부
+export function isSmsConfigured(): boolean {
+  return !!creds();
+}
+
 /**
  * SOLAPI HMAC-SHA256 인증 헤더.
  * 공식 solapi-nodejs SDK(src/lib/authenticator.ts)와 동일한 서명 방식으로 확인됨:
@@ -26,7 +31,11 @@ export async function sendVerificationSms(phone: string, code: string): Promise<
   const text = `[예판상품권] 인증번호 ${code} (3분 내 입력)`;
   const c = creds();
   if (!c) {
-    // 테스트 모드 — 키 없으면 실제 발송 대신 서버 로그
+    if (process.env.NODE_ENV === 'production') {
+      // 운영 환경에서 키가 없으면 인증 성공을 위장하지 않고 명확히 실패 처리
+      throw new Error('문자 발송이 아직 설정되지 않았습니다.');
+    }
+    // 테스트 모드(개발) — 키 없으면 실제 발송 대신 서버 로그
     console.log(`[SMS TEST] to=${phone} code=${code}`);
     return { sent: true, test: true };
   }
