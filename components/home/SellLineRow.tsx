@@ -82,9 +82,9 @@ export default function SellLineRow({ post, onJumped }: SellLineRowProps) {
         {region}
       </span>
 
-      {/* 제목 (모바일은 아래에 판매자·발송일 한 줄 더) */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5 min-w-0">
+      {/* 제목 (모바일은 아래에 판매자·발송일 한 줄 더) — 제목칸 안에서 가운데 정렬 */}
+      <div className="flex-1 min-w-0 text-center">
+        <div className="flex items-center justify-center gap-1.5 min-w-0">
           <span className={`text-[13.5px] font-medium truncate min-w-0 ${isCompleted ? 'text-gray-400' : 'text-gray-900'}`}>
             {post.title}
           </span>

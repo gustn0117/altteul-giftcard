@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
 
   const [usersRes, postsRes, chatsRes, premiumRes, noticesRes] = await Promise.allSettled([
     supabase.from('users').select('id, type, created_at', { count: 'exact' }),
-    supabase.from('posts').select('id, type, is_active, created_at', { count: 'exact' }),
+    supabase.from('posts').select('id, type, is_active, created_at', { count: 'exact' }).is('deleted_at', null),
     supabase.from('chats').select('id, current_step, status, trade_type, created_at', { count: 'exact' }),
     supabase.from('premium_buyers').select('id, is_active, tier', { count: 'exact' }),
     supabase.from('notices').select('id, is_pinned', { count: 'exact' }),

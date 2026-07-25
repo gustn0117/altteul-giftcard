@@ -10,7 +10,7 @@ function HeadRow({ className = '' }: { className?: string }) {
   return (
     <div className={`items-center gap-3 pl-4 pr-3 py-2 bg-gray-50 border-b border-gray-200 text-[11px] font-bold text-gray-400 ${className}`}>
       <span className="shrink-0 w-12 text-center">지역</span>
-      <span className="flex-1 min-w-0">제목</span>
+      <span className="flex-1 min-w-0 text-center">제목</span>
       <span className="hidden lg:block shrink-0 w-20 text-right">발송일</span>
       <span className="shrink-0 w-14 text-right">판매율</span>
       <span className="hidden lg:block shrink-0 w-20 text-right">업체명</span>
@@ -32,7 +32,12 @@ export default function SellLineTable({ posts, onJumped }: { posts: SellPost[]; 
     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
       <div className="lg:grid lg:grid-cols-2 lg:divide-x lg:divide-gray-200">
         {columns.map((col, i) => (
-          <div key={i} className="min-w-0">
+          <div
+            key={i}
+            // 모바일에선 두 칸이 세로로 쌓이는데, 왼쪽 칸 마지막 줄은 border가 없어(last:border-b-0)
+            // 두 칸 경계에 가로줄이 빠진다 → 첫 칸 아래에 모바일 전용 구분선을 넣어 채운다.
+            className={`min-w-0 ${i === 0 && col.length > 0 && columns[1].length > 0 ? 'border-b border-gray-100 lg:border-b-0' : ''}`}
+          >
             {/* 오른쪽 열 머리글은 모바일에서 중복이라 숨긴다 */}
             <HeadRow className={i === 0 ? 'flex' : 'hidden lg:flex'} />
             {col.map((post) => (

@@ -117,7 +117,8 @@ export default function AdminPage() {
     // 모든 데이터를 동시에 병렬 요청
     const [u, p, n, v, pb, ad, st] = await Promise.allSettled([
       supabase.from('users').select('*').order('created_at', { ascending: false }).limit(200),
-      supabase.from('posts').select('*, author:users!author_id(id, name, type)').order('created_at', { ascending: false }).limit(200),
+      // 삭제된 글(deleted_at)은 사이트와 동일하게 관리자 목록에서도 제외 — 안 그러면 삭제해도 관리자엔 남아 헷갈림
+      supabase.from('posts').select('*, author:users!author_id(id, name, type)').is('deleted_at', null).order('created_at', { ascending: false }).limit(200),
       supabase.from('notices').select('*').order('created_at', { ascending: false }).limit(50),
       fetch('/api/visitors').then(r => r.json()),
       getPremiumBuyers(false),
