@@ -34,16 +34,23 @@ export async function POST(req: NextRequest) {
 
     const code = String(crypto.randomInt(0, 1_000_000)).padStart(6, '0');
     const expires_at = new Date(Date.now() + 180_000).toISOString();
+
+    // 발송 성공 후에만 인증 row를 기록 — 발송 실패 시 한도/쿨다운을 소모하지 않는다
+    const result = await sendVerificationSms(digits, code);
+
     const { error } = await supabase.from('phone_verifications').insert({
       phone: digits, code_hash: hashCode(code, digits), expires_at, attempts: 0, ip,
     });
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error('[phone/send] insert error:', error);
+      return NextResponse.json({ error: '인증번호 발송에 실패했습니다. 잠시 후 다시 시도해주세요.' }, { status: 500 });
+    }
 
-    const result = await sendVerificationSms(digits, code);
     const body: Record<string, unknown> = { ok: true, cooldown: 30 };
     if (result.test && process.env.NODE_ENV !== 'production') body.devCode = code;
     return NextResponse.json(body);
   } catch (err) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'fail' }, { status: 500 });
+    console.error('[phone/send] error:', err);
+    return NextResponse.json({ error: '인증번호 발송에 실패했습니다. 잠시 후 다시 시도해주세요.' }, { status: 500 });
   }
 }
