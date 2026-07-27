@@ -31,6 +31,16 @@ function deliveryMethodText(dm: string | null | undefined): string {
   return (dm || '').split(',').map((s) => DM_LABELS[s.trim()] || s.trim()).filter(Boolean).join(', ') || '-';
 }
 
+/** 상세 정보 한 줄 — 라벨 : 값 (스케치의 표 형식) */
+function InfoRow({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <div className="flex items-start gap-4 py-3">
+      <dt className="w-24 shrink-0 text-[13.5px] text-gray-400">{label}</dt>
+      <dd className={`flex-1 min-w-0 text-[15px] font-bold wrap-break-word ${accent ? 'text-accent' : 'text-gray-800'}`}>{value}</dd>
+    </div>
+  );
+}
+
 export default function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
@@ -287,75 +297,39 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
               </div>
             </div>
 
-            {/* Info grid */}
-            <div className="px-5 py-5 border-b border-gray-100">
-              <div className="bg-gray-50 border border-gray-100 p-5">
+            {/* 상세 정보 표 (스케치: 라벨 : 값 세로 나열) */}
+            <div className="px-5 py-4 border-b border-gray-100">
+              <dl className="border-y border-gray-100 divide-y divide-gray-100">
+                <InfoRow label="상품권 종류" value={getCategoryName(post.category)} />
                 {post.percentage != null ? (
-                  /* 팝니다=판매율+발송일 / 삽니다=매입률+매입가능시간 */
-                  /* 3개 항목을 항상 가로 한 줄로 */
-                  <div className="grid grid-cols-3 gap-2 md:gap-4 text-[13px]">
-                    <div className="min-w-0">
-                      <p className="text-[11px] text-gray-400 mb-1 whitespace-nowrap">상품권 종류</p>
-                      <p className="font-bold text-gray-800 truncate">{getCategoryName(post.category)}</p>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[11px] text-gray-400 mb-1 whitespace-nowrap">{isSell ? '판매율' : '매입률'}</p>
-                      <p className="font-bold text-accent text-[18px] md:text-[20px] whitespace-nowrap">{post.percentage}%</p>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[11px] text-gray-400 mb-1 whitespace-nowrap">{isSell ? '발송 예정일' : '매입 가능 시간'}</p>
-                      <p className="font-bold text-gray-800 truncate">
-                        {isSell
-                          ? (post.send_month && post.send_day ? `${post.send_month}월 ${post.send_day}일` : '협의')
-                          : (post.delivery || '-')}
-                      </p>
-                    </div>
-                  </div>
+                  <>
+                    <InfoRow label={isSell ? '판매율' : '매입률'} value={`${post.percentage}%`} accent />
+                    <InfoRow
+                      label={isSell ? '발송 예정일' : '매입 가능 시간'}
+                      value={isSell
+                        ? (post.send_month && post.send_day ? `${post.send_month}월 ${post.send_day}일` : '협의')
+                        : (post.delivery || '-')}
+                    />
+                  </>
                 ) : (
-                  /* 삽니다 또는 기존 데이터: 액면가/할인율/가격 */
-                  <div className="grid grid-cols-4 gap-2 md:gap-4 text-[12px] md:text-[13px]">
-                    <div className="min-w-0">
-                      <p className="text-[11px] text-gray-400 mb-1 whitespace-nowrap">상품권 종류</p>
-                      <p className="font-bold text-gray-800 truncate">{getCategoryName(post.category)}</p>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[11px] text-gray-400 mb-1 whitespace-nowrap">액면가</p>
-                      <p className="font-bold text-gray-800 truncate">{(post.face_value ?? 0).toLocaleString()}원</p>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[11px] text-gray-400 mb-1 whitespace-nowrap">할인율</p>
-                      <p className="font-bold text-accent whitespace-nowrap">{post.discount ?? 0}%</p>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[11px] text-gray-400 mb-1 whitespace-nowrap">{isSell ? '판매가' : '희망가'}</p>
-                      <p className="font-bold text-[14px] md:text-[16px] text-gray-900 truncate">{(post.price ?? 0).toLocaleString()}원</p>
-                    </div>
-                  </div>
+                  <>
+                    <InfoRow label="액면가" value={`${(post.face_value ?? 0).toLocaleString()}원`} />
+                    <InfoRow label="할인율" value={`${post.discount ?? 0}%`} accent />
+                    <InfoRow label={isSell ? '판매가' : '희망가'} value={`${(post.price ?? 0).toLocaleString()}원`} />
+                  </>
                 )}
-              </div>
+                <InfoRow label="배송 방법" value={deliveryMethodText(post.delivery_method)} />
+                {isSell && <InfoRow label="발송 안내" value={post.delivery || '판매일로부터 7일 이내 발송'} />}
+              </dl>
             </div>
 
-            {/* Description */}
-            <div className="px-5 py-5 border-b border-gray-100">
-              {post.description && (
-                <div className="mb-4">
-                  <p className="text-[11px] text-gray-400 mb-2">상세 설명</p>
-                  <p className="text-[13px] text-gray-700 leading-relaxed whitespace-pre-wrap">{post.description}</p>
-                </div>
-              )}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-[12px]">
-                <div>
-                  <p className="text-[11px] text-gray-400 mb-1">배송 방법</p>
-                  <p className="font-medium text-gray-700">{deliveryMethodText(post.delivery_method)}</p>
-                </div>
-                {isSell && (
-                  <div>
-                    <p className="text-[11px] text-gray-400 mb-1">발송 안내</p>
-                    <p className="font-medium text-gray-700">{post.delivery || '판매일로부터 7일 이내 발송'}</p>
-                  </div>
-                )}
+            {/* 상세 설명 — 크고 읽기 좋게 (대표님 요청: 글씨 키움) */}
+            {post.description && (
+              <div className="px-5 py-5 border-b border-gray-100">
+                <p className="text-[14px] font-bold text-gray-800 mb-2.5">상세 설명</p>
+                <p className="text-[15.5px] text-gray-800 leading-loose whitespace-pre-wrap">{post.description}</p>
               </div>
-            </div>
+            )}
 
             {/* 연락처 (팝니다=블라인드+500P 열람 / 삽니다=설정에 따라 공개) */}
             <div className="px-5 py-5 bg-gray-50">
@@ -382,7 +356,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                     className="w-full max-h-56 object-cover rounded-lg border border-gray-200 mb-3" />
                 )}
                 {post.author.intro && (
-                  <p className="text-[13px] text-gray-700 leading-relaxed whitespace-pre-wrap mb-3">{post.author.intro}</p>
+                  <p className="text-[15.5px] text-gray-800 leading-loose whitespace-pre-wrap mb-3">{post.author.intro}</p>
                 )}
                 {post.author.business_hours && (
                   <div className="flex items-center gap-2 text-[12px]">
