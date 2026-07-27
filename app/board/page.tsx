@@ -7,6 +7,7 @@ import { PenSquare, Tag, ShoppingCart, ChevronLeft, ChevronRight, MapPin } from 
 import HomeAside from '@/components/layout/HomeAside';
 import RecommendRail from '@/components/home/RecommendRail';
 import AdSection from '@/components/home/AdSection';
+import RegionSelector from '@/components/home/RegionSelector';
 import SellLineTable from '@/components/home/SellLineTable';
 import BuyPostCard from '@/components/home/BuyPostCard';
 import { getPosts } from '@/lib/api';
@@ -146,6 +147,9 @@ function BoardContent() {
           </div>
         </div>
 
+        {/* 지역별 업체찾기 — 전체폭(메인사진 넓이)으로 펼친 지도 실루엣 격자. 첫 진입 자동 '전국' */}
+        <RegionSelector regions={REGIONS} selected={selectedRegion} onSelect={(r) => setQuery({ region: r, page: 1 })} />
+
         {/* 홈과 동일한 3분할: 좌(최근 본 업체) · 중앙 · 우(오늘의 추천업체) */}
         <div className="grid grid-cols-1 lg:grid-cols-[176px_1fr_184px] gap-4">
           <div className="hidden lg:block">
@@ -187,29 +191,6 @@ function BoardContent() {
                     <PenSquare size={11} /> {writeLabel}
                   </Link>
                 )}
-              </div>
-            </div>
-
-            {/* 지역 탭 — 격자(줄바꿈), 첫 진입 자동 '전국' */}
-            <div className="mb-4 bg-white border border-gray-200 rounded-xl p-3">
-              <p className="flex items-center gap-1 text-[12.5px] font-bold text-gray-700 mb-2.5">
-                <MapPin size={14} className="text-accent" /> 현재 선택지역 : <span className="text-accent">{selectedRegion}</span>
-              </p>
-              <div className="grid grid-cols-6 gap-1">
-                {REGIONS.map((r) => (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => setQuery({ region: r, page: 1 })}
-                    className={`h-8 text-[11px] font-bold rounded-md border transition-colors ${
-                      selectedRegion === r
-                        ? 'border-accent bg-accent/5 text-accent'
-                        : 'border-gray-200 bg-white text-gray-600 hover:border-accent hover:text-accent'
-                    }`}
-                  >
-                    {r}
-                  </button>
-                ))}
               </div>
             </div>
 
