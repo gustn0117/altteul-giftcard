@@ -224,12 +224,6 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
               )}
             </div>
           )}
-          {!isCompleted && !isAuthor && remaining && (
-            <div className="mb-3 px-4 py-2 bg-gray-50 border border-gray-200 text-[12px] text-gray-600 flex items-start gap-2">
-              <Timer size={14} className="text-accent shrink-0 mt-0.5" />
-              <span className="min-w-0">글 만료까지 {remaining}</span>
-            </div>
-          )}
           {!isCompleted && isAuthor && (
             <div className="mb-3 px-4 py-2 bg-gray-50 border border-gray-200 text-[12px] text-gray-600 flex items-center gap-2">
               <Timer size={14} className="text-accent shrink-0" />
@@ -280,11 +274,6 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                 {(Date.now() - new Date(post.created_at).getTime() < 3 * 86400000) && !isCompleted && (
                   <span className="text-[10px] font-bold text-white bg-red-500 px-1.5 py-0.5 rounded-sm">NEW</span>
                 )}
-                {post.tags?.map(t => (
-                  <span key={t} className="text-[11px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded-sm">
-                    {t.startsWith('#') ? t : `#${t}`}
-                  </span>
-                ))}
               </div>
               <h2 className="text-[18px] font-bold text-gray-800 mb-2">{post.title}</h2>
               <div className="flex flex-wrap items-center gap-3 text-[11px] text-gray-500">

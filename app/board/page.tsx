@@ -147,9 +147,6 @@ function BoardContent() {
           </div>
         </div>
 
-        {/* 지역별 업체찾기 — 전체폭(메인사진 넓이)으로 펼친 지도 실루엣 격자. 첫 진입 자동 '전국' */}
-        <RegionSelector regions={REGIONS} selected={selectedRegion} onSelect={(r) => setQuery({ region: r, page: 1 })} />
-
         {/* 홈과 동일한 3분할: 좌(최근 본 업체) · 중앙 · 우(오늘의 추천업체) */}
         <div className="grid grid-cols-1 lg:grid-cols-[176px_1fr_184px] gap-4">
           <div className="hidden lg:block">
@@ -157,6 +154,8 @@ function BoardContent() {
           </div>
 
           <div className="min-w-0">
+            {/* 지역별 업체찾기 — 가운데 칸(메인사진) 폭에 맞춰 지도 실루엣 격자. 첫 진입 자동 '전국' */}
+            <RegionSelector regions={REGIONS} selected={selectedRegion} onSelect={(r) => setQuery({ region: r, page: 1 })} />
             {/* 탭 */}
             <div className="bg-white border border-gray-200 rounded-xl mb-4 overflow-hidden">
               <div className="flex border-b border-gray-200">
