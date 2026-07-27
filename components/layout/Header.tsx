@@ -96,6 +96,8 @@ export default function Header() {
       {/* ───────────────── 데스크탑 헤더 ───────────────── */}
       <div className="hidden md:block">
         <div className="container-wide">
+          {/* PC(lg)에서만 헤더 콘텐츠를 아래 메인사진(가운데 칸) 폭에 맞춤 — 좌 레일(176)+간격=192(pl-48), 우 레일(184)+간격=200(pr-50) 만큼 안쪽으로 */}
+          <div className="lg:pl-48 lg:pr-50">
           {/* 윗줄: 로고(좌) | 검색(중앙) | 액션(우) */}
           <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6 h-20">
             {/* 로고 */}
@@ -196,6 +198,7 @@ export default function Header() {
               </div>
             </div>
           </nav>
+          </div>
         </div>
       </div>
 
