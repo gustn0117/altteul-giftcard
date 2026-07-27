@@ -11,7 +11,7 @@ import ImageUploader from '@/components/ImageUploader';
 import type { Ad, AdSlot } from '@/lib/ads';
 import { AD_SLOT_LABELS, AD_SLOT_SIZES } from '@/lib/ads';
 import Link from 'next/link';
-import { Users, FileText, Bell, MessageCircle, Trash2, Shield, Megaphone, Pencil, Plus, Eye, EyeOff, ArrowLeft, Radio, Crown, LayoutDashboard, TrendingUp, ExternalLink, Activity, Globe } from 'lucide-react';
+import { Users, FileText, Bell, MessageCircle, Trash2, Shield, Megaphone, Pencil, Plus, Eye, EyeOff, ArrowLeft, Radio, Crown, LayoutDashboard, TrendingUp, ExternalLink, Activity, Globe, Clock } from 'lucide-react';
 import { getCategoryName, categories } from '@/data/mock';
 import { getCache, setCache } from '@/lib/cache';
 
@@ -22,7 +22,7 @@ const ALL_SLOTS = Object.keys(AD_SLOT_LABELS) as AdSlot[];
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [pw, setPw] = useState('');
-  const [tab, setTab] = useState<'overview' | 'users' | 'posts' | 'notices' | 'premium' | 'ads' | 'community' | 'national' | 'main' | 'recommend'>('overview');
+  const [tab, setTab] = useState<'overview' | 'users' | 'posts' | 'notices' | 'premium' | 'ads' | 'community' | 'national' | 'main' | 'recommend' | 'expired'>('overview');
   // 회원 목록 일반/업체 구분 필터
   const [userFilter, setUserFilter] = useState<'all' | 'normal' | 'business'>('all');
   // 업체 소개 편집 모달
@@ -345,6 +345,8 @@ export default function AdminPage() {
   // 실제 노출 중 = 승인 & 미만료 (만료 광고는 광고칸에서 내려가므로 카운트에서 제외)
   const liveAds = posts.filter((p) => p.type === 'buy' && p.approved_at && !p.deleted_at && (!p.expires_at || new Date(p.expires_at).getTime() > Date.now()));
   const adCount = (t: string) => liveAds.filter((p) => (p.ad_type ?? 'main') === t).length;
+  // 만료 광고(전 종류 통합) — 승인됐지만 게시기간이 끝난 삽니다 광고
+  const expiredAds = posts.filter((p) => p.type === 'buy' && !p.deleted_at && p.approved_at && p.expires_at && new Date(p.expires_at).getTime() <= Date.now());
 
   const filteredUsers = userFilter === 'all' ? users : users.filter((u) => (userFilter === 'business' ? u.type === 'business' : u.type !== 'business'));
 
@@ -356,6 +358,7 @@ export default function AdminPage() {
     { key: 'national' as const, label: '전국광고', icon: Globe, count: adCount('national') },
     { key: 'main' as const, label: '메인광고', icon: Megaphone, count: adCount('main') },
     { key: 'recommend' as const, label: '추천업체', icon: Crown, count: adCount('recommend') },
+    { key: 'expired' as const, label: '만료광고', icon: Clock, count: expiredAds.length },
   ];
 
   return (
@@ -824,6 +827,47 @@ export default function AdminPage() {
           </div>
         );
       })()}
+
+      {/* ─── 만료 광고 (전 종류 통합) ─── */}
+      {!loading && tab === 'expired' && (
+        <div className="space-y-4">
+          <div className="card p-3 text-[12px] text-gray-600">
+            <b className="text-gray-900">만료 광고</b> — 게시기간이 끝나 광고칸·매입찾기 목록에서 내려간 광고를 종류 구분 없이 한곳에 모아 봅니다. 기간(일)을 넣어 <b>재게시</b>하면 오늘부터 다시 노출됩니다. (글은 삭제되지 않습니다)
+          </div>
+          <div className="card overflow-hidden">
+            <div className="px-4 py-2.5 border-b border-zinc-200 bg-rose-50 text-[13px] font-bold text-rose-800">
+              ⛔ 만료된 광고 ({expiredAds.length})
+            </div>
+            {expiredAds.length === 0 ? (
+              <p className="py-10 text-center text-zinc-400 text-[13px]">만료된 광고가 없습니다.</p>
+            ) : (
+              <div className="divide-y divide-zinc-100">
+                {expiredAds.map(p => {
+                  const exp = p.expires_at ? new Date(p.expires_at) : null;
+                  const adLabel = AD_TYPES.find(a => a.value === (p.ad_type ?? 'main'))?.label ?? '메인광고';
+                  return (
+                    <div key={p.id} className="flex flex-wrap items-center gap-2 px-4 py-2.5">
+                      <span className="text-[12px] font-medium flex-1 min-w-40 truncate">
+                        {p.title}
+                        <span className="text-zinc-400 font-normal"> / {p.author?.name || '비회원'} / {adLabel}{exp ? ` / ${exp.toLocaleDateString('ko-KR')} 만료` : ''}</span>
+                      </span>
+                      {[20, 25, 30].map(d => (
+                        <button key={d} type="button" onClick={() => approveExtension(p.id, d)}
+                          className="h-8 px-2.5 text-[12px] font-bold border border-rose-300 hover:bg-rose-100">{d}일</button>
+                      ))}
+                      <input type="number" min={1} placeholder="직접(일)" value={approveDaysMap[p.id] ?? ''}
+                        onChange={e => setApproveDaysMap(m => ({ ...m, [p.id]: e.target.value }))} className="input h-8 w-20" />
+                      <button type="button" onClick={() => approveExtension(p.id, Number(approveDaysMap[p.id]))}
+                        className="h-8 px-3 text-[12px] font-bold bg-accent text-white hover:bg-blue-700">재게시</button>
+                      <button type="button" onClick={() => deletePost(p.id)} className="h-8 px-1.5 text-red-400 hover:text-red-600"><Trash2 size={14} /></button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ─── Posts ─── */}
       {!loading && tab === 'posts' && (
