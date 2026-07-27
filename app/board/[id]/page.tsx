@@ -3,7 +3,7 @@
 import { use, useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Eye, Clock, Pencil, Tag, ShoppingCart, CheckCircle, Timer, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Eye, Clock, Pencil, Tag, ShoppingCart, CheckCircle, Timer, RotateCcw, FileText } from 'lucide-react';
 import { getPost, togglePostComplete, requestExtension } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import ContactReveal from '@/components/board/ContactReveal';
@@ -31,10 +31,10 @@ function deliveryMethodText(dm: string | null | undefined): string {
   return (dm || '').split(',').map((s) => DM_LABELS[s.trim()] || s.trim()).filter(Boolean).join(', ') || '-';
 }
 
-/** 상세 정보 한 줄 — 라벨 : 값 (스케치의 표 형식) */
+/** 상세 정보 한 줄 — 라벨 : 값. PC 2열 그리드에서 칸마다 아래 구분선을 가진다. */
 function InfoRow({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div className="flex items-start gap-4 py-3">
+    <div className="flex items-start gap-4 py-3 border-b border-gray-100">
       <dt className="w-24 shrink-0 text-[13.5px] text-gray-400">{label}</dt>
       <dd className={`flex-1 min-w-0 text-[15px] font-bold wrap-break-word ${accent ? 'text-accent' : 'text-gray-800'}`}>{value}</dd>
     </div>
@@ -297,9 +297,12 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
               </div>
             </div>
 
-            {/* 상세 정보 표 (스케치: 라벨 : 값 세로 나열) */}
+            {/* 상세 정보 표 — 팝니다=상품정보 / 삽니다=구매정보, PC는 라벨:값 2열 배치 */}
             <div className="px-5 py-4 border-b border-gray-100">
-              <dl className="border-y border-gray-100 divide-y divide-gray-100">
+              <p className="flex items-center gap-1.5 text-[14px] font-bold text-gray-800 mb-3">
+                <FileText size={16} className="text-accent" /> {isSell ? '상품정보' : '구매정보'}
+              </p>
+              <dl className="grid grid-cols-1 sm:grid-cols-2 sm:gap-x-10 border-t border-gray-100">
                 <InfoRow label="상품권 종류" value={getCategoryName(post.category)} />
                 {post.percentage != null ? (
                   <>

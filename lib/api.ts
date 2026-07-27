@@ -40,8 +40,11 @@ export async function getPosts(type?: 'sell' | 'buy', opts?: { limit?: number; w
     .limit(limit);
   if (type) q = q.eq('type', type);
   if (!includeBlinded) q = q.eq('blind_locked', false);
-  // 삽니다(buy)는 관리자 승인(approved_at)된 글만 노출. 팝니다는 승인 불필요.
-  if (type === 'buy' && !opts?.includePending) q = q.not('approved_at', 'is', null);
+  // 삽니다(buy)는 관리자 승인(approved_at) + 게시기간 미만료만 노출. 팝니다는 승인/만료 무관.
+  // 만료된 매입광고는 매입찾기 목록에서도 자동으로 내려간다(관리자 화면은 includePending으로 전부 조회).
+  if (type === 'buy' && !opts?.includePending) {
+    q = q.not('approved_at', 'is', null).gt('expires_at', new Date().toISOString());
+  }
   const { data, error } = await q;
   if (error) throw error;
   return sortByBump((data as unknown) as (DBPost & { author: DBUser })[]);
@@ -61,6 +64,7 @@ export async function getAdPosts(adType: 'national' | 'main' | 'recommend' | ('n
     .is('deleted_at', null)
     .eq('blind_locked', false)
     .not('approved_at', 'is', null)
+    .gt('expires_at', new Date().toISOString())
     .in('ad_type', types)
     .order('last_jumped_at', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })

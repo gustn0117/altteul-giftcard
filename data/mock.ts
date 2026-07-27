@@ -4,6 +4,7 @@ export function getCategoryName(id: string): string {
 }
 
 const categoryMap: Record<string, string> = {
+  all: '모든 상품권',
   lotte: '롯데', shinsegae: '신세계', culture: '문화상품권', cultureland: '컬쳐랜드',
   starbucks: '스타벅스', oncash: '온캐시', googleplay: '구글플레이', teencash: '틴캐시',
   baemin: '배민상품권', happymoney: '해피머니', etc: '기타',

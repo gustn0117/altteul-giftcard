@@ -395,8 +395,9 @@ function WritePostContent() {
             <label className="block text-[12px] font-medium text-zinc-600 mb-1">상품권 종류 *</label>
             <select value={form.category} onChange={(e) => handleChange('category', e.target.value)} className="input" required>
               <option value="">선택하세요</option>
-              {categories.filter(c => c.id !== 'all').map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              {/* 삽니다(buy)는 '모든 상품권'(all)도 선택 가능, 팝니다(sell)는 개별 상품권만 */}
+              {categories.filter(c => c.id !== 'all' || form.type === 'buy').map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.id === 'all' ? '모든 상품권' : cat.name}</option>
               ))}
             </select>
           </div>

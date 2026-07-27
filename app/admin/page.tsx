@@ -342,7 +342,8 @@ export default function AdminPage() {
   }
 
   // 삽니다 글 = 광고. 승인되어 실제 노출 중인 것만 종류별로 센다.
-  const liveAds = posts.filter((p) => p.type === 'buy' && p.approved_at && !p.deleted_at);
+  // 실제 노출 중 = 승인 & 미만료 (만료 광고는 광고칸에서 내려가므로 카운트에서 제외)
+  const liveAds = posts.filter((p) => p.type === 'buy' && p.approved_at && !p.deleted_at && (!p.expires_at || new Date(p.expires_at).getTime() > Date.now()));
   const adCount = (t: string) => liveAds.filter((p) => (p.ad_type ?? 'main') === t).length;
 
   const filteredUsers = userFilter === 'all' ? users : users.filter((u) => (userFilter === 'business' ? u.type === 'business' : u.type !== 'business'));
@@ -665,7 +666,11 @@ export default function AdminPage() {
         const label = adTypeLabel(cur);
         const buyPosts = posts.filter(p => p.type === 'buy' && !p.deleted_at);
         const pending = buyPosts.filter(p => !p.approved_at && !p.extension_requested_at && (p.ad_type ?? 'main') === cur);
-        const live = buyPosts.filter(p => p.approved_at && (p.ad_type ?? 'main') === cur);
+        const nowMs = Date.now();
+        const approved = buyPosts.filter(p => p.approved_at && (p.ad_type ?? 'main') === cur);
+        // 노출 중(미만료) / 만료됨(기간 종료) 분리 — 만료 광고는 광고칸에서 내려가고 여기서 재게시 가능
+        const live = approved.filter(p => !p.expires_at || new Date(p.expires_at).getTime() > nowMs);
+        const expired = approved.filter(p => p.expires_at && new Date(p.expires_at).getTime() <= nowMs);
         // 작성자가 연장을 신청한 글 (승인 대기 목록과 분리)
         const extReq = buyPosts.filter(p => p.extension_requested_at && (p.ad_type ?? 'main') === cur);
         return (
@@ -745,6 +750,7 @@ export default function AdminPage() {
                     <th className="table-header text-center py-2.5 px-4">매입률</th>
                     <th className="table-header text-left py-2.5 px-4">지역</th>
                     <th className="table-header text-center py-2.5 px-4">게시 만료</th>
+                    <th className="table-header text-center py-2.5 px-4">연장</th>
                     <th className="table-header text-center py-2.5 px-4">종류 변경</th>
                     <th className="table-header text-center py-2.5 px-4">관리</th>
                   </tr></thead>
@@ -761,6 +767,13 @@ export default function AdminPage() {
                           <td className={`py-2.5 px-4 text-center text-[11px] ${expired ? 'text-red-500 font-bold' : 'text-zinc-400'}`}>
                             {exp ? `${exp.toLocaleDateString('ko-KR')}${expired ? ' (만료)' : ''}` : '-'}
                           </td>
+                          <td className="py-2.5 px-4 text-center whitespace-nowrap">
+                            <input type="number" min={1} placeholder="일" value={approveDaysMap[p.id] ?? ''}
+                              onChange={e => setApproveDaysMap(m => ({ ...m, [p.id]: e.target.value }))}
+                              className="input h-7 w-14 text-[12px] mr-1" />
+                            <button type="button" onClick={() => approveExtension(p.id, Number(approveDaysMap[p.id]))}
+                              className="h-7 px-2 text-[11px] font-bold bg-accent text-white hover:bg-blue-700">연장</button>
+                          </td>
                           <td className="py-2.5 px-4 text-center">
                             <select value={p.ad_type ?? 'main'} onChange={(e) => changeAdType(p.id, e.target.value)}
                               className="h-8 px-2 border border-gray-300 text-[12px] focus:border-accent focus:outline-none">
@@ -774,11 +787,40 @@ export default function AdminPage() {
                         </tr>
                       );
                     })}
-                    {live.length === 0 && <tr><td colSpan={7} className="py-8 text-center text-zinc-400">노출 중인 {label}가 없습니다.</td></tr>}
+                    {live.length === 0 && <tr><td colSpan={8} className="py-8 text-center text-zinc-400">노출 중인 {label}가 없습니다.</td></tr>}
                   </tbody>
                 </table>
               </div>
             </div>
+
+            {/* 만료됨 — 기간이 끝나 광고칸·목록에서 내려간 광고. 기간(일)을 넣어 재게시(오늘부터 다시 노출) */}
+            {expired.length > 0 && (
+              <div className="card p-4 border border-rose-200 bg-rose-50/40">
+                <h3 className="text-[13px] font-bold text-rose-800 mb-1">⛔ {label} 만료됨 ({expired.length})</h3>
+                <p className="text-[11px] text-rose-700/70 mb-3">기간이 끝나 광고칸·매입찾기 목록에서 내려간 광고입니다. 기간(일)을 넣어 재게시하면 오늘부터 다시 노출됩니다.</p>
+                <div className="space-y-2">
+                  {expired.map(p => {
+                    const exp = p.expires_at ? new Date(p.expires_at) : null;
+                    return (
+                      <div key={p.id} className="flex flex-wrap items-center gap-2 bg-white border border-rose-200 px-3 py-2">
+                        <span className="text-[12px] font-medium flex-1 min-w-[140px] truncate">
+                          {p.title} <span className="text-zinc-400 font-normal">/ {p.author?.name || '비회원'} / {getCategoryName(p.category)}{exp ? ` / ${exp.toLocaleDateString('ko-KR')} 만료` : ''}</span>
+                        </span>
+                        {[20, 25, 30].map(d => (
+                          <button key={d} type="button" onClick={() => approveExtension(p.id, d)}
+                            className="h-8 px-2.5 text-[12px] font-bold border border-rose-300 hover:bg-rose-100">{d}일</button>
+                        ))}
+                        <input type="number" min={1} placeholder="직접(일)" value={approveDaysMap[p.id] ?? ''}
+                          onChange={e => setApproveDaysMap(m => ({ ...m, [p.id]: e.target.value }))} className="input h-8 w-20" />
+                        <button type="button" onClick={() => approveExtension(p.id, Number(approveDaysMap[p.id]))}
+                          className="h-8 px-3 text-[12px] font-bold bg-accent text-white hover:bg-blue-700">재게시</button>
+                        <button type="button" onClick={() => deletePost(p.id)} className="h-8 px-1.5 text-red-400 hover:text-red-600"><Trash2 size={14} /></button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         );
       })()}
