@@ -257,9 +257,10 @@ function WritePostContent() {
         tags: [form.type === 'sell' ? sellSendText : '', form.region ? `#${form.region}` : '', ...dmTags].filter(Boolean),
       };
 
-      // 팝니다·삽니다 모두 percentage(판매율/매입률) 사용, 금액 필드는 사용 안 함
+      // 팝니다·삽니다 모두 percentage(판매율/매입률) 사용
+      // face_value는 팝니다=상품권 금액, 삽니다=구입한도로 공용 (둘은 글마다 배타적)
       payload.percentage = percentage;
-      payload.face_value = null;
+      payload.face_value = Number(String(form.faceValue).replace(/[^0-9]/g, '')) || null;
       payload.price = null;
       if (form.type === 'sell') {
         payload.send_month = sendMonth || null;
@@ -453,6 +454,12 @@ function WritePostContent() {
                   <p className="text-[11px] text-accent mt-1 font-medium">표시: {sendMonth}월 {sendDay}일 발송</p>
                 )}
               </div>
+              <div>
+                <label className="block text-[12px] font-medium text-zinc-600 mb-1">상품권 금액 (원) <span className="text-[11px] text-zinc-400 font-normal">(선택)</span></label>
+                <input type="number" min={0} value={form.faceValue} onChange={(e) => handleChange('faceValue', e.target.value)}
+                  placeholder="예: 500000" className="input" />
+                {Number(form.faceValue) > 0 && <p className="text-[11px] text-accent mt-1 font-medium">{Number(form.faceValue).toLocaleString()}원</p>}
+              </div>
             </>
           ) : (
             <>
@@ -530,11 +537,17 @@ function WritePostContent() {
                 <input type="text" value={form.delivery} onChange={(e) => handleChange('delivery', e.target.value)}
                   placeholder="예: 24시간 / 평일 09:00~18:00" className="input" />
               </div>
+              <div>
+                <label className="block text-[12px] font-medium text-zinc-600 mb-1">구입한도 (원) <span className="text-[11px] text-zinc-400 font-normal">(선택)</span></label>
+                <input type="number" min={0} value={form.faceValue} onChange={(e) => handleChange('faceValue', e.target.value)}
+                  placeholder="예: 10000000 (1천만원)" className="input" />
+                {Number(form.faceValue) > 0 && <p className="text-[11px] text-accent mt-1 font-medium">{Number(form.faceValue).toLocaleString()}원</p>}
+              </div>
             </>
           )}
 
           <div>
-            <label className="block text-[12px] font-medium text-zinc-600 mb-1">배송 방법 <span className="text-[11px] text-zinc-400 font-normal">(중복 선택 가능)</span></label>
+            <label className="block text-[12px] font-medium text-zinc-600 mb-1">{form.type === 'buy' ? '매입 방법' : '배송 방법'} <span className="text-[11px] text-zinc-400 font-normal">(중복 선택 가능)</span></label>
             <div className="flex gap-2">
               {DELIVERY_METHODS.map(opt => {
                 const selected = deliveryList.includes(opt.value);

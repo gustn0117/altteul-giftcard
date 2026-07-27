@@ -318,7 +318,14 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                     <InfoRow label={isSell ? '판매가' : '희망가'} value={`${(post.price ?? 0).toLocaleString()}원`} />
                   </>
                 )}
-                <InfoRow label="배송 방법" value={deliveryMethodText(post.delivery_method)} />
+                {post.face_value ? (
+                  <InfoRow
+                    label={isSell ? '상품권 금액' : '구입한도'}
+                    value={`${post.face_value.toLocaleString()}원`}
+                  />
+                ) : null}
+                <InfoRow label={isSell ? '배송 방법' : '매입 방법'} value={deliveryMethodText(post.delivery_method)} />
+                <InfoRow label="지역" value={post.region || '전국'} />
                 {isSell && <InfoRow label="발송 안내" value={post.delivery || '판매일로부터 7일 이내 발송'} />}
               </dl>
             </div>
