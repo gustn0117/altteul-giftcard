@@ -22,7 +22,7 @@ const ALL_SLOTS = Object.keys(AD_SLOT_LABELS) as AdSlot[];
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [pw, setPw] = useState('');
-  const [tab, setTab] = useState<'overview' | 'users' | 'posts' | 'notices' | 'premium' | 'ads' | 'community' | 'national' | 'main' | 'recommend' | 'expired'>('overview');
+  const [tab, setTab] = useState<'overview' | 'users' | 'posts' | 'notices' | 'premium' | 'ads' | 'community' | 'national' | 'main' | 'recommend' | 'expired' | 'writepost'>('overview');
   // 회원 목록 일반/업체 구분 필터
   const [userFilter, setUserFilter] = useState<'all' | 'normal' | 'business'>('all');
   // 업체 소개 편집 모달
@@ -43,6 +43,14 @@ export default function AdminPage() {
   const [buyContactPublic, setBuyContactPublic] = useState(true);
   const [settingBusy, setSettingBusy] = useState(false);
   const [approveDaysMap, setApproveDaysMap] = useState<Record<string, string>>({});
+  // 관리자 직접 등록 폼 (폰 인증 없이 번호 직접 입력)
+  const [directForm, setDirectForm] = useState({
+    type: 'sell' as 'sell' | 'buy', category: '', region: '', title: '', percentage: '',
+    guestName: '', guestPhone: '', description: '', sendMonth: '', sendDay: '',
+    delivery: '', mobile: true, parcel: true, direct: true,
+    adType: 'main' as 'national' | 'main' | 'recommend', days: '30',
+  });
+  const [directBusy, setDirectBusy] = useState(false);
   const [loading, setLoading] = useState(() => !getCache('admin_users'));
 
   // Chat viewer
@@ -341,6 +349,64 @@ export default function AdminPage() {
     );
   }
 
+  // 관리자 직접 등록 — 폰 인증 게이트를 거치지 않고 번호를 직접 넣어 바로 게시.
+  // 팝니다·삽니다 모두 즉시 노출(approved_at=now). 삽니다는 고른 광고칸에 바로 뜬다.
+  const submitDirectPost = async () => {
+    const f = directForm;
+    const pct = Number(f.percentage);
+    const phone = f.guestPhone.replace(/[^0-9]/g, '');
+    if (!f.title.trim()) return alert('제목을 입력하세요.');
+    if (!f.category) return alert('상품권 종류를 선택하세요.');
+    if (!f.region) return alert('지역을 선택하세요.');
+    if (!pct || pct <= 0 || pct > 200) return alert(`${f.type === 'sell' ? '판매율' : '매입률'}(%)을 1~200으로 입력하세요.`);
+    if (!f.guestName.trim()) return alert(f.type === 'sell' ? '판매자명을 입력하세요.' : '업체명을 입력하세요.');
+    if (phone.length < 9) return alert('전화번호를 정확히 입력하세요.');
+    const dmArr = (['mobile', 'parcel', 'direct'] as const).filter((k) => f[k]);
+    if (dmArr.length === 0) return alert('배송/매입 방법을 1개 이상 선택하세요.');
+
+    setDirectBusy(true);
+    const now = new Date();
+    const nowIso = now.toISOString();
+    const isSell = f.type === 'sell';
+    const sm = Number(f.sendMonth) || null;
+    const sd = Number(f.sendDay) || null;
+    const sellSendText = isSell && sm && sd ? `${sm}월 ${sd}일 발송` : '';
+    const dmTagMap: Record<string, string> = { mobile: '#모바일', parcel: '#택배', direct: '#직접만남' };
+    const dmTags = dmArr.map((v) => dmTagMap[v]);
+    const days = Number(f.days) || 30;
+
+    const payload: Record<string, unknown> = {
+      type: f.type,
+      title: f.title.trim(),
+      category: f.category,
+      percentage: pct,
+      region: f.region,
+      delivery_method: dmArr.join(','),
+      delivery: isSell ? (sellSendText || '발송일 협의') : (f.delivery.trim() || '협의'),
+      description: f.description.trim() || null,
+      tags: [isSell ? sellSendText : '', `#${f.region}`, ...dmTags].filter(Boolean),
+      send_month: isSell ? sm : null,
+      send_day: isSell ? sd : null,
+      author_id: null,
+      guest_name: f.guestName.trim(),
+      guest_phone: f.guestPhone.trim(),
+      guest_password: Math.random().toString(36).slice(2, 8), // 관리자 등록글 임의 비번
+      blind_locked: false,
+      is_active: true,
+      approved_at: nowIso, // 관리자 등록이므로 즉시 노출(팝니다·삽니다 모두)
+      // 팝니다: 60일 뒤 자동삭제 대상이므로 만료 넉넉히 / 삽니다: 관리자가 정한 게시기간
+      expires_at: new Date(now.getTime() + (isSell ? 60 : days) * 86400000).toISOString(),
+    };
+    if (!isSell) payload.ad_type = f.adType;
+
+    const { error } = await supabase.from('posts').insert(payload);
+    setDirectBusy(false);
+    if (error) return alert('등록 실패: ' + error.message);
+    alert(`${isSell ? '판매글' : '구매글(광고)'}이 등록되었습니다.`);
+    setDirectForm({ ...f, title: '', percentage: '', guestName: '', guestPhone: '', description: '', sendMonth: '', sendDay: '', delivery: '' });
+    fetchData();
+  };
+
   // 삽니다 글 = 광고. 승인되어 실제 노출 중인 것만 종류별로 센다.
   // 실제 노출 중 = 승인 & 미만료 (만료 광고는 광고칸에서 내려가므로 카운트에서 제외)
   const liveAds = posts.filter((p) => p.type === 'buy' && p.approved_at && !p.deleted_at && (!p.expires_at || new Date(p.expires_at).getTime() > Date.now()));
@@ -352,6 +418,7 @@ export default function AdminPage() {
 
   const tabs = [
     { key: 'overview' as const, label: '대시보드', icon: LayoutDashboard, count: null as number | null },
+    { key: 'writepost' as const, label: '직접등록', icon: Plus, count: null as number | null },
     { key: 'users' as const, label: '회원', icon: Users, count: users.length },
     { key: 'posts' as const, label: '총 게시글', icon: FileText, count: posts.filter((p) => !p.deleted_at).length },
     { key: 'notices' as const, label: '공지', icon: Bell, count: notices.length },
@@ -827,6 +894,118 @@ export default function AdminPage() {
           </div>
         );
       })()}
+
+      {/* ─── 글 직접 등록 (폰 인증 없이) ─── */}
+      {!loading && tab === 'writepost' && (
+        <div className="max-w-3xl space-y-4">
+          <div className="card p-3 text-[12px] text-gray-600">
+            <b className="text-gray-900">글 직접 등록</b> — 휴대폰 인증 없이 번호를 직접 입력해 팝니다/삽니다 글을 바로 게시합니다. (관리자 전용, 즉시 노출)
+          </div>
+          <div className="card p-4 space-y-3">
+            <div className="flex gap-2">
+              {(['sell', 'buy'] as const).map(t => (
+                <button key={t} type="button" onClick={() => setDirectForm(f => ({ ...f, type: t }))}
+                  className={`flex-1 h-10 text-[13px] font-bold rounded-md border transition-colors ${directForm.type === t ? 'border-accent bg-accent/5 text-accent' : 'border-gray-200 text-gray-600 hover:border-accent'}`}>
+                  {t === 'sell' ? '팝니다 (판매글)' : '삽니다 (매입광고)'}
+                </button>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block">
+                <span className="text-[12px] text-gray-500">상품권 종류 *</span>
+                <select value={directForm.category} onChange={e => setDirectForm(f => ({ ...f, category: e.target.value }))} className="input mt-1">
+                  <option value="">선택</option>
+                  {categories.filter(c => c.id !== 'all' || directForm.type === 'buy').map(c => (
+                    <option key={c.id} value={c.id}>{c.id === 'all' ? '모든 상품권' : c.name}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="block">
+                <span className="text-[12px] text-gray-500">지역 *</span>
+                <select value={directForm.region} onChange={e => setDirectForm(f => ({ ...f, region: e.target.value }))} className="input mt-1">
+                  <option value="">선택</option>
+                  {['전국', '서울', '경기', '인천', '대전', '대구', '부산', '광주', '울산', '세종', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'].map(r => <option key={r} value={r}>{r}</option>)}
+                </select>
+              </label>
+            </div>
+
+            <label className="block">
+              <span className="text-[12px] text-gray-500">{directForm.type === 'buy' ? '상단문구 *' : '제목 *'}</span>
+              <input value={directForm.title} onChange={e => setDirectForm(f => ({ ...f, title: e.target.value }))} className="input mt-1"
+                placeholder={directForm.type === 'buy' ? '예: 모든 상품권 최고가 매입' : '예: 신세계 50만원 팝니다'} />
+            </label>
+
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block">
+                <span className="text-[12px] text-gray-500">{directForm.type === 'sell' ? '판매율(%) *' : '매입률(%) *'}</span>
+                <input type="number" value={directForm.percentage} onChange={e => setDirectForm(f => ({ ...f, percentage: e.target.value }))} className="input mt-1" placeholder="예: 90" />
+              </label>
+              {directForm.type === 'buy' ? (
+                <label className="block">
+                  <span className="text-[12px] text-gray-500">매입 가능 시간</span>
+                  <input value={directForm.delivery} onChange={e => setDirectForm(f => ({ ...f, delivery: e.target.value }))} className="input mt-1" placeholder="예: 24시간" />
+                </label>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="block"><span className="text-[12px] text-gray-500">발송 월</span>
+                    <input type="number" min={1} max={12} value={directForm.sendMonth} onChange={e => setDirectForm(f => ({ ...f, sendMonth: e.target.value }))} className="input mt-1" placeholder="월" /></label>
+                  <label className="block"><span className="text-[12px] text-gray-500">발송 일</span>
+                    <input type="number" min={1} max={31} value={directForm.sendDay} onChange={e => setDirectForm(f => ({ ...f, sendDay: e.target.value }))} className="input mt-1" placeholder="일" /></label>
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block">
+                <span className="text-[12px] text-gray-500">{directForm.type === 'sell' ? '판매자명 *' : '업체명 *'}</span>
+                <input value={directForm.guestName} onChange={e => setDirectForm(f => ({ ...f, guestName: e.target.value }))} className="input mt-1" />
+              </label>
+              <label className="block">
+                <span className="text-[12px] text-gray-500">전화번호 * <span className="text-accent font-bold">(인증 없이 직접 입력)</span></span>
+                <input value={directForm.guestPhone} onChange={e => setDirectForm(f => ({ ...f, guestPhone: e.target.value }))} className="input mt-1" placeholder="010-0000-0000" />
+              </label>
+            </div>
+
+            <div>
+              <span className="text-[12px] text-gray-500">{directForm.type === 'buy' ? '매입 방법' : '배송 방법'} *</span>
+              <div className="flex gap-4 mt-1.5">
+                {([['mobile', '모바일'], ['parcel', '택배'], ['direct', '직접만남']] as const).map(([k, label]) => (
+                  <label key={k} className="flex items-center gap-1.5 text-[13px] cursor-pointer">
+                    <input type="checkbox" checked={directForm[k]} onChange={e => setDirectForm(f => ({ ...f, [k]: e.target.checked }))} /> {label}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {directForm.type === 'buy' && (
+              <div className="grid grid-cols-2 gap-3">
+                <label className="block">
+                  <span className="text-[12px] text-gray-500">광고 종류 *</span>
+                  <select value={directForm.adType} onChange={e => setDirectForm(f => ({ ...f, adType: e.target.value as 'national' | 'main' | 'recommend' }))} className="input mt-1">
+                    {AD_TYPES.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
+                  </select>
+                </label>
+                <label className="block">
+                  <span className="text-[12px] text-gray-500">게시 기간(일) *</span>
+                  <input type="number" min={1} value={directForm.days} onChange={e => setDirectForm(f => ({ ...f, days: e.target.value }))} className="input mt-1" />
+                </label>
+              </div>
+            )}
+
+            <label className="block">
+              <span className="text-[12px] text-gray-500">상세 설명</span>
+              <textarea value={directForm.description} onChange={e => setDirectForm(f => ({ ...f, description: e.target.value }))} className="input mt-1 h-24" />
+            </label>
+
+            <button type="button" onClick={submitDirectPost} disabled={directBusy}
+              className="w-full h-11 bg-accent text-white font-bold rounded-md hover:bg-blue-700 disabled:opacity-50">
+              {directBusy ? '등록 중...' : (directForm.type === 'sell' ? '판매글 즉시 등록' : '매입광고 즉시 등록')}
+            </button>
+            {directForm.type === 'sell' && <p className="text-[11px] text-gray-400 text-center">※ 판매글은 작성 60일 후 자동 삭제됩니다.</p>}
+          </div>
+        </div>
+      )}
 
       {/* ─── 만료 광고 (전 종류 통합) ─── */}
       {!loading && tab === 'expired' && (

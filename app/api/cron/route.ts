@@ -5,7 +5,7 @@ import { createServiceClient } from '@/lib/supabase';
  * 주기적으로 호출되는 cron 엔드포인트.
  * - 만료 임박 알림 (글: 1시간 전, 배너: 3일 전)
  * - 만료된 글/배너를 블라인드 처리
- * - 30일 지난 팝니다 글을 soft-delete
+ * - 60일 지난 팝니다 글을 soft-delete
  *
  * 인증: ADMIN_SECRET 헤더 또는 Bearer 토큰
  * 호출 예: curl -H "x-cron-secret: $ADMIN_SECRET" https://altteul-giftcard.hsweb.pics/api/cron
@@ -33,7 +33,7 @@ async function runCron() {
   const nowIso = now.toISOString();
   const inOneHour = new Date(now.getTime() + 3600 * 1000).toISOString();
   const inThreeDays = new Date(now.getTime() + 3 * 86400 * 1000).toISOString();
-  const thirtyDaysAgo = new Date(now.getTime() - 30 * 86400 * 1000).toISOString();
+  const sixtyDaysAgo = new Date(now.getTime() - 60 * 86400 * 1000).toISOString();
 
   const result: Record<string, number> = {
     ads_expired: 0,
@@ -70,13 +70,13 @@ async function runCron() {
     result.posts_notified = noties.length;       // 실제 알림 발송 건수 (비회원 글은 제외되므로 다를 수 있음)
   }
 
-  // ── 2. 30일 지난 팝니다 글 soft-delete ──
+  // ── 2. 60일 지난 팝니다 글 soft-delete ──
   const { data: toDelete } = await supabase
     .from('posts')
     .select('id')
     .eq('type', 'sell')
     .is('deleted_at', null)
-    .lte('created_at', thirtyDaysAgo);
+    .lte('created_at', sixtyDaysAgo);
   if (toDelete && toDelete.length > 0) {
     const ids = toDelete.map((p) => p.id);
     await supabase.from('posts').update({ deleted_at: nowIso }).in('id', ids);
