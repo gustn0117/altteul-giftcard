@@ -42,6 +42,8 @@ export default function AdminPage() {
   const [visitors, setVisitors] = useState<{ total: number; today: number; last30: { date: string; count: number }[] }>({ total: 0, today: 0, last30: [] });
   const [buyContactPublic, setBuyContactPublic] = useState(true);
   const [settingBusy, setSettingBusy] = useState(false);
+  const [footerInfo, setFooterInfo] = useState('');
+  const [footerSaving, setFooterSaving] = useState(false);
   const [approveDaysMap, setApproveDaysMap] = useState<Record<string, string>>({});
   // 관리자 직접 등록 폼 (폰 인증 없이 번호 직접 입력)
   const [directForm, setDirectForm] = useState({
@@ -154,9 +156,30 @@ export default function AdminPage() {
     if (!authed) return;
     fetch('/api/admin/settings')
       .then((r) => r.json())
-      .then((d) => { if (typeof d.buy_contact_public === 'boolean') setBuyContactPublic(d.buy_contact_public); })
+      .then((d) => {
+        if (typeof d.buy_contact_public === 'boolean') setBuyContactPublic(d.buy_contact_public);
+        if (typeof d.footer_info === 'string') setFooterInfo(d.footer_info);
+      })
       .catch(() => {});
   }, [authed]);
+
+  const saveFooterInfo = async () => {
+    if (footerSaving) return;
+    setFooterSaving(true);
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'footer_info', value: footerInfo }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '저장 실패');
+      alert('하단 사업자 정보를 저장했습니다. (모든 화면 하단에 반영)');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '저장 실패');
+    } finally {
+      setFooterSaving(false);
+    }
+  };
 
   const toggleBuyContactPublic = async () => {
     if (settingBusy) return;
@@ -545,6 +568,22 @@ export default function AdminPage() {
                 aria-label="삽니다 연락처 공개 토글"
               >
                 <span className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white transition-transform ${buyContactPublic ? 'translate-x-5' : ''}`} />
+              </button>
+            </div>
+          </div>
+
+          {/* 하단 사업자 정보 (푸터) 편집 */}
+          <div className="card p-4">
+            <p className="text-[13px] font-semibold text-zinc-800">하단 사업자 정보 (푸터)</p>
+            <p className="text-[11.5px] text-zinc-500 mt-0.5 mb-2">홈·판매글·구매글 등 <b>모든 화면 맨 아래</b>에 표시됩니다. 상호명·대표자·사업자등록번호·통신판매업신고·주소 등을 자유롭게 작성하세요. (줄바꿈 그대로 나옵니다)</p>
+            <textarea value={footerInfo} onChange={(e) => setFooterInfo(e.target.value)} rows={5}
+              className="input w-full text-[12.5px] leading-relaxed"
+              placeholder={'예)\n상호명 예판상품권 · 대표자 홍길동 · 사업자등록번호 000-00-00000\n통신판매업신고 제0000-서울강남-00000호 · 서울특별시 강남구 · 고객센터 1599-9687'} />
+            <div className="flex items-center justify-between mt-2">
+              <span className="text-[11px] text-zinc-400">비워두면 기본 문구가 표시됩니다.</span>
+              <button type="button" onClick={saveFooterInfo} disabled={footerSaving}
+                className="h-9 px-4 text-[12px] font-bold bg-accent text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
+                {footerSaving ? '저장 중...' : '저장'}
               </button>
             </div>
           </div>

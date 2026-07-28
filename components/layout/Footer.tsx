@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Phone, Clock, ShieldCheck, ExternalLink } from 'lucide-react';
+import FooterInfoText from './FooterInfoText';
 
 const SECTIONS = [
   {
@@ -39,6 +40,19 @@ const TRUST_LINKS = [
 
 export default function Footer() {
   return (
+    <>
+    {/* 모바일 하단 사업자 정보 — 데스크탑 풀 푸터는 숨김이라 별도로 표시 (홈·판매글·구매글 등 전 화면) */}
+    <footer className="md:hidden border-t border-gray-200 bg-gray-50 px-5 pt-6 pb-24">
+      <Link href="/" className="inline-block">
+        <Image src="/logo.png" alt="예판상품권" width={612} height={277} className="h-9 w-auto object-contain" />
+      </Link>
+      <FooterInfoText className="text-[11px] text-gray-400 leading-relaxed mt-3" />
+      <p className="text-[10.5px] text-gray-400 mt-3">
+        © 2026 예판상품권. All rights reserved.
+        <Link href="/admin" className="ml-2 text-gray-300">· 관리자</Link>
+      </p>
+    </footer>
+
     <footer className="border-t border-gray-200 bg-gray-50 mt-auto hidden md:block">
       <div className="container-main py-10">
         <div className="grid grid-cols-12 gap-8">
@@ -116,16 +130,7 @@ export default function Footer() {
         {/* 사업자 정보 + 카피라이트 */}
         <div className="mt-8 pt-6 border-t border-gray-200">
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="text-[10.5px] text-gray-400 leading-relaxed">
-              <p>
-                <span className="font-medium text-gray-500">예판상품권</span> · 대표 운영팀 ·
-                사업자등록번호 255-62-00840 · 통신판매업신고 제2025-서울강남-03876호
-              </p>
-              <p className="mt-1">
-                서울특별시 강남구 · 팩스 02-543-4569 · 예판상품권은 광고 플랫폼만 제공할 뿐 직접 매입·중개를 하지 않으며,
-                등록 업체가 제공하는 정보로 인한 손해에 책임지지 않습니다.
-              </p>
-            </div>
+            <FooterInfoText className="text-[10.5px] text-gray-400 leading-relaxed max-w-2xl" />
             <div className="text-[10.5px] text-gray-400 whitespace-nowrap">
               © 2026 예판상품권. All rights reserved.
               <Link href="/admin" className="ml-2 text-gray-300 hover:text-accent">· 관리자</Link>
@@ -134,5 +139,6 @@ export default function Footer() {
         </div>
       </div>
     </footer>
+    </>
   );
 }

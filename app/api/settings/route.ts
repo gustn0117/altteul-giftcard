@@ -12,5 +12,7 @@ export async function GET() {
     buy_contact_public: map.buy_contact_public !== 'false',
     // 문자 인증이 실제로 동작 가능할 때만(=SOLAPI 키 설정됨) 또는 개발환경(테스트 모드 사용 가능)에서만 강제
     phoneVerifyRequired: isSmsConfigured() || process.env.NODE_ENV !== 'production',
+    // 하단 사업자 정보 (관리자에서 수정). 비어있으면 프론트에서 기본문구 사용
+    footer_info: map.footer_info ?? '',
   });
 }
