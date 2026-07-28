@@ -46,9 +46,10 @@ export default function AdminPage() {
   // 관리자 직접 등록 폼 (폰 인증 없이 번호 직접 입력)
   const [directForm, setDirectForm] = useState({
     type: 'sell' as 'sell' | 'buy', category: '', region: '', title: '', percentage: '',
-    guestName: '', guestPhone: '', description: '', sendMonth: '', sendDay: '',
+    faceValue: '', guestName: '', guestPhone: '', description: '', sendMonth: '', sendDay: '',
     delivery: '', mobile: true, parcel: true, direct: true,
     adType: 'main' as 'national' | 'main' | 'recommend', days: '30',
+    imageUrl: '', centerLine1: '', centerLine2: '',
   });
   const [directBusy, setDirectBusy] = useState(false);
   const [loading, setLoading] = useState(() => !getCache('admin_users'));
@@ -380,6 +381,7 @@ export default function AdminPage() {
       title: f.title.trim(),
       category: f.category,
       percentage: pct,
+      face_value: Number(String(f.faceValue).replace(/[^0-9]/g, '')) || null, // 팝니다=상품권 금액, 삽니다=구입한도
       region: f.region,
       delivery_method: dmArr.join(','),
       delivery: isSell ? (sellSendText || '발송일 협의') : (f.delivery.trim() || '협의'),
@@ -397,13 +399,17 @@ export default function AdminPage() {
       // 팝니다: 60일 뒤 자동삭제 대상이므로 만료 넉넉히 / 삽니다: 관리자가 정한 게시기간
       expires_at: new Date(now.getTime() + (isSell ? 60 : days) * 86400000).toISOString(),
     };
-    if (!isSell) payload.ad_type = f.adType;
+    if (!isSell) {
+      payload.ad_type = f.adType;
+      payload.image_url = f.imageUrl || null;                                                          // 광고박스 상단 이미지
+      payload.center_text = [f.centerLine1.trim(), f.centerLine2.trim()].filter(Boolean).join('\n') || null; // 중앙문구(최대 2줄)
+    }
 
     const { error } = await supabase.from('posts').insert(payload);
     setDirectBusy(false);
     if (error) return alert('등록 실패: ' + error.message);
     alert(`${isSell ? '판매글' : '구매글(광고)'}이 등록되었습니다.`);
-    setDirectForm({ ...f, title: '', percentage: '', guestName: '', guestPhone: '', description: '', sendMonth: '', sendDay: '', delivery: '' });
+    setDirectForm({ ...f, title: '', percentage: '', faceValue: '', guestName: '', guestPhone: '', description: '', sendMonth: '', sendDay: '', delivery: '', imageUrl: '', centerLine1: '', centerLine2: '' });
     fetchData();
   };
 
@@ -956,6 +962,13 @@ export default function AdminPage() {
               )}
             </div>
 
+            <label className="block">
+              <span className="text-[12px] text-gray-500">{directForm.type === 'sell' ? '상품권 금액(원)' : '구입한도(원)'} <span className="text-gray-400">(선택)</span></span>
+              <input type="number" min={0} value={directForm.faceValue} onChange={e => setDirectForm(f => ({ ...f, faceValue: e.target.value }))} className="input mt-1"
+                placeholder={directForm.type === 'sell' ? '예: 500000' : '예: 10000000 (1천만원)'} />
+              {Number(directForm.faceValue) > 0 && <p className="text-[11px] text-accent mt-1 font-medium">{Number(directForm.faceValue).toLocaleString()}원</p>}
+            </label>
+
             <div className="grid grid-cols-2 gap-3">
               <label className="block">
                 <span className="text-[12px] text-gray-500">{directForm.type === 'sell' ? '판매자명 *' : '업체명 *'}</span>
@@ -979,18 +992,32 @@ export default function AdminPage() {
             </div>
 
             {directForm.type === 'buy' && (
-              <div className="grid grid-cols-2 gap-3">
-                <label className="block">
-                  <span className="text-[12px] text-gray-500">광고 종류 *</span>
-                  <select value={directForm.adType} onChange={e => setDirectForm(f => ({ ...f, adType: e.target.value as 'national' | 'main' | 'recommend' }))} className="input mt-1">
-                    {AD_TYPES.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
-                  </select>
-                </label>
-                <label className="block">
-                  <span className="text-[12px] text-gray-500">게시 기간(일) *</span>
-                  <input type="number" min={1} value={directForm.days} onChange={e => setDirectForm(f => ({ ...f, days: e.target.value }))} className="input mt-1" />
-                </label>
-              </div>
+              <>
+                <div>
+                  <span className="text-[12px] text-gray-500">광고박스 상단 이미지 <span className="text-gray-400">(선택)</span></span>
+                  <div className="mt-1">
+                    <ImageUploader value={directForm.imageUrl} onChange={(url) => setDirectForm(f => ({ ...f, imageUrl: url }))} folder="ads"
+                      hint="가로형 이미지 권장(예: 640×400). 광고박스 상단에 표시되고 그 위에 중앙문구가 흰 글씨로 겹칩니다. 안 올리면 어두운 배경." />
+                  </div>
+                </div>
+                <div>
+                  <span className="text-[12px] text-gray-500">중앙문구 <span className="text-gray-400">(최대 2줄, 선택)</span></span>
+                  <input type="text" maxLength={16} value={directForm.centerLine1} onChange={e => setDirectForm(f => ({ ...f, centerLine1: e.target.value }))} className="input mt-1 mb-2" placeholder="1줄 (예: 24시간 신속 매입)" />
+                  <input type="text" maxLength={16} value={directForm.centerLine2} onChange={e => setDirectForm(f => ({ ...f, centerLine2: e.target.value }))} className="input" placeholder="2줄 (선택)" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="block">
+                    <span className="text-[12px] text-gray-500">광고 종류 *</span>
+                    <select value={directForm.adType} onChange={e => setDirectForm(f => ({ ...f, adType: e.target.value as 'national' | 'main' | 'recommend' }))} className="input mt-1">
+                      {AD_TYPES.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
+                    </select>
+                  </label>
+                  <label className="block">
+                    <span className="text-[12px] text-gray-500">게시 기간(일) *</span>
+                    <input type="number" min={1} value={directForm.days} onChange={e => setDirectForm(f => ({ ...f, days: e.target.value }))} className="input mt-1" />
+                  </label>
+                </div>
+              </>
             )}
 
             <label className="block">
