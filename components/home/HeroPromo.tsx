@@ -66,7 +66,7 @@ export default function HeroPromo() {
             {data.image_url && (
               <div className="hidden md:block w-full bg-white">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={data.image_url} alt="" className="block w-full h-auto" />
+                <img src={data.image_url} alt="예판상품권 - 상품권 예판·예약판매 안전 직거래" className="block w-full h-auto" />
               </div>
             )}
             {/* 모바일 이미지 — 자연 비율 그대로 */}
@@ -75,7 +75,7 @@ export default function HeroPromo() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={data.image_url_mobile || data.image_url || ''}
-                  alt=""
+                  alt="예판상품권 - 상품권 예판·예약판매 안전 직거래"
                   className="block w-full h-auto"
                 />
               </div>

@@ -8,15 +8,33 @@ import ScrollToTop from "@/components/layout/ScrollToTop";
 import { Suspense } from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CallModalProvider } from "@/contexts/CallModalContext";
-import { SITE_URL, SITE_DESC } from "@/lib/site";
+import { SITE_URL, SITE_DESC, SITE_KEYWORDS, SITE_NAME } from "@/lib/site";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "예판상품권 - 상품권 매입/매도 중개 플랫폼",
+  title: {
+    default: "예판상품권 | 상품권 예판·예약판매 안전 직거래",
+    template: "%s | 예판상품권",
+  },
   description: SITE_DESC,
+  keywords: SITE_KEYWORDS,
+  applicationName: SITE_NAME,
   alternates: {
     canonical: "/",
     types: { "application/rss+xml": `${SITE_URL}/rss.xml` },
+  },
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    locale: "ko_KR",
+    url: SITE_URL,
+    title: "예판상품권 | 상품권 예판·예약판매 안전 직거래",
+    description: SITE_DESC,
+  },
+  twitter: {
+    card: "summary",
+    title: "예판상품권 | 상품권 예판·예약판매 안전 직거래",
+    description: SITE_DESC,
   },
 };
 

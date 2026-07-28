@@ -9,6 +9,34 @@ import HomeAside from '@/components/layout/HomeAside';
 import AdSection from '@/components/home/AdSection';
 import SellLineAds from '@/components/home/SellLineAds';
 import RecommendRail from '@/components/home/RecommendRail';
+import { SITE_URL, SITE_DESC } from '@/lib/site';
+
+// 검색엔진용 구조화 데이터 — '예판상품권'을 정식명, '상품권예판/상품권예약판매'를 별칭으로 등록
+const JSON_LD = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      name: '예판상품권',
+      alternateName: ['상품권예판', '상품권 예판', '상품권예약판매', '상품권 예약판매', '예판 상품권'],
+      url: SITE_URL,
+      description: SITE_DESC,
+      inLanguage: 'ko-KR',
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: `${SITE_URL}/search?q={search_term_string}`,
+        'query-input': 'required name=search_term_string',
+      },
+    },
+    {
+      '@type': 'Organization',
+      name: '예판상품권',
+      alternateName: ['상품권예판', '상품권예약판매'],
+      url: SITE_URL,
+      description: SITE_DESC,
+    },
+  ],
+};
 
 /**
  * 홈 광고칸 3종 — 전부 '관리자 승인된 삽니다(buy) 글'로 통일.
@@ -17,6 +45,10 @@ import RecommendRail from '@/components/home/RecommendRail';
 export default function Home() {
   return (
     <div className="bg-linear-to-b from-gray-50/50 to-white min-h-[calc(100vh-200px)] pb-3 md:pb-8">
+      {/* 검색엔진 구조화 데이터 */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }} />
+      {/* 검색 노출용 핵심 제목 (화면에는 이미지 히어로가 있으므로 스크린리더/검색엔진용 H1) */}
+      <h1 className="sr-only">예판상품권 · 상품권예판 · 상품권예약판매 — 상품권 예판(예약판매) 안전 직거래 플랫폼</h1>
       <div className="container-wide pt-1 md:pt-3">
         {/* PC: 좌(최근 본 업체) · 중앙 · 우(오늘의 추천업체 2개 랜덤). 모바일은 중앙만.
             양옆 레일을 좁혀 중앙(메인/광고)을 최대한 넓게 확보한다. */}
