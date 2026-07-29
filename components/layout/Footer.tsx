@@ -42,12 +42,14 @@ export default function Footer() {
   return (
     <>
     {/* 모바일 하단 사업자 정보 — 데스크탑 풀 푸터는 숨김이라 별도로 표시 (홈·판매글·구매글 등 전 화면) */}
-    <footer className="md:hidden border-t border-gray-200 bg-gray-50 px-5 pt-6 pb-24">
-      <Link href="/" className="inline-block">
-        <Image src="/logo.png" alt="예판상품권" width={612} height={277} className="h-9 w-auto object-contain" />
+    <footer className="md:hidden border-t border-gray-200 bg-gray-50 px-5 pt-7 pb-24">
+      {/* 로고 — 1.5배 확대 + 가운데 정렬 */}
+      <Link href="/" className="block">
+        <Image src="/logo.png" alt="예판상품권" width={612} height={277} className="h-14 w-auto object-contain mx-auto" />
       </Link>
-      <FooterInfoText className="text-[11px] text-gray-400 leading-relaxed mt-3" />
-      <p className="text-[10.5px] text-gray-400 mt-3">
+      {/* 사업자 정보 — 글씨 크게(약 2배) */}
+      <FooterInfoText className="text-[16px] text-gray-500 leading-relaxed mt-4" />
+      <p className="text-[13px] text-gray-400 mt-3">
         © 2026 예판상품권. All rights reserved.
         <Link href="/admin" className="ml-2 text-gray-300">· 관리자</Link>
       </p>
