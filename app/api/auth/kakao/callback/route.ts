@@ -27,8 +27,23 @@ export async function GET(req: NextRequest) {
     const supabase = createServiceClient();
     const nowIso = new Date().toISOString();
 
-    // 1) kakao_id로 기존 연결 회원 조회
+    // 1) kakao_id로 기존 연결 회원 조회 → 있으면 닉네임/이메일/전화번호 새로 들어온 것 갱신
     let { data: user } = await supabase.from('users').select('*').eq('kakao_id', profile.id).maybeSingle();
+    if (user) {
+      const patch: Record<string, unknown> = {};
+      if (profile.nickname && profile.nickname !== user.name) patch.name = profile.nickname;
+      if (profile.email && profile.email !== user.email) patch.email = profile.email;
+      if (profile.phone && !user.phone) {
+        patch.phone = profile.phone;
+        patch.phone_verified = true;
+        patch.phone_verified_at = nowIso;
+      }
+      if (Object.keys(patch).length > 0) {
+        patch.updated_at = nowIso;
+        await supabase.from('users').update(patch).eq('id', user.id);
+        user = { ...user, ...patch };
+      }
+    }
 
     // 2) 없으면 전화번호로 기존 일반회원 매칭(기존 회원이 카카오로 처음 로그인) → kakao_id 연결
     if (!user && profile.phone) {
