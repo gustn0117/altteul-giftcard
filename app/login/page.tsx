@@ -87,6 +87,26 @@ function LoginContent() {
         ))}
       </div>
 
+      {loginType === 'normal' && (
+        <>
+          <a
+            href="/api/auth/kakao/login"
+            className="mt-5 flex items-center justify-center gap-2 w-full h-12 rounded-lg font-bold text-[14.5px] hover:brightness-95 transition-all"
+            style={{ background: '#FEE500', color: '#191600' }}
+          >
+            <svg width="19" height="19" viewBox="0 0 18 18" aria-hidden>
+              <path fill="#191600" d="M9 1.5C4.86 1.5 1.5 4.15 1.5 7.42c0 2.12 1.4 3.98 3.51 5.03-.16.55-.57 2.02-.65 2.33-.1.39.14.39.3.28.12-.08 2.01-1.36 2.83-1.92.48.07.98.11 1.51.11 4.14 0 7.5-2.65 7.5-5.93S13.14 1.5 9 1.5z" />
+            </svg>
+            카카오로 시작하기
+          </a>
+          <div className="flex items-center gap-3 my-4">
+            <span className="flex-1 h-px bg-gray-200" />
+            <span className="text-[12px] text-gray-400">또는</span>
+            <span className="flex-1 h-px bg-gray-200" />
+          </div>
+        </>
+      )}
+
       <form onSubmit={handleLogin} className="space-y-3 mt-5">
         {loginType === 'normal' ? (
           <Field icon={Phone} label="휴대폰 번호" hint="가입 시 입력한 휴대폰 번호">
