@@ -2,10 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { createServiceClient } from '@/lib/supabase';
 import { kakaoExchangeToken, kakaoGetProfile, signBridgeToken } from '@/lib/kakao';
+import { SITE_URL } from '@/lib/site';
+
+// 리버스 프록시 뒤라서 req.nextUrl.origin이 0.0.0.0으로 잡힘 → 공개 도메인으로 복원.
+function publicOrigin(req: NextRequest): string {
+  const host = req.headers.get('x-forwarded-host') || req.headers.get('host') || '';
+  const proto = req.headers.get('x-forwarded-proto') || 'https';
+  if (host && !/^(0\.0\.0\.0|localhost|127\.|\[?::)/.test(host)) return `${proto}://${host}`;
+  return SITE_URL; // 공개 도메인(예판상품권.com) 폴백
+}
 
 // 카카오 인증 콜백 — 코드 교환 → 프로필 조회 → 회원 찾기/생성 → 브릿지 토큰으로 클라이언트 로그인 페이지 이동
 export async function GET(req: NextRequest) {
-  const origin = req.nextUrl.origin;
+  const origin = publicOrigin(req);
   const code = req.nextUrl.searchParams.get('code');
   const err = req.nextUrl.searchParams.get('error');
   if (err || !code) {
