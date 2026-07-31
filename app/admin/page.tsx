@@ -588,6 +588,20 @@ export default function AdminPage() {
             </div>
           </div>
 
+          {/* 데이터 다운로드 (CSV) */}
+          <div className="card p-4">
+            <p className="text-[13px] font-semibold text-zinc-800">데이터 다운로드 (CSV)</p>
+            <p className="text-[11.5px] text-zinc-500 mt-0.5 mb-2.5">회원·게시글 데이터를 엑셀(CSV)로 내려받아 백업·보관할 수 있습니다.</p>
+            <div className="flex flex-wrap gap-2">
+              <a href="/api/admin/export?table=users" className="h-9 px-3.5 inline-flex items-center gap-1.5 text-[12px] font-bold bg-zinc-800 text-white rounded-md hover:bg-zinc-900">
+                <FileText size={13} /> 회원 CSV
+              </a>
+              <a href="/api/admin/export?table=posts" className="h-9 px-3.5 inline-flex items-center gap-1.5 text-[12px] font-bold bg-zinc-800 text-white rounded-md hover:bg-zinc-900">
+                <FileText size={13} /> 게시글 CSV
+              </a>
+            </div>
+          </div>
+
           {/* 주요 지표 */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="card p-4">

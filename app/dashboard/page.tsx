@@ -10,10 +10,35 @@ import type { DBPost } from '@/lib/types';
 
 /** 거래(채팅) 기능이 없는 사이트라 거래 현황 대신 내 글/광고 현황을 보여준다 */
 export default function DashboardPage() {
-  const { user, isLoggedIn, ready } = useAuth();
+  const { user, isLoggedIn, ready, logout } = useAuth();
   const router = useRouter();
   const [posts, setPosts] = useState<DBPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showWithdraw, setShowWithdraw] = useState(false);
+  const [withdrawPw, setWithdrawPw] = useState('');
+  const [withdrawing, setWithdrawing] = useState(false);
+  const isKakao = !!(user as { kakao_id?: string | null } | null)?.kakao_id;
+
+  const handleWithdraw = async () => {
+    if (!user || withdrawing) return;
+    setWithdrawing(true);
+    try {
+      const res = await fetch('/api/auth/withdraw', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, password: withdrawPw }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '탈퇴에 실패했습니다.');
+      alert('회원탈퇴가 완료되었습니다. 그동안 이용해주셔서 감사합니다.');
+      logout();
+      router.push('/');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '탈퇴에 실패했습니다.');
+    } finally {
+      setWithdrawing(false);
+    }
+  };
 
   useEffect(() => {
     // 로그인 정보를 다 읽기 전에는 판단하지 않는다 (로그인했는데 /login 으로 튕기던 문제)
@@ -107,6 +132,38 @@ export default function DashboardPage() {
             })}
           </div>
         )}
+
+        {/* 회원탈퇴 */}
+        <div className="mt-8 pt-6 border-t border-gray-100">
+          {!showWithdraw ? (
+            <button onClick={() => setShowWithdraw(true)} className="text-[12px] text-gray-400 hover:text-red-500 transition-colors">
+              회원탈퇴
+            </button>
+          ) : (
+            <div className="card p-4 border border-red-200 bg-red-50/40">
+              <p className="text-[13px] font-bold text-red-700 mb-1">정말 탈퇴하시겠어요?</p>
+              <p className="text-[12px] text-gray-500 mb-3">
+                탈퇴하면 계정과 작성하신 글이 모두 삭제되며 복구할 수 없습니다.{isKakao ? ' (카카오 연결도 해제됩니다)' : ''}
+              </p>
+              {!isKakao && (
+                <input
+                  type="password" value={withdrawPw} onChange={(e) => setWithdrawPw(e.target.value)}
+                  placeholder="비밀번호를 입력해 확인" className="input w-full mb-3 text-[13px]"
+                />
+              )}
+              <div className="flex gap-2">
+                <button onClick={() => { setShowWithdraw(false); setWithdrawPw(''); }}
+                  className="flex-1 h-9 text-[12px] font-bold border border-gray-300 text-gray-600 rounded-md hover:bg-gray-100">
+                  취소
+                </button>
+                <button onClick={handleWithdraw} disabled={withdrawing}
+                  className="flex-1 h-9 text-[12px] font-bold bg-red-500 text-white rounded-md hover:bg-red-600 disabled:opacity-50">
+                  {withdrawing ? '처리 중...' : '탈퇴하기'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </DashboardLayout>
   );
