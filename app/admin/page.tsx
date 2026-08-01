@@ -51,7 +51,7 @@ export default function AdminPage() {
     faceValue: '', guestName: '', guestPhone: '', description: '', sendMonth: '', sendDay: '',
     delivery: '', mobile: true, parcel: true, direct: true,
     adType: 'main' as 'national' | 'main' | 'recommend', days: '30',
-    imageUrl: '', centerLine1: '', centerLine2: '', password: '1234',
+    imageUrl: '', centerLine1: '', centerLine2: '', password: '102030',
   });
   const [directBusy, setDirectBusy] = useState(false);
   const [loading, setLoading] = useState(() => !getCache('admin_users'));
@@ -415,7 +415,7 @@ export default function AdminPage() {
       author_id: null,
       guest_name: f.guestName.trim(),
       guest_phone: f.guestPhone.trim(),
-      guest_password: f.password.trim() || '1234', // 수정·완료 시 쓸 비번 (관리자가 지정)
+      guest_password: f.password.trim() || '102030', // 수정·완료 시 쓸 비번 (관리자가 지정)
       blind_locked: false,
       is_active: true,
       approved_at: nowIso, // 관리자 등록이므로 즉시 노출(팝니다·삽니다 모두)
