@@ -51,7 +51,7 @@ export default function AdminPage() {
     faceValue: '', guestName: '', guestPhone: '', description: '', sendMonth: '', sendDay: '',
     delivery: '', mobile: true, parcel: true, direct: true,
     adType: 'main' as 'national' | 'main' | 'recommend', days: '30',
-    imageUrl: '', centerLine1: '', centerLine2: '',
+    imageUrl: '', centerLine1: '', centerLine2: '', password: '1234',
   });
   const [directBusy, setDirectBusy] = useState(false);
   const [loading, setLoading] = useState(() => !getCache('admin_users'));
@@ -415,7 +415,7 @@ export default function AdminPage() {
       author_id: null,
       guest_name: f.guestName.trim(),
       guest_phone: f.guestPhone.trim(),
-      guest_password: Math.random().toString(36).slice(2, 8), // 관리자 등록글 임의 비번
+      guest_password: f.password.trim() || '1234', // 수정·완료 시 쓸 비번 (관리자가 지정)
       blind_locked: false,
       is_active: true,
       approved_at: nowIso, // 관리자 등록이므로 즉시 노출(팝니다·삽니다 모두)
@@ -1032,6 +1032,12 @@ export default function AdminPage() {
                 <input value={directForm.guestPhone} onChange={e => setDirectForm(f => ({ ...f, guestPhone: e.target.value }))} className="input mt-1" placeholder="010-0000-0000" />
               </label>
             </div>
+
+            <label className="block">
+              <span className="text-[12px] text-gray-500">수정·완료 비밀번호 *</span>
+              <input value={directForm.password} onChange={e => setDirectForm(f => ({ ...f, password: e.target.value }))} className="input mt-1" placeholder="예: 1234" />
+              <span className="text-[11px] text-gray-400 mt-1 block">등록 후 이 글을 <b>수정하거나 판매완료</b> 처리할 때 쓰는 비밀번호입니다. (기존 직접등록 글은 <b>1234</b>)</span>
+            </label>
 
             <div>
               <span className="text-[12px] text-gray-500">{directForm.type === 'buy' ? '매입 방법' : '배송 방법'} *</span>
