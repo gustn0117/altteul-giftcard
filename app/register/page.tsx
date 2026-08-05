@@ -82,6 +82,7 @@ function RegisterContent() {
     // 이메일 없이 휴대폰 번호가 아이디
     let payload: Record<string, unknown>;
     if (type === 'normal') {
+      if (!mok) return setError('휴대폰 본인확인을 먼저 완료해주세요.');
       if (!form.name.trim()) return setError('이름(닉네임)을 입력해주세요.');
       if (form.phone.replace(/[^0-9]/g, '').length < 10) return setError('휴대폰 번호를 정확히 입력해주세요. (로그인 시 사용됩니다)');
       payload = {
@@ -202,17 +203,22 @@ function RegisterContent() {
             </svg>
             카카오로 시작하기
           </a>
-          {/* 휴대폰 본인확인 (드림시큐리티 표준창) — 완료 시 실명·번호 자동입력 + 인증 배지 */}
+          {/* 휴대폰 본인확인 (드림시큐리티 표준창) — 개인 가입 필수. 완료 시 실명·번호 자동입력 + 인증 배지 */}
           <div className="mt-3">
             <MokVerifyButton
               usage="01001"
               onVerified={handleMokVerified}
               verified={mok ? { name: mok.name, phone: mok.phone } : null}
             />
+            {!mok && (
+              <p className="text-[11px] text-gray-400 mt-1.5 text-center">
+                가입에 필요한 본인확인이에요. 완료하면 실명·번호가 자동 입력됩니다.
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-3 my-4">
             <span className="flex-1 h-px bg-gray-200" />
-            <span className="text-[12px] text-gray-400">또는 직접 가입</span>
+            <span className="text-[12px] text-gray-400">{mok ? '가입 정보 입력' : '비밀번호 설정'}</span>
             <span className="flex-1 h-px bg-gray-200" />
           </div>
         </>
@@ -222,15 +228,15 @@ function RegisterContent() {
         {type === 'normal' ? (
           /* 개인 폼 */
           <>
-            <Field icon={User} label={mok ? '이름 (본인확인됨)' : '이름 / 닉네임'}>
+            <Field icon={User} label={mok ? '이름 (본인확인됨)' : '이름'}>
               <input type="text" value={form.name} onChange={(e) => change('name', e.target.value)}
-                placeholder="게시글에 표시될 이름" maxLength={30} className="auth-input" required
-                readOnly={!!mok} />
+                placeholder="본인확인 시 자동 입력됩니다" maxLength={30}
+                className={`auth-input ${mok ? '' : 'bg-gray-50 text-gray-400'}`} required readOnly />
             </Field>
             <Field icon={Phone} label={mok ? '휴대폰 번호 (본인확인됨)' : '휴대폰 번호'} hint="로그인 아이디로 사용됩니다.">
               <input type="tel" value={form.phone} onChange={(e) => change('phone', e.target.value)}
-                placeholder="010-0000-0000" className="auth-input" required autoComplete="tel"
-                readOnly={!!mok} />
+                placeholder="본인확인 시 자동 입력됩니다" autoComplete="tel"
+                className={`auth-input ${mok ? '' : 'bg-gray-50 text-gray-400'}`} required readOnly />
             </Field>
           </>
         ) : (
@@ -304,9 +310,11 @@ function RegisterContent() {
           <div className="px-3 py-2.5 bg-rose-50 border border-rose-200 text-[12px] text-rose-600 rounded-md">{error}</div>
         )}
 
-        <button type="submit" disabled={submitting}
+        <button type="submit" disabled={submitting || (type === 'normal' && !mok)}
           className="w-full h-11 bg-accent hover:bg-blue-700 text-white text-[13px] font-bold rounded-md transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
-          {submitting ? '처리 중...' : <>{type === 'normal' ? '가입하기' : '제휴 신청하기'} <ArrowRight size={14} /></>}
+          {submitting ? '처리 중...'
+            : (type === 'normal' && !mok) ? '휴대폰 본인확인 후 가입 가능'
+            : <>{type === 'normal' ? '가입하기' : '제휴 신청하기'} <ArrowRight size={14} /></>}
         </button>
 
         <div className="text-center text-[12px] text-gray-500 pt-1">
