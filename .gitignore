@@ -35,3 +35,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# 드림시큐리티 본인확인 키파일/가이드 (절대 커밋 금지)
+0805 본인인증/
+mok_keyInfo/
+*.dat
+개발가이드_*.pdf
+V3_본인확인_*.pdf

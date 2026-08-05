@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { User, Building2, Lock, Phone, MessageCircle, ArrowRight, CheckCircle2, HelpCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthShell from '@/components/auth/AuthShell';
+import MokVerifyButton, { type MokVerified } from '@/components/auth/MokVerifyButton';
 
 type RegisterType = 'normal' | 'business';
 
@@ -27,6 +28,13 @@ function RegisterContent() {
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [mok, setMok] = useState<MokVerified | null>(null);
+
+  const handleMokVerified = (v: MokVerified) => {
+    setMok(v);
+    setForm((p) => ({ ...p, name: v.name || p.name, phone: v.phone || p.phone }));
+    setError(null);
+  };
 
   // 공통 + 분기 필드
   const [form, setForm] = useState({
@@ -83,6 +91,7 @@ function RegisterContent() {
         type: 'normal',
         securityQuestion: form.securityQuestion,
         securityAnswer: form.securityAnswer.trim(),
+        ...(mok ? { mokVerificationId: mok.verificationId } : {}),
       };
     } else {
       const phoneDigits = form.phone.replace(/[^0-9]/g, '');
@@ -193,6 +202,14 @@ function RegisterContent() {
             </svg>
             카카오로 시작하기
           </a>
+          {/* 휴대폰 본인확인 (드림시큐리티 표준창) — 완료 시 실명·번호 자동입력 + 인증 배지 */}
+          <div className="mt-3">
+            <MokVerifyButton
+              usage="01001"
+              onVerified={handleMokVerified}
+              verified={mok ? { name: mok.name, phone: mok.phone } : null}
+            />
+          </div>
           <div className="flex items-center gap-3 my-4">
             <span className="flex-1 h-px bg-gray-200" />
             <span className="text-[12px] text-gray-400">또는 직접 가입</span>
@@ -205,13 +222,15 @@ function RegisterContent() {
         {type === 'normal' ? (
           /* 개인 폼 */
           <>
-            <Field icon={User} label="이름 / 닉네임">
+            <Field icon={User} label={mok ? '이름 (본인확인됨)' : '이름 / 닉네임'}>
               <input type="text" value={form.name} onChange={(e) => change('name', e.target.value)}
-                placeholder="게시글에 표시될 이름" maxLength={30} className="auth-input" required />
+                placeholder="게시글에 표시될 이름" maxLength={30} className="auth-input" required
+                readOnly={!!mok} />
             </Field>
-            <Field icon={Phone} label="휴대폰 번호" hint="로그인 아이디로 사용됩니다.">
+            <Field icon={Phone} label={mok ? '휴대폰 번호 (본인확인됨)' : '휴대폰 번호'} hint="로그인 아이디로 사용됩니다.">
               <input type="tel" value={form.phone} onChange={(e) => change('phone', e.target.value)}
-                placeholder="010-0000-0000" className="auth-input" required autoComplete="tel" />
+                placeholder="010-0000-0000" className="auth-input" required autoComplete="tel"
+                readOnly={!!mok} />
             </Field>
           </>
         ) : (
