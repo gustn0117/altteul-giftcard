@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { AD_TYPES } from '@/lib/types';
 import ImageUploader from '@/components/ImageUploader';
 import PhoneVerifyBox from '@/components/auth/PhoneVerifyBox';
+import MokVerifyButton, { type MokVerified } from '@/components/auth/MokVerifyButton';
 
 // 만료 정책 (일 단위)
 const SELL_EXPIRE_DAYS = 7;   // 팝니다: 7일 후 잠금 (30일 후 자동삭제)
@@ -83,7 +84,13 @@ function WritePostContent() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [showVerify, setShowVerify] = useState(false);
-  const [guestVerifiedPhone, setGuestVerifiedPhone] = useState<string | null>(null);
+  const [guestMok, setGuestMok] = useState<MokVerified | null>(null);
+
+  // 비회원 판매글: 드림시큐리티 본인확인 완료 → 실명·번호 자동입력(잠금)
+  const handleGuestMok = (v: MokVerified) => {
+    setGuestMok(v);
+    setForm((f) => ({ ...f, guestName: v.name || f.guestName, guestPhone: v.phone || f.guestPhone }));
+  };
   // 문자 인증이 실제로 동작 가능할 때(SOLAPI 설정됨) 또는 개발환경에서만 인증 게이트 적용
   const [phoneVerifyRequired, setPhoneVerifyRequired] = useState(false);
 
@@ -196,9 +203,10 @@ function WritePostContent() {
       return;
     }
 
-    // 비회원 판매글 필수 검증 (로그인 안된 경우)
+    // 비회원 판매글 필수 검증 (로그인 안된 경우) — 휴대폰 본인확인 필수
     if (!isLoggedIn && !isEdit) {
-      if (!form.guestName.trim()) return alert('이름을 입력하세요.');
+      if (!guestMok) return alert('휴대폰 본인확인을 먼저 완료해주세요.');
+      if (!form.guestName.trim()) return alert('본인확인을 다시 진행해주세요.');
       if (!form.guestPassword.trim() || form.guestPassword.length < 4) return alert('비밀번호는 4자 이상 입력하세요.');
     }
 
@@ -218,22 +226,13 @@ function WritePostContent() {
     // 지역은 반드시 선택 (미선택 시 '전국'으로 처리되던 것 방지)
     if (!form.region) return alert('지역을 선택하세요.');
 
-    // 휴대폰 인증 게이트 (수정 제외, 문자 발송이 실제로 가능할 때만 적용)
-    if (!isEdit && phoneVerifyRequired) {
-      if (isLoggedIn && user) {
-        if (!user.phone_verified) {
-          setShowVerify(true);
-          alert('인증받은 회원이 아닙니다. 휴대폰 인증 후 등록됩니다.');
-          return; // 인증 UI에서 통과하면 사용자가 다시 등록
-        }
-      } else {
-        // 비회원: 입력한 번호가 방금 인증되지 않았으면 인증 요구
-        const digits = form.guestPhone.replace(/[^0-9]/g, '');
-        if (!digits || guestVerifiedPhone !== digits) {
-          setShowVerify(true);
-          alert('휴대폰 인증 후 등록됩니다.');
-          return;
-        }
+    // 휴대폰 인증 게이트 (수정 제외) — 회원은 SMS 인증(가입 시 본인확인 완료면 통과),
+    // 비회원은 위에서 드림시큐리티 본인확인(guestMok)으로 이미 검증됨.
+    if (!isEdit && phoneVerifyRequired && isLoggedIn && user) {
+      if (!user.phone_verified) {
+        setShowVerify(true);
+        alert('인증받은 회원이 아닙니다. 휴대폰 인증 후 등록됩니다.');
+        return; // 인증 UI에서 통과하면 사용자가 다시 등록
       }
     }
 
@@ -584,23 +583,33 @@ function WritePostContent() {
               rows={4} className="input h-auto py-3 resize-none" />
           </div>
 
-          {/* 비회원 정보 — 판매(팝니다)만 비회원 허용 */}
+          {/* 비회원 정보 — 판매(팝니다)만 비회원 허용. 휴대폰 본인확인 필수 */}
           {!isLoggedIn && !isEdit && form.type === 'sell' && (
             <div className="card bg-zinc-50 border-zinc-200 p-4">
               <p className="text-[12px] font-semibold text-zinc-700 mb-2">비회원 작성 정보</p>
-              <p className="text-[11px] text-zinc-500 mb-3">글 수정·삭제 시 아래 정보가 필요합니다. 회원가입 없이 작성할 수 있습니다.</p>
+              <p className="text-[11px] text-zinc-500 mb-3">회원가입 없이 작성할 수 있어요. 휴대폰 본인확인 후 실명·번호가 자동 입력됩니다.</p>
+
+              {/* 드림시큐리티 휴대폰 본인확인 (본인확인용 01005) */}
+              <div className="mb-3">
+                <MokVerifyButton
+                  usage="01005"
+                  onVerified={handleGuestMok}
+                  verified={guestMok ? { name: guestMok.name, phone: guestMok.phone } : null}
+                />
+              </div>
+
               <div className="space-y-3">
                 <div>
-                  <label className="block text-[12px] font-medium text-zinc-600 mb-1">이름/닉네임 *</label>
+                  <label className="block text-[12px] font-medium text-zinc-600 mb-1">이름 {guestMok ? '(본인확인됨)' : '*'}</label>
                   <input type="text" value={form.guestName}
-                    onChange={(e) => handleChange('guestName', e.target.value)}
-                    placeholder="게시글에 표시됩니다" className="input" required />
+                    placeholder="본인확인 시 자동 입력됩니다"
+                    className={`input ${guestMok ? '' : 'bg-zinc-100 text-zinc-400'}`} required readOnly />
                 </div>
                 <div>
-                  <label className="block text-[12px] font-medium text-zinc-600 mb-1">연락처</label>
+                  <label className="block text-[12px] font-medium text-zinc-600 mb-1">연락처 {guestMok ? '(본인확인됨)' : ''}</label>
                   <input type="text" value={form.guestPhone}
-                    onChange={(e) => handleChange('guestPhone', e.target.value)}
-                    placeholder="010-0000-0000 (선택)" className="input" />
+                    placeholder="본인확인 시 자동 입력됩니다"
+                    className={`input ${guestMok ? '' : 'bg-zinc-100 text-zinc-400'}`} readOnly />
                 </div>
                 <div>
                   <label className="block text-[12px] font-medium text-zinc-600 mb-1">비밀번호 * (4자 이상)</label>
@@ -612,19 +621,14 @@ function WritePostContent() {
             </div>
           )}
 
-              {showVerify && !isEdit && (
+              {/* 회원 SMS 인증(가입 시 본인확인 안 된 기존 회원용). 비회원은 위 드림시큐리티 본인확인 사용 */}
+              {showVerify && !isEdit && isLoggedIn && user && (
                 <PhoneVerifyBox
-                  phone={isLoggedIn ? (user?.phone ?? '') : form.guestPhone}
-                  editablePhone={!isLoggedIn || !user?.phone}
-                  userId={isLoggedIn ? user?.id : undefined}
-                  onVerified={({ phone }) => {
-                    if (isLoggedIn && user) {
-                      login({ ...user, phone_verified: true }); // 로컬 사용자 갱신 → 재인증 불필요
-                    } else {
-                      setGuestVerifiedPhone(phone.replace(/[^0-9]/g, ''));
-                      // 비회원은 인증한 번호를 폼에도 반영
-                      setForm((f) => ({ ...f, guestPhone: phone }));
-                    }
+                  phone={user?.phone ?? ''}
+                  editablePhone={!user?.phone}
+                  userId={user?.id}
+                  onVerified={() => {
+                    login({ ...user, phone_verified: true }); // 로컬 사용자 갱신 → 재인증 불필요
                     setShowVerify(false);
                     alert('인증 완료! 등록 버튼을 다시 눌러주세요.');
                   }}
@@ -633,9 +637,14 @@ function WritePostContent() {
 
               <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
                 <Link href={`/board?tab=${form.type}`} className="btn-secondary h-10 px-4 text-[13px]">취소</Link>
-                <button type="submit" disabled={submitting} className="btn-accent h-10 px-6 text-[13px] disabled:opacity-60">
-                  {submitting ? '처리 중...' : isEdit ? '수정하기' : '등록하기'}
-                </button>
+                {(() => {
+                  const guestBlocked = !isLoggedIn && !isEdit && form.type === 'sell' && !guestMok;
+                  return (
+                    <button type="submit" disabled={submitting || guestBlocked} className="btn-accent h-10 px-6 text-[13px] disabled:opacity-60">
+                      {submitting ? '처리 중...' : guestBlocked ? '본인확인 후 등록 가능' : isEdit ? '수정하기' : '등록하기'}
+                    </button>
+                  );
+                })()}
               </div>
             </form>
           </div>
