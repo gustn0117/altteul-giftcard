@@ -6,81 +6,28 @@ import { ArrowRight, Smartphone, BarChart3, Shield, Clock, CheckCircle2, AlertCi
 
 const AD_PRODUCTS = [
   {
-    id: 'hero_banner',
-    name: '메인 히어로 배너',
-    size: '1140 x 200 px',
-    position: '메인 페이지 최상단',
-    price: 500000,
-    unit: '월',
+    id: 'nationwide',
+    name: '전국광고',
+    slots: '선착순 6업체',
     popular: true,
     features: ['최대 노출량', '전체 유저 도달', '브랜드 인지도 극대화'],
-    desc: '사이트 방문 시 가장 먼저 보이는 프리미엄 위치. 전체 사용자 100%에 노출됩니다.',
+    desc: '사이트 방문 시 어느 곳을 클릭하고 어느 곳을 둘러봐도 항상 최상단에 위치, 전체 사용자 100%에 노출됩니다. (지역별 노출도 함께 됩니다.)',
   },
   {
-    id: 'main_top',
-    name: '메인 상단 배너',
-    size: '1140 x 90 px',
-    position: '히어로 배너 아래',
-    price: 300000,
-    unit: '월',
+    id: 'main',
+    name: '메인광고',
+    slots: '위치 랜덤 노출',
     popular: false,
-    features: ['높은 클릭률', '자연스러운 노출'],
-    desc: '게시글 목록 바로 위에 위치하여 상품 탐색 전 자연스럽게 노출됩니다.',
+    features: ['랜덤 균등 노출', '지역별 노출'],
+    desc: '전국광고 바로 아래에 노출됩니다. 위치 지정이 안 되고 랜덤 방식(새로고침·뒤로가기·방문자 개인별 랜덤)이라 모든 업체가 동등하게 광고 효과를 누릴 수 있습니다. (지역별 노출도 함께 됩니다.)',
   },
   {
-    id: 'board_top',
-    name: '게시판 상단 배너',
-    size: '960 x 90 px',
-    position: '삽니다/팝니다 게시판 상단',
-    price: 250000,
-    unit: '월',
-    popular: false,
-    features: ['구매 의향 높은 유저', '타겟 마케팅'],
-    desc: '거래글을 적극적으로 탐색하는 유저에게 직접 노출되는 타겟 상품입니다.',
-  },
-  {
-    id: 'detail_bottom',
-    name: '게시글 상세 하단',
-    size: '740 x 90 px',
-    position: '개별 게시글 하단',
-    price: 200000,
-    unit: '월',
-    popular: false,
-    features: ['구매 결정 단계 노출', '높은 전환율'],
-    desc: '상품 상세 정보를 확인한 유저에게 노출되는 고효율 광고 위치입니다.',
-  },
-  {
-    id: 'footer_banner',
-    name: '푸터 상단 배너',
-    size: '1140 x 80 px',
-    position: '페이지 하단 푸터 위',
-    price: 150000,
-    unit: '월',
-    popular: false,
-    features: ['전 페이지 노출', '반복 인지 효과'],
-    desc: '모든 페이지 하단에 지속 노출. 반복 인지를 통한 브랜드 각인에 유리합니다.',
-  },
-  {
-    id: 'popup',
-    name: '팝업 광고',
-    size: '400 x 500 px',
-    position: '사이트 접속 시 화면 중앙',
-    price: 400000,
-    unit: '월',
-    popular: false,
-    features: ['강제 노출', '이벤트/프로모션'],
-    desc: '신규 방문자에게 풀스크린 팝업으로 노출되어 이벤트·프로모션에 최적화됩니다.',
-  },
-  {
-    id: 'premium_buyer',
-    name: '프리미엄 구매 업체',
-    size: '카드형',
-    position: '메인 / 게시판 삽니다 탭',
-    price: 100000,
-    unit: '월~',
+    id: 'recommend',
+    name: '추천업체',
+    slots: '선착순 20업체',
     popular: true,
-    features: ['등급별 노출 우선순위', '전용 상세 페이지', '연락처 노출'],
-    desc: '구매 업체 전용 프리미엄 카드. 등급(프리미엄/스탠다드/베이직)별 차등 노출됩니다.',
+    features: ['오늘의 추천 노출', 'PC 우측 고정', '스크롤해도 항상 노출'],
+    desc: '오늘의 추천업체로 차별화된 광고 효과를 누릴 수 있습니다. PC버전에서는 오른쪽에 고정 방식으로 강력한 홍보 효과가 있습니다. 랜덤 방식으로 2업체만 표시되며(새로고침·뒤로가기·방문자 개인별 랜덤), 모든 업체가 동등하게 광고 효과를 누릴 수 있습니다. (스크롤을 내리고 올려도 항상 보입니다.)',
   },
 ];
 
@@ -99,7 +46,7 @@ const FAQS = [
   },
   {
     q: '최소 계약 기간이 있나요?',
-    a: '모든 상품은 월 단위 계약이 가능합니다. 3개월 이상 장기 계약 시 5~15% 할인 혜택이 적용됩니다.',
+    a: '모든 상품은 월 단위 계약이 가능합니다.',
   },
   {
     q: '광고 성과 리포트를 받을 수 있나요?',
@@ -187,9 +134,9 @@ export default function AdvertisingPage() {
       {/* Quick summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
         {[
-          { label: '광고 상품', value: '7종' },
-          { label: '최소 요금', value: '10만원~' },
-          { label: '평균 게재', value: '2~3일' },
+          { label: '광고 상품', value: '3종' },
+          { label: '최소 요금', value: '협의' },
+          { label: '평균 게재', value: '24시간 이내' },
           { label: '계약 단위', value: '월' },
         ].map(s => (
           <div key={s.label} className="card p-4 text-center">
@@ -213,10 +160,9 @@ export default function AdvertisingPage() {
               )}
               <div className="p-4 md:p-5 flex flex-col md:flex-row md:items-center gap-4">
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-[14px] font-semibold text-zinc-900 mb-1">{p.name}</h3>
-                  <div className="flex flex-wrap items-center gap-1.5 mb-2">
-                    <span className="badge bg-zinc-100 text-zinc-500">{p.size}</span>
-                    <span className="badge bg-zinc-100 text-zinc-500">{p.position}</span>
+                  <div className="flex items-center flex-wrap gap-2 mb-1.5">
+                    <h3 className="text-[15px] font-semibold text-zinc-900">{p.name}</h3>
+                    <span className="badge bg-accent/10 text-accent">{p.slots}</span>
                   </div>
                   <p className="text-[12px] text-zinc-500 leading-relaxed mb-2">{p.desc}</p>
                   <div className="flex flex-wrap gap-2">
@@ -227,12 +173,9 @@ export default function AdvertisingPage() {
                     ))}
                   </div>
                 </div>
-                <div className="text-right md:shrink-0 md:w-32">
-                  <p className="text-[18px] font-bold text-zinc-900 whitespace-nowrap">
-                    {p.price.toLocaleString()}
-                    <span className="text-[11px] font-normal text-zinc-400">원</span>
-                  </p>
-                  <p className="text-[11px] text-zinc-400">/ {p.unit}</p>
+                <div className="text-right md:shrink-0 md:w-24">
+                  <p className="text-[16px] font-bold text-zinc-900 whitespace-nowrap">협의</p>
+                  <p className="text-[11px] text-zinc-400">월 단위</p>
                 </div>
               </div>
             </div>
@@ -247,7 +190,7 @@ export default function AdvertisingPage() {
           <div className="card p-5 text-center">
             <Shield size={20} className="mx-auto mb-3 text-accent" />
             <h4 className="text-[13px] font-semibold mb-1">안전한 플랫폼</h4>
-            <p className="text-[11px] text-zinc-500 leading-relaxed">계약서 기반 거래 시스템으로 신뢰도 높은 사용자층이 형성되어 있습니다.</p>
+            <p className="text-[11px] text-zinc-500 leading-relaxed">본인인증 시스템으로 신뢰도 높은 사용자층이 형성되어 있습니다.</p>
           </div>
           <div className="card p-5 text-center">
             <BarChart3 size={20} className="mx-auto mb-3 text-accent" />
@@ -413,8 +356,8 @@ export default function AdvertisingPage() {
             <button type="submit" disabled={submitting} className="btn-primary h-11 px-8 text-[13px] disabled:opacity-60">
               {submitting ? '전송 중...' : '문의 보내기'}
             </button>
-            <a href="tel:1234-5678" className="btn-secondary h-11 px-5 text-[13px]">
-              <Smartphone size={14} /> 1234-5678
+            <a href="tel:010-8017-8500" className="btn-secondary h-11 px-5 text-[13px]">
+              <Smartphone size={14} /> 010-8017-8500
             </a>
           </div>
         </form>
