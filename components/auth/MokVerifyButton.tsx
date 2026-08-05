@@ -47,20 +47,25 @@ export default function MokVerifyButton({
   }, []);
 
   // 표준창 SDK 미리 로드 — 클릭 시 window.open 이 제스처 안에서 동기 실행돼야 팝업이 안 막힌다.
+  // 주의: index.js 는 로드 직후 다시 client_process.js 를 동적 로드해 window.MOBILEOK 를 정의한다.
+  // 따라서 <script> onload 가 아니라 window.MOBILEOK 실제 존재를 폴링해서 준비완료로 판단한다.
   useEffect(() => {
     if (!scriptUrl) return;
-    if (window.MOBILEOK) { setScriptReady(true); return; }
-    const existing = document.querySelector<HTMLScriptElement>(`script[src="${scriptUrl}"]`);
-    if (existing) {
-      existing.addEventListener('load', () => setScriptReady(true));
-      if (window.MOBILEOK) setScriptReady(true);
-      return;
+    let timer: ReturnType<typeof setInterval> | null = null;
+    const markWhenReady = () => {
+      if (window.MOBILEOK?.process) { setScriptReady(true); if (timer) clearInterval(timer); return true; }
+      return false;
+    };
+    if (markWhenReady()) return;
+    if (!document.querySelector<HTMLScriptElement>(`script[src="${scriptUrl}"]`)) {
+      const s = document.createElement('script');
+      s.src = scriptUrl; s.async = true;
+      s.onerror = () => setErr('본인확인 모듈을 불러오지 못했습니다.');
+      document.head.appendChild(s);
     }
-    const s = document.createElement('script');
-    s.src = scriptUrl; s.async = true;
-    s.onload = () => setScriptReady(true);
-    s.onerror = () => setErr('본인확인 모듈을 불러오지 못했습니다.');
-    document.head.appendChild(s);
+    timer = setInterval(markWhenReady, 200);
+    const stop = setTimeout(() => { if (timer) clearInterval(timer); }, 15000);
+    return () => { if (timer) clearInterval(timer); clearTimeout(stop); };
   }, [scriptUrl]);
 
   // SDK 가 호출할 전역 콜백 등록 (returnUrl 응답 JSON 문자열을 받음)
