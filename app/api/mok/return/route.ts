@@ -12,10 +12,14 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   try {
     const raw = await req.text();
-    // Content-Type: application/x-www-form-urlencoded (data=<url-encoded-json>)
-    let dataStr: string | null = new URLSearchParams(raw).get('data');
-    if (!dataStr && raw.trim().startsWith('{')) dataStr = raw;
+    // Content-Type: application/x-www-form-urlencoded, body = "data=<이중 URL 인코딩된 JSON>"
+    // 표준창은 data 를 이중 인코딩해 보낸다(%257B...) → JSON({) 이 될 때까지 decodeURIComponent 반복.
+    const idx = raw.indexOf('data=');
+    let dataStr: string | null = idx >= 0 ? raw.slice(idx + 5).split('&')[0] : (raw.trim().startsWith('{') ? raw : null);
     if (!dataStr) return NextResponse.json({ ok: false, reason: 'no_data' });
+    for (let i = 0; i < 3 && !dataStr.trim().startsWith('{'); i++) {
+      try { dataStr = decodeURIComponent(dataStr); } catch { break; }
+    }
 
     const data = JSON.parse(dataStr) as { encryptMOKKeyToken?: string; resultCode?: string; resultMsg?: string };
     const token = data.encryptMOKKeyToken;
