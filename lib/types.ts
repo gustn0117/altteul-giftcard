@@ -69,6 +69,11 @@ export interface DBUser {
   phone: string | null;
   phone_verified?: boolean;
   phone_verified_at?: string | null;
+  /** 드림시큐리티 휴대폰 본인확인 완료 여부 */
+  identity_verified?: boolean;
+  identity_verified_at?: string | null;
+  /** 본인확인 실명(비공개 기록, 게시글엔 name(닉네임) 표시) */
+  real_name?: string | null;
   type: 'normal' | 'business';
   password_hash?: string;
   /** 업체 회원: 대표자명 */

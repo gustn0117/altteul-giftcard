@@ -33,10 +33,10 @@ function RegisterContent() {
 
   const handleMokVerified = (v: MokVerified) => {
     setMok(v);
-    // 개인=이름, 업체=대표자명 에 실명 채움 (전화번호는 공통)
+    // 전화번호는 자동입력. 업체는 대표자명(실명)도 채움. 개인은 name=닉네임이라 실명 안 채움.
     setForm((p) => type === 'business'
       ? { ...p, representative: v.name || p.representative, phone: v.phone || p.phone }
-      : { ...p, name: v.name || p.name, phone: v.phone || p.phone });
+      : { ...p, phone: v.phone || p.phone });
     setError(null);
   };
 
@@ -228,10 +228,9 @@ function RegisterContent() {
         {type === 'normal' ? (
           /* 개인 폼 */
           <>
-            <Field icon={User} label={mok ? '이름 (본인확인됨)' : '이름'}>
+            <Field icon={User} label="닉네임 (게시글 표시 이름)" hint="실명은 공개되지 않아요. 게시글엔 이 닉네임이 표시됩니다.">
               <input type="text" value={form.name} onChange={(e) => change('name', e.target.value)}
-                placeholder="본인확인 시 자동 입력됩니다" maxLength={30}
-                className={`auth-input ${mok ? '' : 'bg-gray-50 text-gray-400'}`} required readOnly />
+                placeholder="게시글에 표시될 닉네임" maxLength={20} className="auth-input" required />
             </Field>
             <Field icon={Phone} label={mok ? '휴대폰 번호 (본인확인됨)' : '휴대폰 번호'} hint="로그인 아이디로 사용됩니다.">
               <input type="tel" value={form.phone} onChange={(e) => change('phone', e.target.value)}

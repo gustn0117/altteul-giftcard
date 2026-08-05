@@ -50,8 +50,8 @@ export async function POST(req: NextRequest) {
     verified = { name: mv.user_name || name, phone: mv.user_phone || phone, ci: mv.ci };
   }
 
-  // 개인: 계정 이름 = 본인확인 실명. 업체: 계정 이름 = 사업체명(폼), 실명은 대표자명으로만 사용.
-  const effName = (verified && userType === 'normal') ? verified.name : name;
+  // 계정 이름(name)은 게시글 표시용 — 개인=닉네임(폼), 업체=사업체명(폼). 실명은 real_name 에 숨김 저장.
+  const effName = name;
   const effPhone = verified?.phone ?? phone;
 
   if (!effName || !password || !effPhone) {
@@ -89,8 +89,9 @@ export async function POST(req: NextRequest) {
     insertData.security_question = securityQuestion;
     insertData.security_answer_hash = hashPassword(String(securityAnswer).trim().toLowerCase());
   }
-  // 본인확인 완료 가입: 실명·인증 상태·CI 저장
+  // 본인확인 완료 가입: 실명(숨김)·인증 상태·CI 저장
   if (verified) {
+    insertData.real_name = verified.name; // 게시글엔 안 뜸(실명 기록용)
     insertData.phone_verified = true;
     insertData.phone_verified_at = new Date().toISOString();
     insertData.identity_verified = true;
@@ -101,7 +102,7 @@ export async function POST(req: NextRequest) {
   const { data: user, error } = await supabase
     .from('users')
     .insert(insertData)
-    .select('id, name, phone, type, created_at, updated_at')
+    .select('id, name, phone, type, created_at, updated_at, phone_verified, phone_verified_at, identity_verified, identity_verified_at')
     .single();
 
   if (error) {

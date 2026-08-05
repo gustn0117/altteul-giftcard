@@ -86,10 +86,10 @@ function WritePostContent() {
   const [showVerify, setShowVerify] = useState(false);
   const [guestMok, setGuestMok] = useState<MokVerified | null>(null);
 
-  // 비회원 판매글: 드림시큐리티 본인확인 완료 → 실명·번호 자동입력(잠금)
+  // 비회원 판매글: 본인확인 완료 → 번호만 자동입력. 실명은 숨김(guest_real_name), 게시글엔 닉네임 표시.
   const handleGuestMok = (v: MokVerified) => {
     setGuestMok(v);
-    setForm((f) => ({ ...f, guestName: v.name || f.guestName, guestPhone: v.phone || f.guestPhone }));
+    setForm((f) => ({ ...f, guestPhone: v.phone || f.guestPhone }));
   };
   // 문자 인증이 실제로 동작 가능할 때(SOLAPI 설정됨) 또는 개발환경에서만 인증 게이트 적용
   const [phoneVerifyRequired, setPhoneVerifyRequired] = useState(false);
@@ -206,7 +206,7 @@ function WritePostContent() {
     // 비회원 판매글 필수 검증 (로그인 안된 경우) — 휴대폰 본인확인 필수
     if (!isLoggedIn && !isEdit) {
       if (!guestMok) return alert('휴대폰 본인확인을 먼저 완료해주세요.');
-      if (!form.guestName.trim()) return alert('본인확인을 다시 진행해주세요.');
+      if (!form.guestName.trim()) return alert('게시글에 표시될 닉네임을 입력하세요.');
       if (!form.guestPassword.trim() || form.guestPassword.length < 4) return alert('비밀번호는 4자 이상 입력하세요.');
     }
 
@@ -229,7 +229,8 @@ function WritePostContent() {
     // 휴대폰 인증 게이트 (수정 제외) — 회원은 SMS 인증(가입 시 본인확인 완료면 통과),
     // 비회원은 위에서 드림시큐리티 본인확인(guestMok)으로 이미 검증됨.
     if (!isEdit && phoneVerifyRequired && isLoggedIn && user) {
-      if (!user.phone_verified) {
+      // 가입 시 본인확인(identity_verified)했거나 이전에 번호인증(phone_verified)했으면 재인증 불필요
+      if (!user.phone_verified && !user.identity_verified) {
         setShowVerify(true);
         alert('인증받은 회원이 아닙니다. 휴대폰 인증 후 등록됩니다.');
         return; // 인증 UI에서 통과하면 사용자가 다시 등록
@@ -287,7 +288,8 @@ function WritePostContent() {
       } else {
         payload.author_id = null;
         if (!isEdit) {
-          payload.guest_name = form.guestName;
+          payload.guest_name = form.guestName;               // 게시글 표시 닉네임
+          payload.guest_real_name = guestMok?.name || null;  // 본인확인 실명(비공개 기록)
           payload.guest_password = form.guestPassword;
           payload.guest_phone = form.guestPhone || null;
         }
@@ -600,10 +602,10 @@ function WritePostContent() {
 
               <div className="space-y-3">
                 <div>
-                  <label className="block text-[12px] font-medium text-zinc-600 mb-1">이름 {guestMok ? '(본인확인됨)' : '*'}</label>
+                  <label className="block text-[12px] font-medium text-zinc-600 mb-1">닉네임 * <span className="font-normal text-zinc-400">(게시글 표시 이름, 실명 비공개)</span></label>
                   <input type="text" value={form.guestName}
-                    placeholder="본인확인 시 자동 입력됩니다"
-                    className={`input ${guestMok ? '' : 'bg-zinc-100 text-zinc-400'}`} required readOnly />
+                    onChange={(e) => handleChange('guestName', e.target.value)}
+                    placeholder="게시글에 표시될 닉네임" maxLength={20} className="input" required />
                 </div>
                 <div>
                   <label className="block text-[12px] font-medium text-zinc-600 mb-1">연락처 {guestMok ? '(본인확인됨)' : ''}</label>
