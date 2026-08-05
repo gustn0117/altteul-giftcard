@@ -18,7 +18,7 @@ const JSON_LD = {
     {
       '@type': 'WebSite',
       name: '예판상품권',
-      alternateName: ['상품권예판', '상품권 예판', '상품권예약판매', '상품권 예약판매', '예판 상품권'],
+      alternateName: ['상품권예약판매', '상품권예판', '예약판매상품권', '상품권 예판', '상품권 예약판매', '예판 상품권'],
       url: SITE_URL,
       description: SITE_DESC,
       inLanguage: 'ko-KR',
@@ -31,7 +31,7 @@ const JSON_LD = {
     {
       '@type': 'Organization',
       name: '예판상품권',
-      alternateName: ['상품권예판', '상품권예약판매'],
+      alternateName: ['상품권예약판매', '상품권예판', '예약판매상품권', '예판상품권'],
       url: SITE_URL,
       description: SITE_DESC,
     },
@@ -48,7 +48,7 @@ export default function Home() {
       {/* 검색엔진 구조화 데이터 */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }} />
       {/* 검색 노출용 핵심 제목 (화면에는 이미지 히어로가 있으므로 스크린리더/검색엔진용 H1) */}
-      <h1 className="sr-only">예판상품권 · 상품권예판 · 상품권예약판매 — 상품권 예판(예약판매) 안전 직거래 플랫폼</h1>
+      <h1 className="sr-only">상품권예약판매 · 상품권예판 · 예약판매상품권 · 예판상품권 — 상품권 예약판매(예판) 안전 직거래 플랫폼</h1>
       <div className="container-wide pt-1 md:pt-3">
         {/* PC: 좌(최근 본 업체) · 중앙 · 우(오늘의 추천업체 2개 랜덤). 모바일은 중앙만.
             양옆 레일을 좁혀 중앙(메인/광고)을 최대한 넓게 확보한다. */}
