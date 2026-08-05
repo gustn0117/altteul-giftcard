@@ -33,7 +33,10 @@ function RegisterContent() {
 
   const handleMokVerified = (v: MokVerified) => {
     setMok(v);
-    setForm((p) => ({ ...p, name: v.name || p.name, phone: v.phone || p.phone }));
+    // 개인=이름, 업체=대표자명 에 실명 채움 (전화번호는 공통)
+    setForm((p) => type === 'business'
+      ? { ...p, representative: v.name || p.representative, phone: v.phone || p.phone }
+      : { ...p, name: v.name || p.name, phone: v.phone || p.phone });
     setError(null);
   };
 
@@ -97,6 +100,7 @@ function RegisterContent() {
       };
     } else {
       const phoneDigits = form.phone.replace(/[^0-9]/g, '');
+      if (!mok) return setError('대표자 휴대폰 본인확인을 먼저 완료해주세요.');
       if (!form.businessName.trim()) return setError('사업체명을 입력해주세요.');
       if (!form.representative.trim()) return setError('대표자명을 입력해주세요.');
       if (phoneDigits.length < 10) return setError('휴대폰 번호를 정확히 입력해주세요. (로그인 시 사용됩니다)');
@@ -111,6 +115,7 @@ function RegisterContent() {
         messengerId: form.messengerId.trim(),
         securityQuestion: form.securityQuestion,
         securityAnswer: form.securityAnswer.trim(),
+        ...(mok ? { mokVerificationId: mok.verificationId } : {}),
       };
     }
 
@@ -198,28 +203,26 @@ function RegisterContent() {
         </div>
       )}
 
-      {type === 'normal' && (
-        <>
-          {/* 휴대폰 본인확인 (드림시큐리티 표준창) — 개인 가입 필수. 완료 시 실명·번호 자동입력 + 인증 배지 */}
-          <div className="mt-5">
-            <MokVerifyButton
-              usage="01001"
-              onVerified={handleMokVerified}
-              verified={mok ? { name: mok.name, phone: mok.phone } : null}
-            />
-            {!mok && (
-              <p className="text-[11px] text-gray-400 mt-1.5 text-center">
-                가입을 위해 휴대폰 본인확인을 진행해주세요. 완료하면 실명·번호가 자동 입력됩니다.
-              </p>
-            )}
-          </div>
-          <div className="flex items-center gap-3 my-4">
-            <span className="flex-1 h-px bg-gray-200" />
-            <span className="text-[12px] text-gray-400">{mok ? '가입 정보 입력' : '비밀번호 설정'}</span>
-            <span className="flex-1 h-px bg-gray-200" />
-          </div>
-        </>
-      )}
+      {/* 휴대폰 본인확인 (드림시큐리티 표준창) — 개인/업체 모두 필수. 완료 시 실명·번호 자동입력 + 인증 배지 */}
+      <div className="mt-5">
+        <MokVerifyButton
+          usage="01001"
+          onVerified={handleMokVerified}
+          verified={mok ? { name: mok.name, phone: mok.phone } : null}
+        />
+        {!mok && (
+          <p className="text-[11px] text-gray-400 mt-1.5 text-center">
+            {type === 'business'
+              ? '가입을 위해 대표자 휴대폰 본인확인을 진행해주세요. 완료하면 대표자명·번호가 자동 입력됩니다.'
+              : '가입을 위해 휴대폰 본인확인을 진행해주세요. 완료하면 실명·번호가 자동 입력됩니다.'}
+          </p>
+        )}
+      </div>
+      <div className="flex items-center gap-3 my-4">
+        <span className="flex-1 h-px bg-gray-200" />
+        <span className="text-[12px] text-gray-400">{mok ? '가입 정보 입력' : '비밀번호 설정'}</span>
+        <span className="flex-1 h-px bg-gray-200" />
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-3 mt-5">
         {type === 'normal' ? (
@@ -244,14 +247,15 @@ function RegisterContent() {
                 <input type="text" value={form.businessName} onChange={(e) => change('businessName', e.target.value)}
                   placeholder="사업체명" className="auth-input" required />
               </Field>
-              <Field icon={User} label="대표자명">
+              <Field icon={User} label={mok ? '대표자명 (본인확인됨)' : '대표자명'}>
                 <input type="text" value={form.representative} onChange={(e) => change('representative', e.target.value)}
-                  placeholder="대표자 이름" className="auth-input" required />
+                  placeholder="본인확인 시 자동 입력" className={`auth-input ${mok ? '' : 'bg-gray-50 text-gray-400'}`} required readOnly />
               </Field>
             </div>
-            <Field icon={Phone} label="휴대폰 번호" hint="로그인 시 아이디로 사용됩니다.">
+            <Field icon={Phone} label={mok ? '휴대폰 번호 (본인확인됨)' : '휴대폰 번호'} hint="로그인 시 아이디로 사용됩니다.">
               <input type="tel" value={form.phone} onChange={(e) => change('phone', e.target.value)}
-                placeholder="010-0000-0000" className="auth-input" required />
+                placeholder="본인확인 시 자동 입력됩니다" autoComplete="tel"
+                className={`auth-input ${mok ? '' : 'bg-gray-50 text-gray-400'}`} required readOnly />
             </Field>
             <div className="grid grid-cols-2 gap-3">
               <Field icon={MessageCircle} label="메신저">
@@ -307,10 +311,10 @@ function RegisterContent() {
           <div className="px-3 py-2.5 bg-rose-50 border border-rose-200 text-[12px] text-rose-600 rounded-md">{error}</div>
         )}
 
-        <button type="submit" disabled={submitting || (type === 'normal' && !mok)}
+        <button type="submit" disabled={submitting || !mok}
           className="w-full h-11 bg-accent hover:bg-blue-700 text-white text-[13px] font-bold rounded-md transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
           {submitting ? '처리 중...'
-            : (type === 'normal' && !mok) ? '휴대폰 본인확인 후 가입 가능'
+            : !mok ? '휴대폰 본인확인 후 가입 가능'
             : <>{type === 'normal' ? '가입하기' : '제휴 신청하기'} <ArrowRight size={14} /></>}
         </button>
 

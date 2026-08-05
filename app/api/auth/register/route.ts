@@ -50,7 +50,8 @@ export async function POST(req: NextRequest) {
     verified = { name: mv.user_name || name, phone: mv.user_phone || phone, ci: mv.ci };
   }
 
-  const effName = verified?.name ?? name;
+  // 개인: 계정 이름 = 본인확인 실명. 업체: 계정 이름 = 사업체명(폼), 실명은 대표자명으로만 사용.
+  const effName = (verified && userType === 'normal') ? verified.name : name;
   const effPhone = verified?.phone ?? phone;
 
   if (!effName || !password || !effPhone) {
@@ -78,7 +79,8 @@ export async function POST(req: NextRequest) {
   // 번호는 숫자만으로 통일 저장
   const insertData: Record<string, unknown> = { name: effName, password_hash, phone: digits, type: userType };
   if (userType === 'business') {
-    insertData.representative = representative || null;
+    // 대표자명은 본인확인 실명을 신뢰(있으면), 없으면 폼 값
+    insertData.representative = (verified?.name ?? representative) || null;
     insertData.messenger = messenger || null;
     insertData.messenger_id = messengerId || null;
   }
