@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import crypto from 'crypto';
 import { createServiceClient } from '@/lib/supabase';
 import { kakaoExchangeToken, kakaoGetProfile, signBridgeToken } from '@/lib/kakao';
 import { SITE_URL } from '@/lib/site';
@@ -57,23 +56,10 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // 3) 그래도 없으면 신규 생성 (비밀번호는 임의값 — 카카오로만 로그인)
+    // 3) 기존 회원이 아니면 카카오로는 신규 가입 불가 — 휴대폰 본인확인 가입으로 유도.
+    //    (회원가입은 '무조건 본인확인' 정책. 카카오는 기존 연결회원 로그인 용도로만 유지)
     if (!user) {
-      const name = profile.nickname || (profile.phone ? `카카오회원${profile.phone.slice(-4)}` : '카카오회원');
-      const randomPw = crypto.randomBytes(16).toString('hex');
-      const { data: created, error } = await supabase.from('users').insert({
-        type: 'normal',
-        name,
-        email: profile.email,
-        phone: profile.phone,
-        kakao_id: profile.id,
-        password_hash: crypto.createHash('sha256').update(randomPw).digest('hex'),
-        points: 0,
-        phone_verified: !!profile.phone,
-        phone_verified_at: profile.phone ? nowIso : null,
-      }).select('*').single();
-      if (error) throw new Error(`회원 생성 실패: ${error.message}`);
-      user = created;
+      return NextResponse.redirect(`${origin}/register?need=verify`);
     }
 
     const token = signBridgeToken(user.id as string);

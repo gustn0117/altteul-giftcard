@@ -23,6 +23,7 @@ function RegisterContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialType = (searchParams.get('type') as RegisterType) === 'business' ? 'business' : 'normal';
+  const needVerify = searchParams.get('need') === 'verify';
   const { login } = useAuth();
   const [type, setType] = useState<RegisterType>(initialType);
   const [done, setDone] = useState(false);
@@ -191,20 +192,16 @@ function RegisterContent() {
         ))}
       </div>
 
+      {needVerify && (
+        <div className="mt-4 px-3.5 py-3 bg-blue-50 border border-blue-200 rounded-lg text-[12.5px] text-blue-700">
+          카카오로 가입된 계정이 없어요. <b>휴대폰 본인확인</b>으로 회원가입을 먼저 진행해주세요.
+        </div>
+      )}
+
       {type === 'normal' && (
         <>
-          <a
-            href="/api/auth/kakao/login"
-            className="mt-5 flex items-center justify-center gap-2 w-full h-12 rounded-lg font-bold text-[14.5px] hover:brightness-95 transition-all"
-            style={{ background: '#FEE500', color: '#191600' }}
-          >
-            <svg width="19" height="19" viewBox="0 0 18 18" aria-hidden>
-              <path fill="#191600" d="M9 1.5C4.86 1.5 1.5 4.15 1.5 7.42c0 2.12 1.4 3.98 3.51 5.03-.16.55-.57 2.02-.65 2.33-.1.39.14.39.3.28.12-.08 2.01-1.36 2.83-1.92.48.07.98.11 1.51.11 4.14 0 7.5-2.65 7.5-5.93S13.14 1.5 9 1.5z" />
-            </svg>
-            카카오로 시작하기
-          </a>
           {/* 휴대폰 본인확인 (드림시큐리티 표준창) — 개인 가입 필수. 완료 시 실명·번호 자동입력 + 인증 배지 */}
-          <div className="mt-3">
+          <div className="mt-5">
             <MokVerifyButton
               usage="01001"
               onVerified={handleMokVerified}
@@ -212,7 +209,7 @@ function RegisterContent() {
             />
             {!mok && (
               <p className="text-[11px] text-gray-400 mt-1.5 text-center">
-                가입에 필요한 본인확인이에요. 완료하면 실명·번호가 자동 입력됩니다.
+                가입을 위해 휴대폰 본인확인을 진행해주세요. 완료하면 실명·번호가 자동 입력됩니다.
               </p>
             )}
           </div>
