@@ -588,16 +588,19 @@ export default function AdminPage() {
             </div>
           </div>
 
-          {/* 데이터 다운로드 (CSV) */}
+          {/* 데이터 다운로드 (CSV / 전체 백업) */}
           <div className="card p-4">
-            <p className="text-[13px] font-semibold text-zinc-800">데이터 다운로드 (CSV)</p>
-            <p className="text-[11.5px] text-zinc-500 mt-0.5 mb-2.5">회원·게시글 데이터를 엑셀(CSV)로 내려받아 백업·보관할 수 있습니다.</p>
+            <p className="text-[13px] font-semibold text-zinc-800">데이터 다운로드 · 백업</p>
+            <p className="text-[11.5px] text-zinc-500 mt-0.5 mb-2.5">회원·게시글은 엑셀(CSV)로, 전체 DB는 압축(gzip) 파일로 내려받아 보관할 수 있습니다.</p>
             <div className="flex flex-wrap gap-2">
               <a href="/api/admin/export?table=users" className="h-9 px-3.5 inline-flex items-center gap-1.5 text-[12px] font-bold bg-zinc-800 text-white rounded-md hover:bg-zinc-900">
                 <FileText size={13} /> 회원 CSV
               </a>
               <a href="/api/admin/export?table=posts" className="h-9 px-3.5 inline-flex items-center gap-1.5 text-[12px] font-bold bg-zinc-800 text-white rounded-md hover:bg-zinc-900">
                 <FileText size={13} /> 게시글 CSV
+              </a>
+              <a href="/api/admin/backup" className="h-9 px-3.5 inline-flex items-center gap-1.5 text-[12px] font-bold bg-emerald-600 text-white rounded-md hover:bg-emerald-700">
+                <FileText size={13} /> 전체 DB 백업 (압축)
               </a>
             </div>
           </div>
