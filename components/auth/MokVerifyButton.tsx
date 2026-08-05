@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ShieldCheck, CheckCircle2, Loader2 } from 'lucide-react';
 
 // 드림시큐리티 표준창 SDK 타입(전역)
@@ -30,6 +30,7 @@ export default function MokVerifyButton({
 }) {
   const [enabled, setEnabled] = useState<boolean | null>(null);
   const [scriptUrl, setScriptUrl] = useState<string | null>(null);
+  const [scriptReady, setScriptReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [started, setStarted] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -42,6 +43,24 @@ export default function MokVerifyButton({
       .then((c) => { setEnabled(!!c.enabled); setScriptUrl(c.scriptUrl || null); })
       .catch(() => setEnabled(false));
   }, []);
+
+  // 표준창 SDK 미리 로드 — 클릭 시점에 window.open 이 제스처 안에서 동기 실행돼야
+  // 팝업이 차단되지 않는다(await 후 열면 첫 클릭이 막힘).
+  useEffect(() => {
+    if (!scriptUrl) return;
+    if (window.MOBILEOK) { setScriptReady(true); return; }
+    const existing = document.querySelector<HTMLScriptElement>(`script[src="${scriptUrl}"]`);
+    if (existing) {
+      existing.addEventListener('load', () => setScriptReady(true));
+      if (window.MOBILEOK) setScriptReady(true);
+      return;
+    }
+    const s = document.createElement('script');
+    s.src = scriptUrl; s.async = true;
+    s.onload = () => setScriptReady(true);
+    s.onerror = () => setErr('본인확인 모듈을 불러오지 못했습니다.');
+    document.head.appendChild(s);
+  }, [scriptUrl]);
 
   // 표준창 팝업 결과 수신
   useEffect(() => {
@@ -71,30 +90,15 @@ export default function MokVerifyButton({
     return () => window.removeEventListener('message', onMsg);
   }, []);
 
-  const ensureScript = useCallback(
-    () => new Promise<void>((resolve, reject) => {
-      if (window.MOBILEOK) return resolve();
-      if (!scriptUrl) return reject(new Error('no-script-url'));
-      const s = document.createElement('script');
-      s.src = scriptUrl; s.async = true;
-      s.onload = () => resolve();
-      s.onerror = () => reject(new Error('script-load-failed'));
-      document.head.appendChild(s);
-    }),
-    [scriptUrl],
-  );
-
-  const start = async () => {
-    setErr(null); setBusy(true);
-    try {
-      await ensureScript();
-      const device = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ? 'MB' : 'WB';
-      window.MOBILEOK!.process(`/api/mok/request?usage=${usage}`, device, '');
-      setStarted(true);
-    } catch {
-      setBusy(false);
-      setErr('본인확인 모듈을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
+  // 클릭 제스처 안에서 동기 실행 (팝업 차단 방지)
+  const start = () => {
+    if (!window.MOBILEOK) {
+      setErr('본인확인 모듈을 준비 중입니다. 잠시 후 다시 눌러주세요.');
+      return;
     }
+    setErr(null); setBusy(true); setStarted(true);
+    const device = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ? 'MB' : 'WB';
+    window.MOBILEOK.process(`/api/mok/request?usage=${usage}`, device, '');
   };
 
   if (enabled === false) return null; // 미설정 시 숨김
@@ -114,11 +118,11 @@ export default function MokVerifyButton({
       <button
         type="button"
         onClick={start}
-        disabled={busy || enabled === null}
+        disabled={!scriptReady}
         className="flex items-center justify-center gap-2 w-full h-12 rounded-lg font-bold text-[14.5px] bg-gray-900 text-white hover:bg-black transition-all disabled:opacity-60"
       >
         {busy ? <Loader2 size={18} className="animate-spin" /> : <ShieldCheck size={18} />}
-        {busy ? '본인확인 진행 중…' : '휴대폰 본인확인'}
+        {busy ? '본인확인 진행 중…' : scriptReady ? '휴대폰 본인확인' : '본인확인 준비 중…'}
       </button>
       {started && (
         <p className="text-[11px] text-gray-400 mt-1.5 text-center">
