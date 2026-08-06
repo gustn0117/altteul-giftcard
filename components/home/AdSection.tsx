@@ -101,7 +101,11 @@ export default function AdSection({ adType, title, icon, perPage = 50, shuffle =
   if (loading) {
     return (
       <section className="mb-5">
-        <h2 className="flex items-center gap-1.5 text-[15px] font-bold text-gray-800 mb-3">{icon}{title}</h2>
+        <div className="flex items-center gap-3 mb-3">
+          <span className="flex-1 h-px bg-gray-200" />
+          <h2 className="flex items-center gap-1.5 text-[15px] font-bold text-gray-800 shrink-0">{icon}{title}</h2>
+          <span className="flex-1 h-px bg-gray-200" />
+        </div>
         <div className={gridCls}>
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="h-56 bg-gray-100 animate-pulse" />
@@ -113,12 +117,13 @@ export default function AdSection({ adType, title, icon, perPage = 50, shuffle =
 
   return (
     <section className="mb-5">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="flex items-center gap-1.5 text-[15px] font-bold text-gray-800">
+      <div className="flex items-center gap-3 mb-3">
+        <span className="flex-1 h-px bg-gray-200" />
+        <h2 className="flex items-center gap-1.5 text-[15px] font-bold text-gray-800 shrink-0">
           {icon}{title}
           {list.length > 0 && <span className="text-[12px] font-normal text-gray-400">({list.length})</span>}
         </h2>
-        <Link href="/board?tab=buy" className="text-[11.5px] text-gray-500 hover:text-accent">더보기 →</Link>
+        <span className="flex-1 h-px bg-gray-200" />
       </div>
 
       {list.length === 0 ? (

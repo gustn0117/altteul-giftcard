@@ -42,3 +42,6 @@ mok_keyInfo/
 *.dat
 개발가이드_*.pdf
 V3_본인확인_*.pdf
+
+# 파비콘 원본 소스(가공본은 app/ 에)
+favicon.png

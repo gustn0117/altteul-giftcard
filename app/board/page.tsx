@@ -140,11 +140,10 @@ function BoardContent() {
       </div>
 
       <div className="container-wide py-6">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-[18px] font-bold text-gray-800">{title}</h1>
-          <div className="breadcrumb">
-            <Link href="/">HOME</Link> &gt; {title}
-          </div>
+        <div className="flex items-center gap-3 mb-4">
+          <span className="flex-1 h-px bg-gray-200" />
+          <h1 className="text-[18px] font-bold text-gray-800 shrink-0 text-center">{title}</h1>
+          <span className="flex-1 h-px bg-gray-200" />
         </div>
 
         {/* 홈과 동일한 3분할: 좌(최근 본 업체) · 중앙 · 우(오늘의 추천업체) */}

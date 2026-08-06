@@ -578,7 +578,7 @@ export default function AdminPage() {
             <p className="text-[11.5px] text-zinc-500 mt-0.5 mb-2">홈·판매글·구매글 등 <b>모든 화면 맨 아래</b>에 표시됩니다. 상호명·대표자·사업자등록번호·통신판매업신고·주소 등을 자유롭게 작성하세요. (줄바꿈 그대로 나옵니다)</p>
             <textarea value={footerInfo} onChange={(e) => setFooterInfo(e.target.value)} rows={5}
               className="input w-full text-[12.5px] leading-relaxed"
-              placeholder={'예)\n상호명 예판상품권 · 대표자 홍길동 · 사업자등록번호 000-00-00000\n통신판매업신고 제0000-서울강남-00000호 · 서울특별시 강남구 · 고객센터 1599-9687'} />
+              placeholder={'예)\n상호명 예판상품권 · 대표자 홍길동 · 사업자등록번호 000-00-00000\n통신판매업신고 제0000-서울강남-00000호 · 서울특별시 강남구 · 고객센터 010-8017-8500'} />
             <div className="flex items-center justify-between mt-2">
               <span className="text-[11px] text-zinc-400">비워두면 기본 문구가 표시됩니다.</span>
               <button type="button" onClick={saveFooterInfo} disabled={footerSaving}

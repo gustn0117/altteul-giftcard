@@ -48,7 +48,7 @@ export default function SellLineAds() {
     <section>
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-[13px] font-bold text-gray-800">팝니다 줄광고</h2>
+        <h2 className="text-[13px] font-bold text-gray-800">팝니다 상품</h2>
         <Link href="/advertising" className="inline-flex items-center gap-1 text-[10.5px] text-gray-500 hover:text-accent">
           광고문의 <HelpCircle size={10} />
         </Link>
@@ -58,7 +58,7 @@ export default function SellLineAds() {
         <div className="bg-white border border-gray-200 rounded-xl py-10 text-center text-gray-400 text-[12px]">불러오는 중...</div>
       ) : posts.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-xl py-10 text-center text-gray-400 text-[12px]">
-          아직 등록된 팝니다 줄광고가 없습니다.
+          아직 등록된 팝니다 상품이 없습니다.
         </div>
       ) : (
         <SellLineTable posts={pagePosts} />

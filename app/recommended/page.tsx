@@ -1,7 +1,6 @@
 'use client';
 
 import { Suspense } from 'react';
-import Link from 'next/link';
 import { MapPin, Crown } from 'lucide-react';
 import AdSection from '@/components/home/AdSection';
 import HomeAside from '@/components/layout/HomeAside';
@@ -30,11 +29,10 @@ export default function RecommendedPage() {
 
         {/* 중앙 */}
         <div className="min-w-0">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-[18px] font-bold text-gray-800">오늘의 추천업체</h1>
-            <div className="breadcrumb">
-              <Link href="/">HOME</Link> &gt; 오늘의 추천업체
-            </div>
+          <div className="flex items-center gap-3 mb-4">
+            <span className="flex-1 h-px bg-gray-200" />
+            <h1 className="text-[18px] font-bold text-gray-800 shrink-0 text-center">오늘의 추천업체</h1>
+            <span className="flex-1 h-px bg-gray-200" />
           </div>
 
           <Suspense fallback={null}>

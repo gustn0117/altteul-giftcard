@@ -75,7 +75,7 @@ export default function Footer() {
               <div className="flex items-center gap-1.5 text-[11px] text-gray-500 mb-1">
                 <Phone size={11} className="text-accent" /> 고객센터
               </div>
-              <p className="text-[20px] font-bold text-gray-900 tabular-nums">1599-9687</p>
+              <p className="text-[20px] font-bold text-gray-900 tabular-nums">010-8017-8500</p>
               <div className="flex items-center gap-1.5 mt-1.5 text-[10.5px] text-gray-400">
                 <Clock size={10} /> 평일 10:00 - 17:00 (점심 12:30 - 13:30)
               </div>
