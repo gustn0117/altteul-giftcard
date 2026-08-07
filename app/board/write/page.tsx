@@ -81,6 +81,10 @@ function WritePostContent() {
     guestName: '',
     guestPassword: '',
     guestPhone: '',
+    // 공개 연락처 (팝니다) — 전화/카톡 중 선택 공개
+    showPhone: true,
+    showKakao: false,
+    contactKakao: '',
   });
   const [submitting, setSubmitting] = useState(false);
   const [showVerify, setShowVerify] = useState(false);
@@ -133,6 +137,9 @@ function WritePostContent() {
             centerLine2: (post.center_text || '').split('\n')[1] || '',
             guestName: post.guest_name || '',
             guestPhone: post.guest_phone || '',
+            showPhone: post.show_phone !== false,
+            showKakao: !!post.show_kakao,
+            contactKakao: post.contact_kakao || '',
           }));
 
           // 회원 글이면 로그인 필요
@@ -210,6 +217,12 @@ function WritePostContent() {
       if (!form.guestPassword.trim() || form.guestPassword.length < 4) return alert('비밀번호는 4자 이상 입력하세요.');
     }
 
+    // 팝니다 공개 연락처 검증 — 전화/카톡 중 최소 1개
+    if (form.type === 'sell') {
+      if (!form.showPhone && !form.showKakao) return alert('공개할 연락처(전화번호 또는 카카오톡)를 1개 이상 선택하세요.');
+      if (form.showKakao && !form.contactKakao.trim()) return alert('카카오톡 아이디를 입력하세요.');
+    }
+
     // 판매율/매입률(%) 검증
     if (!percentage || percentage <= 0 || percentage > 200) {
       return alert(`${form.type === 'sell' ? '판매율' : '매입률'}(%)을 1~200 사이로 입력하세요.`);
@@ -265,6 +278,10 @@ function WritePostContent() {
       if (form.type === 'sell') {
         payload.send_month = sendMonth || null;
         payload.send_day = sendDay || null;
+        // 공개 연락처 선택 (전화/카톡)
+        payload.show_phone = form.showPhone;
+        payload.show_kakao = form.showKakao;
+        payload.contact_kakao = form.showKakao ? form.contactKakao.trim() : null;
       } else {
         payload.send_month = null;
         payload.send_day = null;
@@ -461,6 +478,33 @@ function WritePostContent() {
                 <input type="number" min={0} value={form.faceValue} onChange={(e) => handleChange('faceValue', e.target.value)}
                   placeholder="예: 500000" className="input" />
                 {Number(form.faceValue) > 0 && <p className="text-[11px] text-accent mt-1 font-medium">{Number(form.faceValue).toLocaleString()}원</p>}
+              </div>
+
+              {/* 공개 연락처 — 전화/카톡 중 원하는 것 선택 (블라인드 → 선착순 5명 무료 열람) */}
+              <div className="border-t border-gray-100 pt-3">
+                <label className="block text-[12px] font-medium text-zinc-600 mb-2">
+                  공개 연락처 <span className="text-[11px] text-zinc-400 font-normal">(최소 1개 · 열람 시 선착순 5명 무료)</span>
+                </label>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-[13px] text-zinc-700 cursor-pointer">
+                    <input type="checkbox" checked={form.showPhone}
+                      onChange={(e) => setForm((f) => ({ ...f, showPhone: e.target.checked }))}
+                      className="w-4 h-4 accent-blue-700" />
+                    전화번호 공개 <span className="text-[11px] text-zinc-400">(내 번호 사용)</span>
+                  </label>
+                  <label className="flex items-center gap-2 text-[13px] text-zinc-700 cursor-pointer">
+                    <input type="checkbox" checked={form.showKakao}
+                      onChange={(e) => setForm((f) => ({ ...f, showKakao: e.target.checked }))}
+                      className="w-4 h-4 accent-blue-700" />
+                    카카오톡 아이디 공개
+                  </label>
+                  {form.showKakao && (
+                    <input type="text" value={form.contactKakao}
+                      onChange={(e) => handleChange('contactKakao', e.target.value)}
+                      placeholder="카카오톡 아이디 또는 오픈채팅 링크" maxLength={80} className="input" />
+                  )}
+                </div>
+                <p className="text-[11px] text-zinc-400 mt-1.5">체크한 연락처가 블라인드 처리되고, 선착순 5명에게 무료로 공개됩니다.</p>
               </div>
             </>
           ) : (

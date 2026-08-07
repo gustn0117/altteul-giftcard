@@ -15,6 +15,12 @@ export interface DBPost {
   guest_name?: string | null;
   guest_password?: string | null;
   guest_phone?: string | null;
+  /** 팝니다 공개 연락처 — 카카오톡 아이디 */
+  contact_kakao?: string | null;
+  /** 전화번호 공개 여부 (기본 true) */
+  show_phone?: boolean;
+  /** 카카오톡 공개 여부 (기본 false) */
+  show_kakao?: boolean;
   type: 'sell' | 'buy';
   category: string;
   title: string;

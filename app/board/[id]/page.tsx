@@ -104,6 +104,9 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
 
   const isCompleted = !!post.completed_at;
   const rawPhone = post.guest_phone || post.author?.phone || '';
+  const rawKakao = post.contact_kakao || '';
+  const showPhone = post.show_phone !== false; // 기본 true
+  const showKakao = !!post.show_kakao;
   const remaining = formatRemainingTime(post.expires_at);
 
   // 판매완료(거래완료)·수정 버튼을 보여줄 대상:
@@ -336,6 +339,9 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                 postId={id}
                 postType={isSell ? 'sell' : 'buy'}
                 rawPhone={rawPhone}
+                rawKakao={rawKakao}
+                showPhone={showPhone}
+                showKakao={showKakao}
                 authorName={authorName}
                 isAuthor={isAuthor}
                 isCompleted={isCompleted}

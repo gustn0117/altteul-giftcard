@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Phone, MessageSquare, Lock, Eye, RotateCcw } from 'lucide-react';
+import { Phone, MessageSquare, Lock, Eye, RotateCcw, MessageCircle, Copy, Check } from 'lucide-react';
 import { useCallModal } from '@/contexts/CallModalContext';
 import { formatPhone } from '@/lib/format';
 
@@ -10,6 +10,9 @@ interface Props {
   postId: string;
   postType: 'sell' | 'buy';
   rawPhone: string;
+  rawKakao?: string;
+  showPhone?: boolean;
+  showKakao?: boolean;
   authorName: string;
   isAuthor: boolean;
   isCompleted: boolean;
@@ -26,20 +29,33 @@ function maskPhone(phone: string): string {
   return `${d.slice(0, 3)}-****-****`;
 }
 
+function maskKakao(id: string): string {
+  const s = String(id).trim();
+  if (s.length <= 2) return s[0] ? `${s[0]}***` : '****';
+  return `${s.slice(0, 2)}${'*'.repeat(Math.max(3, s.length - 2))}`;
+}
+
 export default function ContactReveal(props: Props) {
-  const { postId, postType, rawPhone, authorName, isAuthor, isCompleted, isLoggedIn, currentUserId, buyPublic } = props;
+  const { postId, postType, rawPhone, rawKakao = '', authorName, isAuthor, isCompleted, isLoggedIn, currentUserId, buyPublic } = props;
   const { openCall } = useCallModal();
+
+  const showPhone = props.showPhone !== false; // 기본 true
+  const showKakao = !!props.showKakao;
+  const hasPhone = showPhone && !!rawPhone;
+  const hasKakao = showKakao && !!rawKakao;
 
   // 삽니다 공개 설정이 켜져 있으면 전체 공개
   const publicNow = postType === 'buy' && buyPublic;
+  const openInit = isAuthor || publicNow;
 
-  const [revealed, setRevealed] = useState(isAuthor || publicNow);
-  const [phone, setPhone] = useState(isAuthor || publicNow ? rawPhone : '');
+  const [revealed, setRevealed] = useState(openInit);
+  const [phone, setPhone] = useState(openInit && hasPhone ? rawPhone : '');
+  const [kakao, setKakao] = useState(openInit && hasKakao ? rawKakao : '');
   const [count, setCount] = useState(0);
   const [limit, setLimit] = useState(5);
-  const [cost, setCost] = useState(500);
   const [locked, setLocked] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -50,14 +66,16 @@ export default function ContactReveal(props: Props) {
       if (!res.ok) return;
       setCount(data.count ?? 0);
       setLimit(data.limit ?? 5);
-      setCost(data.cost ?? 500);
       setLocked(!!data.locked);
-      if (data.revealed && data.phone) { setRevealed(true); setPhone(data.phone); }
+      if (data.revealed) {
+        setRevealed(true);
+        if (data.phone) setPhone(data.phone);
+        if (data.kakao) setKakao(data.kakao);
+      }
     } catch { /* noop */ }
   }, [postId, currentUserId]);
 
   useEffect(() => {
-    // 전체공개(공개설정/작성자)면 상태조회 불필요. 단, 작성자는 열람 현황을 보여주려 조회.
     if (publicNow && !isAuthor) return;
     fetchStatus();
   }, [publicNow, isAuthor, fetchStatus]);
@@ -74,8 +92,8 @@ export default function ContactReveal(props: Props) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '열람에 실패했습니다.');
       setRevealed(true);
-      setPhone(data.phone);
-      if (data.charged) alert(`연락처를 열람했습니다. (${cost}P 차감, 잔액 ${data.balance}P)`);
+      if (data.phone) setPhone(data.phone);
+      if (data.kakao) setKakao(data.kakao);
       fetchStatus();
     } catch (err) {
       alert(err instanceof Error ? err.message : '열람 실패');
@@ -104,25 +122,43 @@ export default function ContactReveal(props: Props) {
     }
   };
 
-  // 전화/문자 버튼 (연락처가 공개된 상태)
+  const copyKakao = async () => {
+    try { await navigator.clipboard.writeText(kakao); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch { /* noop */ }
+  };
+
+  // 공개된 연락처(전화/카톡) 표시
   const ContactButtons = () => (
-    <>
-      <div className="flex items-center justify-center gap-2 py-2 text-[14px] font-bold text-gray-900 whitespace-nowrap">
-        <Phone size={16} className="text-accent shrink-0" />
-        <span className="tabular-nums">{formatPhone(phone)}</span>
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        <button onClick={() => openCall(authorName, phone)} className="btn-accent w-full h-11 text-[13px]">
-          <Phone size={14} /> 전화하기
-        </button>
-        <a href={`sms:${phone.replace(/[^0-9]/g, '')}`} className="btn-secondary w-full h-11 text-[13px] flex items-center justify-center gap-1">
-          <MessageSquare size={14} /> 문자하기
-        </a>
-      </div>
-    </>
+    <div className="space-y-2">
+      {phone && (
+        <>
+          <div className="flex items-center justify-center gap-2 py-1.5 text-[14px] font-bold text-gray-900 whitespace-nowrap">
+            <Phone size={16} className="text-accent shrink-0" />
+            <span className="tabular-nums">{formatPhone(phone)}</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <button onClick={() => openCall(authorName, phone)} className="btn-accent w-full h-11 text-[13px]">
+              <Phone size={14} /> 전화하기
+            </button>
+            <a href={`sms:${phone.replace(/[^0-9]/g, '')}`} className="btn-secondary w-full h-11 text-[13px] flex items-center justify-center gap-1">
+              <MessageSquare size={14} /> 문자하기
+            </a>
+          </div>
+        </>
+      )}
+      {kakao && (
+        <div className="flex items-center justify-between gap-2 rounded-lg border border-[#FEE500] bg-[#FEE500]/25 px-3 h-11">
+          <span className="flex items-center gap-1.5 text-[13px] font-bold text-[#3c1e1e] min-w-0">
+            <MessageCircle size={15} className="shrink-0" /> 카톡 <span className="tabular-nums truncate">{kakao}</span>
+          </span>
+          <button onClick={copyKakao} className="shrink-0 inline-flex items-center gap-1 h-7 px-2.5 rounded-full bg-[#3c1e1e] text-[#FEE500] text-[11px] font-bold">
+            {copied ? <><Check size={11} /> 복사됨</> : <><Copy size={11} /> 복사</>}
+          </button>
+        </div>
+      )}
+    </div>
   );
 
-  if (!rawPhone) {
+  if (!hasPhone && !hasKakao) {
     return <p className="text-[12px] text-gray-500 text-center py-4">연락처가 등록되지 않았습니다.</p>;
   }
 
@@ -147,18 +183,24 @@ export default function ContactReveal(props: Props) {
 
   // 공개 or 이미 열람
   if (revealed) {
-    return <div className="space-y-2"><ContactButtons /></div>;
+    return <ContactButtons />;
   }
+
+  // 블라인드 미리보기 (마스킹)
+  const maskedPreview = [
+    hasPhone ? maskPhone(rawPhone) : '',
+    hasKakao ? `카톡 ${maskKakao(rawKakao)}` : '',
+  ].filter(Boolean).join('  ·  ');
 
   // 블라인드 상태
   return (
     <div className="text-center py-4 space-y-3">
-      <p className="text-[14px] font-bold text-zinc-500 tabular-nums">{maskPhone(rawPhone)}</p>
+      <p className="text-[14px] font-bold text-zinc-500 tabular-nums">{maskedPreview}</p>
       {isCompleted ? (
         <p className="text-[11px] text-zinc-400">거래완료된 글입니다. 연락처가 비공개되었습니다.</p>
       ) : !isLoggedIn ? (
         <>
-          <p className="text-[11.5px] text-zinc-500">연락처는 로그인 후 {cost}P로 열람할 수 있습니다.</p>
+          <p className="text-[11.5px] text-zinc-500">연락처는 로그인 후 <b className="text-accent">선착순 {limit}명 무료</b>로 열람할 수 있습니다.</p>
           <Link href={`/login?redirect=${encodeURIComponent(`/board/${postId}`)}`}
             className="inline-flex items-center gap-1 h-9 px-4 bg-accent hover:bg-blue-700 text-white text-[12.5px] font-bold rounded-full transition-colors">
             로그인 →
@@ -175,9 +217,9 @@ export default function ContactReveal(props: Props) {
         <>
           <button onClick={handleReveal} disabled={busy}
             className="inline-flex items-center gap-1.5 h-10 px-5 bg-accent hover:bg-blue-700 text-white text-[13px] font-bold rounded-full transition-colors disabled:opacity-50">
-            <Eye size={15} /> {busy ? '처리 중...' : `연락처 보기 (${cost}P)`}
+            <Eye size={15} /> {busy ? '처리 중...' : '연락처 보기 (무료)'}
           </button>
-          <p className="text-[10.5px] text-zinc-400">현재 {count}/{limit}명 열람 · 한 번 열람하면 이후 무료로 다시 볼 수 있어요.</p>
+          <p className="text-[10.5px] text-zinc-400">선착순 {count}/{limit}명 무료 열람 · 한 번 열람하면 이후에도 무료로 다시 볼 수 있어요.</p>
         </>
       )}
     </div>
